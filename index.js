@@ -1,6 +1,18 @@
 const express = require("express");
 const app = express();
 const path = require("path");
+const multer  = require('multer')
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'library/');
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.originalname)
+    },
+});
+
+const upload = multer({ storage })
 
 const port = 3000;
 
@@ -31,6 +43,10 @@ app.post('/register', (req, res) => {
 
 app.get('/upload',(req, res) => {
   res.render("upload.ejs");
+});
+
+app.post('/upload', upload.single('file'), (req, res) => {
+  res.render("upload.ejs")
 });
 
 app.listen(port, function () {
