@@ -1,15 +1,12 @@
 const express = require("express");
+
 const app = express();
-const path = require("path");
-
 const port = 3000;
-
-app.use(express.static(path.join(__dirname, 'public')))
 
 app.set('view-engine', 'ejs')
 
 app.get("/", (req, res) => {
-  res.render("index.ejs");
+    res.render("index.ejs");
 });
 
 app.get('/login',(req, res) => {
@@ -28,10 +25,6 @@ app.get('/register',(req, res) => {
 app.post('/register', (req, res) => {
   
 })
-
-app.get('/upload',(req, res) => {
-  res.render("upload.ejs");
-});
 
 app.listen(port, function () {
   console.log(
