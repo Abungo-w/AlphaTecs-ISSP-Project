@@ -85,7 +85,7 @@ header {
 }
 
 .hero-section {
-    background: url('./Images/background.png') no-repeat center center;
+    background: url('../Images/background.png') no-repeat center center;
     background-size: cover;
     color: rgb(35, 28, 28);
     padding: 50px 20px;
