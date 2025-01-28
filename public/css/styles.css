@@ -6,6 +6,7 @@
 }
 
 body {
+    min-height: 100vh;
     font-family: Arial, sans-serif;
 }
 
@@ -13,7 +14,7 @@ body {
 header {
     background-color: white;
     color: white;
-    padding: 10px 20px;
+    padding: 1vw 1vw;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -35,35 +36,34 @@ header {
 }
 
 .logo {
-    width: 100px;
-    height: 50px;
-    margin-right: 10px;
+    width: 7.5vw;
+    height: 2.8vw;
 }
 
 .company-name {
-    font-size: 1.5rem;
+    font-size: 1.5vw;
     font-weight: bold;
 }
 
 .search-bar {
+    width: 30vw;
     display: flex;
-    align-items: center;
     gap: 10px;
     outline: none;
 }
 
 .search-bar input {
-    padding: 10px;
-    border: 2px solid #333; 
+    padding: 0.5vw;
+    border: 0.1vw solid #333; 
     border-radius: 5px;
-    width: 300px;
+    width: 100%;
     outline: none; 
     transition: border-color 0.3s ease; 
 }
 
 .search-bar input:focus {
     border-color: #007BFF; 
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); 
+    box-shadow: 0 0 0.3vw rgba(0, 123, 255, 0.5); 
 }
 
 
@@ -72,17 +72,36 @@ header {
 }
 
 
-.header-options {
-    display: flex;
-    gap: 20px;
-}
+    .header-options {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        width: 7.5vw;
+        height: 2.8vw;
+    }
 
-.notification-icon,
-.user-icon {
-    font-size: 1.5rem;
-    cursor: pointer;
-    color:#333;
-}
+
+    .user-icon {
+        font-size: 75%;
+        width: 2.5vw;
+        height: 2.5vw;
+        cursor: pointer;
+        color: rgb(0, 0, 0);
+        background-color: rgba(23, 22, 22, 0.075);
+        border-radius: 50%;
+        align-items: center;
+        justify-content: center;
+        display: flex;
+    }
+
+    .notification-icon {
+        justify-content: center;
+        align-items: center;
+        display: flex;
+        font-size: 2vw;
+        width: 1.8vw;
+        height: 1.8vw;
+    }
 
 .hero-section {
     background: url('../Images/background.png') no-repeat center center;
@@ -161,5 +180,8 @@ footer {
     background: #333;
     color: white;
     text-align: center;
-    padding: 10px 20px;
+    padding: 0.5vw 0.5vw;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
 }

@@ -44,6 +44,7 @@ app.post("/login", passport.authenticate("local", {
 
 app.get("/home", ensureAuthenticated, authController.home);
 app.get("/admin", ensureAdmin, authController.admin);
+app.get("/admin/revoke/:id", ensureAdmin, authController.revoke);
 
 app.listen(port, function () {
     console.log(
