@@ -17,12 +17,24 @@
             </div>
             <div class="header-options">
                 <img src="/Images/notification.png" class="notification-icon">
-                <div class="user-icon"><%- user.name %></div>
+                <div class="user-icon">
+                    <%- user.name %>
+                    <div class="dropdown">
+                        <ul>
+                            <li><a href="/goals">Goals</a></li>
+                            <li><a href="/my-learning">My Learning</a></li>
+                            <li><a href="/proposed-courses">Proposed Courses</a></li>
+                            <li><a href="/accomplishments">Accomplishments</a></li>
+                            <li><a href="/profile">Profile</a></li>
+                            <li><a href="/help">Help</a></li>
+                            <li><a href="/logout">Log Out</a></li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
-<%- body %>
-
+    <%- body %>
     <footer>
         <p>© 2025 AlphaTecs. All rights reserved.</p>
     </footer>

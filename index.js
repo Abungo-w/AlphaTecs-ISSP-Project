@@ -7,9 +7,11 @@ const { ensureAdmin, forwardAuthenticated, ensureAuthenticated } = require("./mi
 const session = require("express-session");
 const passport = require("./middleware/passport");
 
-app.use(express.static(path.join(__dirname, "public")));
 
+
+app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 app.use(
   session({
     secret: "secret",
@@ -25,10 +27,14 @@ app.use(
 
 const port = 3000;
 
+app.set('layout', 'navbar');
 app.set("view engine", "ejs");
 app.use(ejsLayouts);
 app.use(passport.initialize());
 app.use(passport.session());
+
+// Remove the profile router reference
+// app.use('/', profileRouter);
 
 app.get("/", (req, res) => {
     res.render("index.ejs");
@@ -45,6 +51,10 @@ app.post("/login", passport.authenticate("local", {
 app.get("/home", ensureAuthenticated, authController.home);
 app.get("/admin", ensureAdmin, authController.admin);
 app.get("/admin/revoke/:id", ensureAdmin, authController.revoke);
+
+app.get("/profile", ensureAuthenticated, (req, res) => {
+    res.render("profile", { user: req.user });
+});
 
 app.listen(port, function () {
     console.log(
