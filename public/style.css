@@ -46,7 +46,7 @@ body {
     flex-direction: column;
     text-align: center;
     border: 2px solid #007bff;
-    border-radius: 10px;
+    border-radius: 1px;
     padding: 60px;
     background-color: white;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
