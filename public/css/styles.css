@@ -8,6 +8,12 @@ body {
     min-height: 100vh;
     font-family: Arial, sans-serif;
     margin: 0; /* Ensure no extra margin on the body */
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
 }
 
 header {
@@ -219,7 +225,7 @@ footer {
     color: white;
     text-align: center;
     padding: 0.5vw 0.5vw;
-    position: fixed;
+    position: relative;
     bottom: 0;
     width: 100%;
 }
