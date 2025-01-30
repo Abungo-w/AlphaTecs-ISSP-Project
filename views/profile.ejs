@@ -1,0 +1,111 @@
+<main>
+    <!-- Flash messages for success/error feedback -->
+    <% if (messages.success) { %>
+        <div class="flash-success">
+            <%= messages.success %>
+        </div>
+    <% } %>
+    <% if (messages.error) { %>
+        <div class="flash-error">
+            <%= messages.error %>
+        </div>
+    <% } %>
+
+    <section class="profile-header">
+        <div class="profile-picture">
+            <img src="<%= user.profilePicture || '/Images/default-profile.png' %>" alt="Profile Picture" id="profilePreview">
+            <label class="upload-overlay" for="profilePicture">
+                <i class="fas fa-camera"></i>
+            </label>
+            <input type="file" 
+                   id="profilePicture" 
+                   name="profilePicture" 
+                   accept="image/*" 
+                   style="display: none;"
+                   onchange="previewImage(this)">
+        </div>
+        <div class="profile-info">
+            <h1><%= user.name %></h1>
+            <div class="profile-details-grid">
+                <p>
+                    <strong>Email:</strong>
+                    <span><%= user.email %></span>
+                </p>
+                <p>
+                    <strong>Job Industry:</strong>
+                    <span><%= user.jobIndustry || 'Not specified' %></span>
+                </p>
+                <p>
+                    <% if (user.createdAt) { %>
+                        <strong>Member Since:</strong>
+                        <span><%= user.createdAt.toDateString() %></span>
+                    <% } else { %>
+                        <strong>Member Since:</strong>
+                        <span>N/A</span>
+                    <% } %>
+                </p>
+                <p>
+                    <strong>Position:</strong>
+                    <span><%= user.position || 'Not specified' %></span>
+                </p>
+            </div>
+        </div>
+    </section>
+    <section class="profile-settings">
+        <h2>Settings</h2>
+        <form action="/updateprofile" method="POST" enctype="multipart/form-data">
+            <div class="form-section">
+                <h3>Personal Information</h3>
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" value="<%= user.name %>">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" value="<%= user.email %>">
+                </div>
+                <div class="form-group">
+                    <label for="jobIndustry">Job Industry:</label>
+                    <input type="text" id="jobIndustry" name="jobIndustry" value="<%= user.jobIndustry %>">
+                </div>
+                <div class="form-group">
+                    <label for="position">Position:</label>
+                    <input type="text" id="position" name="position" value="<%= user.position %>">
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Security</h3>
+                <div class="form-group">
+                    <label for="password">New Password:</label>
+                    <input type="password" id="password" name="password" placeholder="Enter new password">
+                    <small class="form-hint">Leave blank to keep current password</small>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Preferences</h3>
+                <div class="form-group">
+                    <label for="profilePicture">Profile Picture:</label>
+                    <input type="file" id="profilePicture" name="profilePicture">
+                </div>
+                <div class="form-group">
+                    <label for="notifications">Notification Preferences:</label>
+                    <select id="notifications" name="notifications">
+                        <option value="all" <%= user.notifications === 'all' ? 'selected' : '' %>>All Notifications</option>
+                        <option value="email" <%= user.notifications === 'email' ? 'selected' : '' %>>Email Only</option>
+                        <option value="none" <%= user.notifications === 'none' ? 'selected' : '' %>>No Notifications</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="privacy">Privacy Settings:</label>
+                    <select id="privacy" name="privacy">
+                        <option value="public" <%= user.privacy === 'public' ? 'selected' : '' %>>Public</option>
+                        <option value="private" <%= user.privacy === 'private' ? 'selected' : '' %>>Private</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit">Update Profile</button>
+        </form>
+    </section>
