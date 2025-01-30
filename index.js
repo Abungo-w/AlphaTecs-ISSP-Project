@@ -49,6 +49,10 @@ app.post('/upload', upload.single('file'), (req, res) => {
   res.render("upload.ejs")
 });
 
+app.get('/module',(req, res) => {
+  res.render("module.ejs");
+});
+
 app.listen(port, function () {
   console.log(
     "Server running. Visit: localhost:3000 in your browser 🚀"
