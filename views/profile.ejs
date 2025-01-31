@@ -109,3 +109,29 @@
             <button type="submit">Update Profile</button>
         </form>
     </section>
+    <script>
+        // Auto-dismiss flash messages after 3 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashMessages = document.querySelectorAll('.flash-success, .flash-error');
+            flashMessages.forEach(message => {
+                setTimeout(() => {
+                    message.style.animation = 'slideOut 0.3s ease-out forwards';
+                    setTimeout(() => {
+                        message.remove();
+                    }, 300);
+                }, 3000);
+            });
+        });
+
+        // Preview profile image before upload
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profilePreview').src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+</main>

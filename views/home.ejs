@@ -1,53 +1,67 @@
-    <section class="hero-section">
-        <h1>Hello <%- user.name %></h1>
-        <p>Explore personalized coaching programs tailored to your needs.</p>
-    </section>
+<!-- Hero Section -->
+<section class="hero-section">
+    <h1 class="welcome-message">Welcome <%- user.name %></h1>
+    <!-- Removed the "Your cybersecurity-learning platform" text -->
+</section>
 
-    <section class="courses-section">
-        <div class="course-category">
-            <h3>We Build a Customized Course for You</h3>
-            <p>Explore personalized coaching solutions.</p>
-            <div class="course-list">
-                <div class="course-item">
-                    <img src="/Images/course1.jpg" alt="Course">
-                    <h4>Course Title</h4>
-                    <p>Short description goes here...</p>
+<!-- All Learning Modules Section -->
+<section class="all-modules">
+    <div class="module-header">
+        <h2>All Learning Modules</h2>
+        <p>Browse through our complete collection of learning modules</p>
+    </div>
+    
+    <div class="module-grid">
+        <% if (modules && modules.length > 0) { %>
+            <% modules.forEach(module => { %>
+                <div class="module-card">
+                    <div class="module-content">
+                        <h3><%= module.title %></h3>
+                        <p><%= module.description %></p>
+                        <div class="module-meta">
+                            <span><i class="fas fa-signal"></i> <%= module.difficulty %></span>
+                            <span><i class="far fa-clock"></i> <%= module.duration %> mins</span>
+                        </div>
+                        <button class="start-btn" onclick="startModule('<%= module.id %>')">Start Learning</button>
+                    </div>
                 </div>
-                <div class="course-item">
-                    <img src="/Images/course2.jpg" alt="Course">
-                    <h4>Course Title</h4>
-                    <p>Short description goes here...</p>
-                </div>
-                <div class="course-item">
-                    <img src="/Images/course3.jpg" alt="Course">
-                    <h4>Course Title</h4>
-                    <p>Short description goes here...</p>
-                </div>
-            </div>
-            <button>Instantly Created for You!</button>
-        </div>
+            <% }) %>
+        <% } else { %>
+            <p class="no-modules">No modules available at the moment.</p>
+        <% } %>
+    </div>
+</section>
 
-        <div class="course-category">
-            <h3>You Select From Our Available Courses</h3>
-            <p>Browse through our curated course options.</p>
-            <div class="course-list">
-                <div class="course-item">
-                    <img src="/Images/course4.jpg" alt="Course">
-                    <h4>Course Title</h4>
-                    <p>Short description goes here...</p>
+<!-- Featured Learning Modules Section -->
+<section class="featured-modules">
+    <div class="module-header">
+        <h2>Featured Learning Modules</h2>
+        <p>Hand-picked modules to boost your cybersecurity knowledge</p>
+    </div>
+    
+    <div class="module-grid">
+        <% if (modules && modules.length > 0) { %>
+            <% modules.slice(0, 3).forEach(module => { %>
+                <div class="module-card">
+                    <div class="module-content">
+                        <h3><%= module.title %></h3>
+                        <p><%= module.description %></p>
+                        <div class="module-meta">
+                            <span><i class="fas fa-signal"></i> <%= module.difficulty %></span>
+                            <span><i class="far fa-clock"></i> <%= module.duration %> mins</span>
+                        </div>
+                        <button class="start-btn" onclick="startModule('<%= module.id %>')">Start Learning</button>
+                    </div>
                 </div>
-                <div class="course-item">
-                    <img src="/Images/course5.jpg" alt="Course">
-                    <h4>Course Title</h4>
-                    <p>Short description goes here...</p>
-                </div>
-                <div class="course-item">
-                    <img src="/Images/course6.jpg" alt="Course">
-                    <h4>Course Title</h4>
-                    <p>Short description goes here...</p>
-                </div>
-            </div>
-            <button>Review Our Courses</button>
-        </div>
-    </section>
+            <% }) %>
+        <% } else { %>
+            <p class="no-modules">No modules available at the moment.</p>
+        <% } %>
+    </div>
+</section>
 
+<script>
+    function startModule(moduleId) {
+        window.location.href = `/modules/${moduleId}`;
+    }
+</script>

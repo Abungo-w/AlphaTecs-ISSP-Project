@@ -1,4 +1,9 @@
 const { db } = require("../prisma/database");
+const fs = require('fs');
+const path = require('path');
+const bcrypt = require('bcrypt');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
 let Controller = {
 
@@ -41,11 +46,30 @@ let Controller = {
     });
   },
 
-  home: (req, res) => {
-    if (req.user.role === "admin") {
-      res.redirect('/admin')
-    } else res.render("home");
+  home: async (req, res) => {
+    const moduleDir = path.join(__dirname, '..', 'modules');
+    
+    try {
+        const files = fs.readdirSync(moduleDir);
+        const modules = files
+            .filter(file => file.endsWith('.json'))
+            .map(file => {
+                const content = JSON.parse(fs.readFileSync(path.join(moduleDir, file), 'utf-8'));
+                return {
+                    id: content.id || file.replace('.json', ''),
+                    title: content.title,
+                    description: content.description,
+                    difficulty: content.difficulty,
+                    duration: content.duration
+                };
+            })
+            .filter(module => module !== null);
 
+        res.render("home", { user: req.user, modules: modules });
+    } catch (error) {
+        console.error('Error loading modules:', error);
+        res.render("home", { user: req.user, modules: [] });
+    }
   },
 
   profile: (req, res) => {
@@ -63,7 +87,7 @@ let Controller = {
   
       if (req.file) {
         if (req.user.profilePicture) {
-          const oldFilePath = path.join(__dirname, 'public', req.user.profilePicture);
+          const oldFilePath = path.join(__dirname, '..', 'public', req.user.profilePicture);
           if (fs.existsSync(oldFilePath)) {
             fs.unlinkSync(oldFilePath);
           }
@@ -133,6 +157,29 @@ let Controller = {
 
   course: (req, res) => {
     res.render("course");
+  },
+
+  module: (req, res) => {
+    res.render("module");
+  },
+
+  modules: async (req, res) => {
+    try {
+      const modules = await db.module.findMany({
+        include: {
+          themes: true
+        }
+      }) || [];
+      
+      res.render("module", {
+        modules: modules
+      });
+    } catch (error) {
+      console.error('Error fetching modules:', error);
+      res.render("module", {
+        modules: []
+      });
+    }
   },
 };
 

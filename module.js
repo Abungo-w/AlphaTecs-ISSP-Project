@@ -46,18 +46,42 @@ app.get('/modules/', (req, res) => {
     fs.readdir(moduleDir, (err, files) => {
         if (err) return res.status(500).send('Error reading modules');
         
-        const modules = files.map(file => file.replace('.json', ''));
-        res.render('module');
+        const modules = files
+            .filter(file => file.endsWith('.json'))
+            .map(file => {
+                const content = JSON.parse(fs.readFileSync(path.join(moduleDir, file), 'utf-8'));
+                return {
+                    id: content.id || file.replace('.json', ''),
+                    title: content.title,
+                    description: content.description,
+                    difficulty: content.difficulty,
+                    duration: content.duration
+                };
+            });
+        
+        res.render('module', { modules });
     });
 });
 // Get a specific learning module
 app.get('/modules/:id', (req, res) => {
     const modulePath = path.join(moduleDir, `${req.params.id}.json`);
     
-    if (!fs.existsSync(modulePath)) return res.status(404).send('Module not found');
+    if (!fs.existsSync(modulePath)) {
+        return res.status(404).render('error', { 
+            message: 'Module not found',
+            error: { status: 404, stack: '' }
+        });
+    }
     
-    res.sendFile(modulePath);
-    res.render('module')
+    try {
+        const moduleContent = JSON.parse(fs.readFileSync(modulePath, 'utf-8'));
+        res.render('module-detail', { module: moduleContent });
+    } catch (error) {
+        res.status(500).render('error', { 
+            message: 'Error loading module',
+            error: { status: 500, stack: error.message }
+        });
+    }
 });
 // Delete a module
 app.delete('/modules/:id', (req, res) => {
