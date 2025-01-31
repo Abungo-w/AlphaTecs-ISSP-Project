@@ -5,7 +5,7 @@ const multer  = require('multer')
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'library/');
+        cb(null, 'modules/');
     },
     filename: function (req, file, cb) {
         cb(null, file.originalname)
@@ -47,6 +47,7 @@ app.get('/upload',(req, res) => {
 
 app.post('/upload', upload.single('file'), (req, res) => {
   res.render("upload.ejs")
+  res.json(req.file)
 });
 
 app.listen(port, function () {
