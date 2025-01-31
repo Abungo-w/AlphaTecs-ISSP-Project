@@ -28,6 +28,8 @@ app.use(
 
 const port = 3000;
 
+app.use(express.static(path.join(__dirname, 'public')))
+
 app.set("view engine", "ejs");
 app.use(ejsLayouts);
 app.use(passport.initialize());
@@ -61,7 +63,7 @@ app.get("/profile", ensureAuthenticated, Controller.profile);
 app.post("/updateprofile", uploadprofileimage.single('profilePicture') ,Controller.updateprofile);
 
 app.listen(port, function () {
-    console.log(
-      "Server running. Visit: localhost:3000 in your browser 🚀"
-    );
+  console.log(
+    "Server running. Visit: localhost:3000 in your browser 🚀"
+  );
 });
