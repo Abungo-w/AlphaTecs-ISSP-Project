@@ -1,0 +1,170 @@
+/* Reset container styles */
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Main container styles */
+.home-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-top: 80px; /* Account for fixed navbar */
+}
+
+/* Hero section */
+.hero-section {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: white;
+    text-align: center;
+    padding: 3rem 2rem;
+    margin: 0 auto 2rem auto;
+    max-width: 1200px;
+    border-radius: 10px;
+}
+
+/* Learning paths section */
+.learning-paths {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.path-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+}
+
+.path-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+/* Module sections */
+.featured-modules,
+.all-modules {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.module-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.module-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    height: 100%;
+}
+
+.module-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.all-modules .module-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #1e3c72;
+}
+
+.all-modules .module-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.all-modules .module-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.all-modules .module-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.all-modules .module-meta {
+    display: flex;
+    justify-content: space-between;
+    color: #666;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+}
+
+.all-modules .start-btn {
+    margin-top: auto;
+    padding: 0.8rem 1.5rem;
+    background: #1e3c72;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.all-modules .start-btn:hover {
+    background: #2a5298;
+}
+
+/* Buttons */
+.start-btn,
+.path-btn {
+    display: inline-block;
+    padding: 0.8rem 1.5rem;
+    background: #1e3c72;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    margin-top: auto;
+}
+
+.start-btn:hover,
+.path-btn:hover {
+    background: #2a5298;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .path-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .module-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-section,
+    .learning-paths,
+    .featured-modules,
+    .all-modules {
+        margin: 1rem;
+        padding: 1rem;
+    }
+
+    .all-modules .module-grid {
+        grid-template-columns: 1fr;
+    }
+}

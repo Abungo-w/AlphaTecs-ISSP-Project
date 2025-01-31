@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Modules</title>
+    <link rel="stylesheet" href="/css/module.css">
+</head>
+<body>
+    <%- include('./navbar.ejs') %>
+    
+    <div class="hero-section">
+        <div class="hero-content">
+            <h1>Learning Modules</h1>
+            <p>Explore our curated collection of learning materials</p>
+        </div>
+    </div>
+
+    <div class="module-navigation">
+        <button class="nav-btn active" data-path="learning">Learning Paths</button>
+        <button class="nav-btn" data-theme="themes">Learning Themes</button>
+    </div>
+
+    <div class="module-container">
+        <div class="module-grid">
+            <% if (modules && modules.length > 0) { %>
+                <% modules.forEach(module => { %>
+                    <div class="module-card">
+                        <div class="module-content">
+                            <h3><%= module.title %></h3>
+                            <p><%= module.description %></p>
+                            <div class="module-meta">
+                                <span class="difficulty"><%= module.difficulty %></span>
+                                <span class="duration"><%= module.duration %> mins</span>
+                            </div>
+                            <button class="start-btn" onclick="startModule('<%= module.id %>')">Start Learning</button>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p class="no-modules">No modules available at the moment.</p>
+            <% } %>
+        </div>
+    </div>
+
+    <script>
+        function startModule(moduleId) {
+            window.location.href = `/modules/${moduleId}`;
+        }
+    </script>
+</body>
+</html>

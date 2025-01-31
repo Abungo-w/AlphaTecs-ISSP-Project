@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error</title>
+    <link rel="stylesheet" href="/css/module.css">
+</head>
+<body>
+    <%- include('./navbar.ejs') %>
+
+    <div class="module-detail-container">
+        <div class="module-header">
+            <h1>Error <%= error.status %></h1>
+            <p class="description"><%= message %></p>
+            <a href="/modules" class="start-btn" style="display: inline-block; text-align: center; text-decoration: none; margin-top: 20px;">
+                Return to Modules
+            </a>
+        </div>
+    </div>
+</body>
+</html>
