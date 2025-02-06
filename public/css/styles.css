@@ -15,32 +15,88 @@ body {
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background-color: #f4f4f4;
+    padding: 0;
+    padding-top: 70px; /* Match header height */
+    position: relative;
+}
+
+.container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+input[type="text"],
+textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
 }
 
 main {
     flex: 1;
 }
 
+/* Fixed Navbar Styles */
 header {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-    color: white;
-    padding: 1vw 1vw;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     position: fixed;
     top: 0;
-    width: 100%;
+    left: 0;
+    right: 0;
     z-index: 1000;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    height: 70px;
+    width: 100%;
+    position: absolute; /* Change to absolute */
 }
 
 .navbar {
+    position: absolute; /* Change to absolute */
+    max-width: 1400px;
+    margin: 0 auto;
+    height: 70px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    background: white;
     width: 100%;
+    left: 0;
+    right: 0;
 }
 
 .logo-section {
@@ -49,90 +105,68 @@ header {
 }
 
 .logo {
-    width: 7.5vw;
-    height: 2.8vw;
-}
-
-.company-name {
-    font-size: 1.5vw;
-    font-weight: bold;
+    height: 45px; /* Slightly larger logo */
+    width: auto;
+    object-fit: contain;
 }
 
 .search-bar {
-    width: 30vw;
-    display: flex;
-    gap: 10px;
-    outline: none;
+    flex: 1;
+    max-width: 400px;
+    margin: 0 2rem;
 }
 
 .search-bar input {
-    padding: 0.5vw;
-    border: 0.1vw solid #333;
-    border-radius: 5px;
     width: 100%;
-    outline: none;
-    transition: border-color 0.3s ease;
-    background: #f5f7fa;
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
-}
-
-.search-bar input:focus {
-    border-color: #007BFF;
-    box-shadow: 0 0 0.5vw rgba(29, 78, 216, 0.2);
-    transform: translateY(-1px);
-    background: white;
-}
-
-.search-bar button:hover {
-    background-color: #0056b3;
+    padding: 0.5rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: #f8fafc;
 }
 
 .header-options {
     display: flex;
     align-items: center;
-    justify-content: space-around;
-    width: 7.5vw;
-    height: 2.8vw;
-    position: relative;
-    z-index: 1000;
-}
-
-.user-icon {
-    font-size: 75%;
-    width: 2.5vw;
-    height: 2.5vw;
-    cursor: pointer;
-    color: rgb(0, 0, 0);
-    background-color: rgba(23, 22, 22, 0.075);
-    border-radius: 50%;
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    position: relative;
-    z-index: 1001;
+    gap: 1.5rem;
 }
 
 .notification-icon {
-    justify-content: center;
-    align-items: center;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+/* Updated User Icon and Dropdown */
+.user-icon {
+    position: relative;
+    padding: 0.5rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #2d3748;
     display: flex;
-    font-size: 2vw;
-    width: 1.8vw;
-    height: 1.8vw;
+    align-items: center;
 }
 
 .dropdown {
-    display: none;
-    position: absolute;
+    position: absolute; /* Changed from fixed */
     top: 100%;
     right: 0;
-    background-color: white;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-    z-index: 1002;
-    border-radius: 5px;
-    overflow: hidden;
-    transition: all 0.3s ease;
+    min-width: 220px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1),
+                0 2px 4px -1px rgba(0,0,0,0.06);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.2s;
+    z-index: 10000;
+}
+
+.user-icon:hover .dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
 }
 
 .dropdown ul {
@@ -142,25 +176,26 @@ header {
 }
 
 .dropdown ul li {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-    transition: background-color 0.3s ease;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.dropdown ul li:last-child {
+    border-bottom: none;
 }
 
 .dropdown ul li a {
+    padding: 12px 20px; /* Larger padding */
+    color: #4a5568;
     text-decoration: none;
-    color: black;
     display: block;
+    transition: all 0.2s;
+    font-size: 0.95rem;
+    white-space: nowrap;
 }
 
-.dropdown ul li:hover {
-    background-color: #f1f1f1;
-}
-
-.user-icon:hover .dropdown {
-    display: block;
-    opacity: 1;
-    transform: translateY(0);
+.dropdown ul li a:hover {
+    background: #f8fafc;
+    color: #2b6cb0;
 }
 
 /* Hero Section */
@@ -168,14 +203,15 @@ header {
     background: url('../Images/background.png') no-repeat center center;
     background-size: cover;
     color: white;
-    padding: 50px 20px;
-    height: 70vh;
+    padding: 0; /* Remove padding */
+    height: calc(70vh - 70px); /* Subtract header height */
+    min-height: 400px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
-    margin-top: 80px;
+    margin-top: 0; /* Remove margin */
     position: relative;
     z-index: 1;
 }
@@ -368,4 +404,71 @@ footer {
 /* Add smooth scrolling */
 html {
     scroll-behavior: smooth;
+}
+
+.main-content {
+    position: relative;
+    z-index: 1;
+    min-height: calc(100vh - 70px); /* Adjust based on navbar height */
+    padding-top: 0; /* Remove padding */
+    margin-top: 0; /* Remove margin */
+    width: 100%;
+}
+
+/* View Courses Button */
+.view-courses-btn {
+    padding: 0.5rem 1rem;
+    background: #1e3c72;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+}
+
+.view-courses-btn:hover {
+    background: #2a5298;
+}
+
+/* Navbar Buttons */
+.nav-btn {
+    padding: 0.5rem 1rem;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+}
+
+.create-course-btn {
+    background: #2a5298;
+}
+
+.create-course-btn:hover {
+    background: #1e3c72;
+}
+
+.view-courses-btn {
+    background: #1e3c72;
+}
+
+.view-courses-btn:hover {
+    background: #2a5298;
+}
+
+.admin-panel-btn {
+    background: #e53e3e;
+}
+
+.admin-panel-btn:hover {
+    background: #c53030;
+}
+
+.create-module-btn {
+    background: #2563eb;
+    margin-right: 1rem;
+}
+
+.create-module-btn:hover {
+    background: #1d4ed8;
 }

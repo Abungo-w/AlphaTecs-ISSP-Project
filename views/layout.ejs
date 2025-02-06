@@ -24,6 +24,12 @@
                 <input type="text" placeholder="Search for coaching programs">
             </div>
             <div class="header-options">
+                <% if (user && user.role === 'admin') { %>
+                    <a href="/modules/create" class="nav-btn create-module-btn">Create Module</a>
+                    <a href="/courses/create_course" class="nav-btn create-course-btn">Create Course</a>
+                    <a href="/courses" class="nav-btn view-courses-btn">View Courses</a>
+                    <a href="/admin" class="nav-btn admin-panel-btn">Admin Panel</a>
+                <% } %>
                 <img src="/Images/notification.png" class="notification-icon">
                 <div class="user-icon">                    
                     <% if (user) { %>
@@ -45,8 +51,9 @@
             </div>
         </div>
     </header>
-<%- body %>
-
+    <main class="main-content">
+        <%- body %>
+    </main>
     <footer>
         <p>© 2025 AlphaTecs. All rights reserved.</p>
     </footer>

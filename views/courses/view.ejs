@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= course.title %></title>
+    <link rel="stylesheet" href="/css/course_view.css">
+</head>
+<body>
+    <div class="course-container">
+        <div class="course-header">
+            <div class="course-meta-info">
+                <span class="course-code">Course Code: <%= course.courseCode %></span>
+                <span class="module-code">Module Code: <%= course.moduleCode %></span>
+            </div>
+            <h1><%= course.title %></h1>
+        </div>
+
+        <div class="course-content">
+            <div class="course-intro">
+                <%- course.intro %>
+            </div>
+
+            <div class="course-sections">
+                <%- course.content %>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

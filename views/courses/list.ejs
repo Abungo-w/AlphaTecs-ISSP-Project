@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>All Courses</title>
+    <link rel="stylesheet" href="/css/course_list.css">
+</head>
+<body>
+    <div class="course-list-container">
+        <div class="course-list-header">
+            <h1>All Courses</h1>
+            <a href="/courses/create_course" class="btn-primary">Create New Course</a>
+        </div>
+
+        <div class="course-grid">
+            <% courses.forEach(course => { %>
+                <div class="course-card">
+                    <div class="course-card-content">
+                        <h3><%= course.title %></h3>
+                        <div class="course-meta">
+                            <span class="created-at">
+                                Created: <%= new Date(course.createdAt).toLocaleDateString() %>
+                            </span>
+                        </div>
+                        <p class="course-intro"><%= course.intro %></p>
+                        <a href="/courses/<%= course.id %>" class="btn-view">View Course</a>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    </div>
+</body>
+</html>

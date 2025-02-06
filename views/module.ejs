@@ -7,12 +7,11 @@
     <link rel="stylesheet" href="/css/module.css">
 </head>
 <body>
-    <%- include('./navbar.ejs') %>
     
     <div class="hero-section">
         <div class="hero-content">
             <h1>Learning Modules</h1>
-            <p>Explore our curated collection of learning materials</p>
+            <p>Explore our collection of training materials</p>
         </div>
     </div>
 
@@ -30,6 +29,7 @@
                             <h3><%= module.title %></h3>
                             <p><%= module.description %></p>
                             <div class="module-meta">
+                                <span class="module-code"><%= module.id %></span>
                                 <span class="difficulty"><%= module.difficulty %></span>
                                 <span class="duration"><%= module.duration %> mins</span>
                             </div>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create New Course</title>
+    <link rel="stylesheet" href="/css/create_course.css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+</head>
+<body>
+    <div class="course-creation-wrapper">
+        <div class="course-creation-header">
+            <h1>Create New Course</h1>
+            <p class="subtitle">Create a new training course</p>
+        </div>
+        
+        <form action="/courses" method="POST" onsubmit="return prepareSubmission()">
+            <div class="form-section">
+                <label for="courseCode">Course Code</label>
+                <p class="field-description">Format: C-XX-XX</p>
+                <input type="text" id="courseCode" name="courseCode" class="form-input" required pattern="C-\d{2}-\d{2}" placeholder="C-45-64">
+            </div>
+
+            <div class="form-section">
+                <label for="title">Course Title</label>
+                <p class="field-description">Main course title</p>
+                <input type="text" id="title" name="title" class="form-input" required placeholder="Construction Project Management">
+            </div>
+
+            <div class="form-section">
+                <label for="description">Course Description</label>
+                <p class="field-description">Brief overview of the course</p>
+                <textarea id="description" name="description" class="form-input" rows="4" required></textarea>
+            </div>
+
+            <div class="form-section">
+                <label for="intro">Course Introduction</label>
+                <div id="intro-editor" class="editor-container"></div>
+                <input type="hidden" name="intro" id="hidden-intro">
+            </div>
+
+            <div class="form-section">
+                <label for="content">Course Content</label>
+                <p class="field-description">Use headers (H1) to create numbered sections</p>
+                <div id="content-editor" class="editor-container"></div>
+                <input type="hidden" name="content" id="hidden-content">
+            </div>
+
+            <div class="form-section">
+                <label>Module Codes</label>
+                <p class="field-description">Enter module codes (M-XX-XX-XX) to link to this course</p>
+                <div id="module-list">
+                    <div class="module-input-group">
+                        <input type="text" name="moduleCodes[]" class="form-input module-code-input" 
+                               pattern="M-\d{2}-\d{2}-\d{2}" placeholder="M-36-58-74">
+                        <button type="button" class="btn-small" onclick="removeModuleInput(this)">Remove</button>
+                    </div>
+                </div>
+                <button type="button" class="btn-secondary" onclick="addModuleInput()">Add Another Module</button>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">Create Course</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script>
+        const introEditor = new Quill('#intro-editor', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    ['bold', 'italic', 'link'],
+                    [{ 'header': [2, false] }]
+                ]
+            },
+            placeholder: 'Write your course introduction...'
+        });
+
+        const contentEditor = new Quill('#content-editor', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    ['bold', 'italic', 'link'],
+                    [{ 'header': [1, 2, false] }],
+                    [{ 'list': 'bullet' }],
+                    ['clean']
+                ]
+            },
+            placeholder: 'Start creating your course content...'
+        });
+
+        function prepareSubmission() {
+            document.getElementById('hidden-intro').value = introEditor.root.innerHTML;
+            document.getElementById('hidden-content').value = contentEditor.root.innerHTML;
+            return true;
+        }
+
+        function addModuleInput() {
+            const container = document.getElementById('module-list');
+            const div = document.createElement('div');
+            div.className = 'module-input-group';
+            div.innerHTML = `
+                <input type="text" name="moduleCodes[]" class="form-input module-code-input" 
+                       pattern="M-\\d{2}-\\d{2}-\\d{2}" placeholder="M-36-58-74">
+                <button type="button" class="btn-small" onclick="removeModuleInput(this)">Remove</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function removeModuleInput(button) {
+            const group = button.parentElement;
+            if (document.querySelectorAll('.module-input-group').length > 1) {
+                group.remove();
+            }
+        }
+    </script>
+</body>
+</html>
+
