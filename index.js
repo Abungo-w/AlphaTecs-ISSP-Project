@@ -9,23 +9,31 @@ const passport = require("./middleware/passport");
 const flash = require('connect-flash');
 const { uploadprofileimage } = require("./upload_module.js");
 const fs = require('fs');
+const fsPromises = require('fs').promises;
 
+// Initialize courses array at the top level
+let courses = [];
+
+// Basic middleware setup
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(path.join(__dirname, "modules")));
-
 app.use(express.urlencoded({ extended: false }));
-app.use(
-  session({
+app.use(express.json());
+
+// Session configuration
+const sessionConfig = {
+    name: 'sessionId',
     secret: "secret",
     resave: false,
     saveUninitialized: false,
     cookie: {
-      httpOnly: true,
-      secure: false,
-      maxAge: 24 * 60 * 60 * 1000,
-    },
-  })
-);
+        httpOnly: true,
+        secure: false,
+        maxAge: 24 * 60 * 60 * 1000,
+    }
+};
+
+app.use(session(sessionConfig));
 
 const port = 3000;
 
@@ -52,7 +60,18 @@ app.post("/login", passport.authenticate("local", {
 
 app.get("/logout", Controller.logout);
 
-app.get("/home", ensureAuthenticated, Controller.home);
+// Update home route to include courses
+app.get("/home", ensureAuthenticated, (req, res) => {
+    const sortedCourses = [...courses].sort((a, b) => 
+        new Date(b.createdAt) - new Date(a.createdAt)
+    );
+    
+    res.render("home", {
+        user: req.user,
+        courses: sortedCourses,
+        featuredCourses: sortedCourses.slice(0, 3)
+    });
+});
 
 app.get("/admin", ensureAdmin, Controller.admin);
 app.get("/admin/revoke/:id", ensureAdmin, Controller.revoke);
@@ -62,6 +81,7 @@ app.get("/course", ensureAdmin, Controller.course);
 app.get("/profile", ensureAuthenticated, Controller.profile);
 app.post("/updateprofile", uploadprofileimage.single('profilePicture') ,Controller.updateprofile);
 
+// Update the modules route to use the new list view
 app.get("/modules", ensureAuthenticated, (req, res) => {
   const moduleDir = path.join(__dirname, 'modules');
   
@@ -74,7 +94,7 @@ app.get("/modules", ensureAuthenticated, (req, res) => {
         try {
           const content = JSON.parse(fs.readFileSync(path.join(moduleDir, file), 'utf-8'));
           return {
-            id: content.moduleCode,
+            moduleCode: content.moduleCode,
             title: content.title,
             description: content.description,
             difficulty: content.difficulty,
@@ -89,8 +109,29 @@ app.get("/modules", ensureAuthenticated, (req, res) => {
       .filter(module => module !== null)
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     
-    res.render("module", { modules });
+    res.render("modules/list", { 
+      modules,
+      user: req.user
+    });
   });
+});
+
+// Add DELETE route for modules
+app.delete('/modules/:moduleCode', ensureAdmin, (req, res) => {
+    const moduleCode = req.params.moduleCode;
+    const moduleFile = path.join(__dirname, 'modules', `${moduleCode}.json`);
+    
+    try {
+        if (fs.existsSync(moduleFile)) {
+            fs.unlinkSync(moduleFile);
+            res.status(200).send('Module deleted');
+        } else {
+            res.status(404).send('Module not found');
+        }
+    } catch (error) {
+        console.error('Error deleting module:', error);
+        res.status(500).send('Error deleting module');
+    }
 });
 
 // Move this route BEFORE the /modules/:id route
@@ -128,65 +169,92 @@ app.get("/modules/:id", ensureAuthenticated, (req, res) => {
   }
 });
 
-// Temporary data storage (replace with database later)
-let courses = [];
-
 app.get('/courses/create_course', ensureAdmin, (req, res) => {
   res.render('courses/create_course', { additionalCSS: '/css/create_course' });
 });
 
-app.post('/courses', ensureAdmin, (req, res) => {
+// Add a new route to get all modules for the datalist
+app.get('/api/modules', ensureAuthenticated, (req, res) => {
     try {
-        // Handle moduleCodes as an array
-        const moduleCodes = Array.isArray(req.body.moduleCodes) 
-            ? req.body.moduleCodes 
-            : (req.body.moduleCodes ? [req.body.moduleCodes] : []);
+        const moduleDir = path.join(__dirname, 'modules');
+        const files = fs.readdirSync(moduleDir);
         
-        // Filter out empty values and trim whitespace
-        const validModuleCodes = moduleCodes.filter(code => code && code.trim());
+        const modules = files
+            .filter(file => file.endsWith('.json'))
+            .map(file => {
+                const content = JSON.parse(fs.readFileSync(path.join(moduleDir, file), 'utf-8'));
+                return {
+                    code: content.moduleCode,
+                    title: content.title
+                };
+            });
         
-        if (validModuleCodes.length === 0) {
-            return res.status(400).send('At least one valid module code is required');
+        res.json(modules);
+    } catch (error) {
+        console.error('Error fetching modules:', error);
+        res.status(500).json({ error: 'Error fetching modules' });
+    }
+});
+
+// Updated course creation endpoint
+app.post('/courses', ensureAdmin, async (req, res) => {
+    try {
+        // Basic validation
+        if (!req.body.courseCode || !req.body.title || !req.body.intro) {
+            req.flash('error', 'All fields are required');
+            return res.redirect('/courses/create_course');
         }
 
+        // Handle module codes properly
+        const rawModuleCodes = req.body.moduleCodes;
+        const moduleCodes = Array.isArray(rawModuleCodes) ? rawModuleCodes : [rawModuleCodes];
+        const validModuleCodes = moduleCodes.filter(Boolean).map(code => code.trim());
+
+        if (validModuleCodes.length === 0) {
+            req.flash('error', 'At least one valid module code is required');
+            return res.redirect('/courses/create_course');
+        }
+
+        // Create new course
+        const courseId = Date.now().toString();
         const newCourse = {
-            id: Date.now().toString(),
+            id: courseId,
             courseCode: req.body.courseCode,
             title: req.body.title,
-            description: req.body.description,
-            intro: req.body.intro,
-            content: req.body.content,
+            description: req.body.intro,
             modules: [],
             createdAt: new Date().toISOString()
         };
 
-        // Verify modules exist and add their data
+        // Add modules to course using async/await
         const moduleDir = path.join(__dirname, 'modules');
         for (const code of validModuleCodes) {
-            const moduleFile = path.join(moduleDir, `${code}.json`);
-            
-            if (!fs.existsSync(moduleFile)) {
-                return res.status(400).send(`Module not found: ${code}`);
-            }
-
             try {
-                const moduleData = JSON.parse(fs.readFileSync(moduleFile, 'utf-8'));
+                const moduleFile = path.join(moduleDir, `${code}.json`);
+                const moduleContent = await fsPromises.readFile(moduleFile, 'utf-8');
+                const moduleData = JSON.parse(moduleContent);
+                
                 newCourse.modules.push({
-                    moduleCode: code,
+                    moduleCode: moduleData.moduleCode,
                     title: moduleData.title,
-                    status: 'linked'
+                    description: moduleData.description,
+                    difficulty: moduleData.difficulty,
+                    duration: moduleData.duration
                 });
             } catch (error) {
-                console.error(`Error reading module ${code}:`, error);
-                return res.status(500).send(`Error processing module ${code}`);
+                req.flash('error', `Module not found: ${code}`);
+                return res.redirect('/courses/create_course');
             }
         }
 
+        // Save the course and redirect to view page
         courses.push(newCourse);
-        res.redirect('/courses');
+        req.flash('success', 'Course created successfully!');
+        return res.redirect(`/courses/${courseId}`);
     } catch (error) {
         console.error('Error creating course:', error);
-        res.status(500).send('Error creating course: ' + error.message);
+        req.flash('error', 'Failed to create course: ' + error.message);
+        return res.redirect('/courses/create_course');
     }
 });
 
@@ -202,8 +270,17 @@ app.get('/api/modules/:moduleCode', ensureAdmin, (req, res) => {
   });
 });
 
+// Update courses list route
 app.get('/courses', ensureAuthenticated, (req, res) => {
-  res.render('courses/list', { courses });
+    const sortedCourses = [...courses].sort((a, b) => 
+        new Date(b.createdAt) - new Date(a.createdAt)
+    );
+    res.render('courses/list', { 
+        courses: sortedCourses,
+        user: req.user,
+        layout: true,
+        messages: req.flash()
+    });
 });
 
 // Update course viewing route

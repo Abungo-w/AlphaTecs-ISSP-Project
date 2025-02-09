@@ -28,6 +28,7 @@
                     <a href="/modules/create" class="nav-btn create-module-btn">Create Module</a>
                     <a href="/courses/create_course" class="nav-btn create-course-btn">Create Course</a>
                     <a href="/courses" class="nav-btn view-courses-btn">View Courses</a>
+                    <a href="/modules" class="nav-btn view-modules-btn">View Modules</a>
                     <a href="/admin" class="nav-btn admin-panel-btn">Admin Panel</a>
                 <% } %>
                 <img src="/Images/notification.png" class="notification-icon">
@@ -51,6 +52,13 @@
             </div>
         </div>
     </header>
+    <nav>
+        <!-- ...existing nav items... -->
+        <% if (user && user.isAdmin) { %>
+            <a href="/modules" class="nav-link">Modules</a>
+        <% } %>
+        <!-- ...existing code... -->
+    </nav>
     <main class="main-content">
         <%- body %>
     </main>

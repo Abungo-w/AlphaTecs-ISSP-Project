@@ -472,3 +472,12 @@ html {
 .create-module-btn:hover {
     background: #1d4ed8;
 }
+
+.view-modules-btn {
+    background: #3182ce;
+    margin-left: 0.5rem;
+}
+
+.view-modules-btn:hover {
+    background: #2c5282;
+}

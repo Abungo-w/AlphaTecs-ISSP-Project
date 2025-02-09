@@ -6,7 +6,7 @@ body {
 .course-creation-wrapper {
     position: relative;
     z-index: 1; /* Ensure content stays below navbar */
-    max-width: 1200px;
+    max-width: 1400px; /* Increased from 1200px */
     margin: 2rem auto;
     padding: 2rem;
     width: 95%;
@@ -32,7 +32,8 @@ body {
 }
 
 .form-section {
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
+    width: 100%;
 }
 
 .form-section label {
@@ -56,6 +57,7 @@ body {
     font-size: 1rem;
     transition: border-color 0.2s;
     background: #f8fafc;
+    max-width: 100%;
 }
 
 .form-input:focus {
@@ -71,6 +73,9 @@ body {
     border: 2px solid #e2e8f0;
     overflow: hidden;
     margin-bottom: 2rem;
+    min-height: 600px; /* Increased from 400px */
+    width: 100%;
+    max-width: 100%;
 }
 
 /* Quill editor customization */
@@ -80,6 +85,8 @@ body {
     border: 2px solid #e2e8f0;
     border-bottom: 1px solid #e2e8f0;
     background: #f8fafc;
+    width: 100%;
+    max-width: 100%;
 }
 
 .ql-container.ql-snow {
@@ -87,7 +94,11 @@ body {
     border-top: none;
     border-bottom-left-radius: 6px;
     border-bottom-right-radius: 6px;
-    min-height: 400px;
+    min-height: 550px; /* Increased from 350px */
+    max-height: 800px; /* Increased from 600px */
+    width: 100%;
+    max-width: 100%;
+    overflow-y: auto;
 }
 
 /* Remove old editor styles */
@@ -383,10 +394,31 @@ textarea {
     gap: 1rem;
     margin-bottom: 1rem;
     align-items: center;
+    width: 100%;
 }
 
 .module-code-input {
     flex: 1;
+    min-width: 0; /* Prevents input from overflowing */
+    width: calc(100% - 100px); /* Adjusts for remove button */
+}
+
+.remove-module-btn {
+    flex-shrink: 0;
+    width: 80px;
+    padding: 0.5rem 1rem;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+#module-list {
+    width: 100%;
+    margin-bottom: 1rem;
 }
 
 .btn-small {
@@ -412,10 +444,65 @@ textarea {
     cursor: pointer;
     margin-bottom: 1rem;
     display: inline-block;
+    width: auto;
+    margin-top: 0.5rem;
 }
 
 .btn-secondary:hover {
     background: #374151;
+}
+
+.remove-module-btn {
+    padding: 0.5rem 1rem;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.remove-module-btn:hover {
+    background: #c82333;
+}
+
+.error {
+    border-color: #dc3545;
+    background-color: #fff8f8;
+}
+
+.module-select {
+    flex: 1;
+    min-width: 0;
+    padding: 0.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 1rem;
+    background: #f8fafc;
+    cursor: pointer;
+}
+
+.module-select:focus {
+    outline: none;
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+/* Make the select element editable */
+.module-select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%234a5568' viewBox='0 0 12 12'%3E%3Cpath d='M6 8.825L1.175 4 2.238 2.938 6 6.7l3.763-3.763L10.825 4z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 12px;
+    padding-right: 2.5rem;
+}
+
+.module-select:focus {
+    outline: none;
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
 }
 
 @media (max-width: 768px) {
