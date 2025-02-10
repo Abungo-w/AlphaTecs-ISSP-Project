@@ -121,6 +121,22 @@ app.get('/module',(req, res) => {
   res.render("module.ejs");
 });
 
+app.get("/quiz_form", (req, res) => {
+  res.render("quiz_form.ejs")
+})
+
+app.post('/add_question', (req, res) => {
+  const { question, option1, option2, option3, option4, correct_option } = req.body;
+  
+  console.log({
+      question,
+      options: { option1, option2, option3, option4 },
+      correct_option
+  });
+
+  res.send("Question submitted successfully!");
+});
+
 app.listen(port, function () {
   console.log(
     "Server running. Visit: localhost:3000 in your browser 🚀"
