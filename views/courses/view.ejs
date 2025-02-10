@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= course.title %></title>
+    <link rel="stylesheet" href="/css/course_view.css">
+</head>
+<body>
+    <div class="course-container">
+        <!-- Course Header -->
+        <div class="course-header">
+            <h1><%= course.title %></h1>
+            <div class="course-meta">
+                <span class="course-code">Course Code: <%= course.courseCode %></span>
+                <span class="created-at">Created: <%= new Date(course.createdAt).toLocaleDateString() %></span>
+            </div>
+        </div>
+
+        <!-- Course Description -->
+        <div class="course-description">
+            <%- course.description %>
+        </div>
+
+        <!-- Modules List -->
+        <div class="course-modules">
+            <h2>Course Modules</h2>
+            <div class="modules-list">
+                <% if (course.modules && course.modules.length > 0) { %>
+                    <% course.modules.forEach((module, index) => { %>
+                        <div class="module-card">
+                            <div class="module-header">
+                                <h3><%= module.title %></h3>
+                                <div class="module-meta">
+                                    <span class="module-code"><%= module.moduleCode %></span>
+                                    <span class="difficulty"><%= module.difficulty %></span>
+                                    <span class="duration"><%= module.duration %> mins</span>
+                                </div>
+                            </div>
+                            <p class="module-description"><%= module.description %></p>
+                            <a href="/modules/<%= module.moduleCode %>" class="btn-view-module">View Module Content</a>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <p class="no-modules">No modules available for this course.</p>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

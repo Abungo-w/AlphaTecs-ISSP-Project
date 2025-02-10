@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Learning Modules</title>
+    <link rel="stylesheet" href="/css/module_list.css">
+</head>
+<body>
+    <div class="module-list-container">
+        <div class="module-list-header">
+            <h1>Learning Modules</h1>
+            <% if (user && user.isAdmin) { %>
+                <a href="/modules/create" class="btn-create">Create New Module</a>
+            <% } %>
+        </div>
+
+        <div class="module-grid">
+            <% if (modules && modules.length > 0) { %>
+                <% modules.forEach(module => { %>
+                    <div class="module-card">
+                        <div class="module-card-content">
+                            <h3><%= module.title %></h3>
+                            <p><%= module.description %></p>
+                            <div class="module-meta">
+                                <span class="module-code"><%= module.moduleCode %></span>
+                                <span class="difficulty"><%= module.difficulty %></span>
+                                <span class="duration"><%= module.duration %> mins</span>
+                            </div>
+                            <div class="module-actions">
+                                <a href="/modules/<%= module.moduleCode %>" class="btn-view">View Module</a>
+                                <% if (user && user.isAdmin) { %>
+                                    <button onclick="deleteModule('<%= module.moduleCode %>')" class="btn-delete">Delete</button>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p class="no-modules">No modules available.</p>
+            <% } %>
+        </div>
+    </div>
+
+    <script>
+        function deleteModule(moduleCode) {
+            if (confirm('Are you sure you want to delete this module?')) {
+                fetch(`/modules/${moduleCode}`, {
+                    method: 'DELETE'
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Error deleting module');
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
