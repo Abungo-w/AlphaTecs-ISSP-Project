@@ -1,0 +1,10 @@
+<h1>admin</h1>
+
+<% blocks.forEach((block) => { %>
+    <p>User ID: <%= block.id %></p>
+    <p>Username: <%= block.name %></p>
+    <p>Email: <%= block.email %></p>
+    <p>Session ID: <%= block.sessionId %></p>
+    <a href="/admin/revoke/<%= block.sessionId %>">Revoke Session</a>
+    
+<% }); %>
