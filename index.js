@@ -389,6 +389,7 @@ app.post('/add_question', (req, res) => {
   });
 
   res.send("Question submitted successfully!");
+});
 
 app.listen(port, function () {
   console.log(
