@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Course - <%= course.title %></title>
+    <link rel="stylesheet" href="/css/create_course.css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+</head>
+<body>
+    <div class="course-creation-wrapper">
+        <h1>Edit Course: <%= course.courseCode %></h1>
+
+        <% if (messages.error) { %>
+            <div class="alert alert-danger"><%= messages.error %></div>
+        <% } %>
+
+        <form action="/courses/<%= course.courseCode %>/edit" method="POST" onsubmit="return validateAndSubmit()">
+            <div class="form-section">
+                <label for="title">Course Title</label>
+                <input type="text" id="title" name="title" required value="<%= course.title %>">
+            </div>
+
+            <div class="form-section">
+                <label>Course Introduction</label>
+                <div id="intro-editor" class="editor-container"></div>
+                <input type="hidden" name="hidden-intro" id="hidden-intro">
+            </div>
+
+            <div class="form-section">
+                <label>Course Modules</label>
+                <div id="module-list">
+                    <% course.modules.forEach(moduleCode => { %>
+                        <div class="module-input-group">
+                            <select name="moduleCodes[]" class="module-select" required>
+                                <option value="">Select a module...</option>
+                            </select>
+                            <button type="button" class="btn-remove" onclick="removeModule(this)">
+                                <i class="fas fa-times"></i> Remove
+                            </button>
+                        </div>
+                    <% }); %>
+                </div>
+                <button type="button" class="btn-add" onclick="addModule()">
+                    <i class="fas fa-plus"></i> Add Module
+                </button>
+            </div>
+
+            <div class="form-section">
+                <label>Course Summary</label>
+                <div id="summary-editor" class="editor-container"></div>
+                <input type="hidden" name="hidden-summary" id="hidden-summary">
+            </div>
+
+            <div class="form-actions">
+                <a href="/courses/<%= course.courseCode %>" class="btn-cancel">Cancel</a>
+                <button type="submit" class="btn-submit">Update Course</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script>
+        // Initialize Quill editors with existing content
+        const introEditor = new Quill('#intro-editor', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    ['bold', 'italic', 'underline'],
+                    [{ 'header': [1, 2, false] }],
+                    ['link', 'image'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }]
+                ]
+            }
+        });
+        introEditor.root.innerHTML = `<%- course.introduction %>`;
+
+        const summaryEditor = new Quill('#summary-editor', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    ['bold', 'italic', 'underline'],
+                    [{ 'header': [1, 2, false] }],
+                    ['link', 'image'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }]
+                ]
+            }
+        });
+        summaryEditor.root.innerHTML = `<%- course.summary %>`;
+
+        // Load available modules and set selected ones
+        async function loadModules() {
+            try {
+                const response = await fetch('/api/modules');
+                const modules = await response.json();
+                window.availableModules = modules; // Store modules globally
+                
+                const selects = document.querySelectorAll('.module-select');
+                const existingModules = <%- JSON.stringify(course.modules) %>;
+                
+                selects.forEach((select, index) => {
+                    select.innerHTML = '<option value="">Select a module...</option>';
+                    modules.forEach(module => {
+                        const option = document.createElement('option');
+                        option.value = module.code;
+                        option.textContent = module.title;
+                        option.selected = module.code === existingModules[index];
+                        select.appendChild(option);
+                    });
+                });
+            } catch (error) {
+                console.error('Error loading modules:', error);
+            }
+        }
+
+        // Add validation and form submission
+        function validateAndSubmit() {
+            const introContent = introEditor.root.innerHTML;
+            const summaryContent = summaryEditor.root.innerHTML;
+            
+            document.getElementById('hidden-intro').value = introContent;
+            document.getElementById('hidden-summary').value = summaryContent;
+            
+            return true;
+        }
+
+        function addModule() {
+            const moduleList = document.getElementById('module-list');
+            const newModuleGroup = document.createElement('div');
+            newModuleGroup.className = 'module-input-group';
+            
+            // Create new select with existing modules
+            const select = document.createElement('select');
+            select.name = 'moduleCodes[]';
+            select.className = 'module-select';
+            select.required = true;
+            select.innerHTML = `<option value="">Select a module...</option>`;
+            
+            // Add available modules
+            if (window.availableModules) {
+                window.availableModules.forEach(module => {
+                    const option = document.createElement('option');
+                    option.value = module.code;
+                    option.textContent = module.title;
+                    select.appendChild(option);
+                });
+            }
+            
+            // Create remove button
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'btn-remove';
+            removeBtn.innerHTML = '<i class="fas fa-times"></i> Remove';
+            removeBtn.onclick = function() { removeModule(this); };
+            
+            // Add elements to group
+            newModuleGroup.appendChild(select);
+            newModuleGroup.appendChild(removeBtn);
+            moduleList.appendChild(newModuleGroup);
+        }
+
+        function removeModule(button) {
+            const moduleGroup = button.closest('.module-input-group');
+            const moduleList = document.getElementById('module-list');
+            
+            if (moduleList.children.length > 1) {
+                moduleGroup.remove();
+            } else {
+                alert('At least one module is required');
+            }
+        }
+
+        // Initialize page
+        loadModules();
+    </script>
+</body>
+</html>

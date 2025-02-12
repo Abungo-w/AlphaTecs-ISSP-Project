@@ -1,5 +1,5 @@
 .module-creation-wrapper {
-    max-width: 1000px;
+    max-width: 1200px;  /* Increased from 1000px */
     margin: 2rem auto;
     padding: 2rem;
     background: #ffffff;
@@ -18,7 +18,9 @@
 }
 
 .form-group {
-    margin-bottom: 2rem;
+    margin-bottom: 3rem;  /* Increased from 2rem */
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
 }
 
 .form-group label {
@@ -43,6 +45,8 @@
     margin-bottom: 1rem;
     transition: border-color 0.2s;
     background: #f8fafc;
+    overflow: auto;
+    word-wrap: break-word;
 }
 
 .form-group textarea {
@@ -66,30 +70,6 @@
     box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
 }
 
-.section-box {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-}
-
-.section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-
-.section-title {
-    flex: 1;
-    padding: 0.5rem;
-    font-size: 1.1rem;
-    border: 1px solid #e2e8f0;
-    border-radius: 4px;
-    margin-right: 1rem;
-}
-
 .btn-remove {
     background: #e53e3e;
     color: white;
@@ -102,6 +82,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: background 0.2s;
+}
+
+.btn-remove:hover {
+    background: #c53030;
 }
 
 .btn-add {
@@ -129,6 +114,7 @@
     cursor: pointer;
     font-size: 1rem;
     width: 100%;
+    margin-bottom: 2rem;
 }
 
 /* Quill editor styles */
@@ -162,14 +148,6 @@
     font-weight: 500;
 }
 
-.section-wrapper {
-    background: #f8fafc;
-    border: 2px solid #e2e8f0;
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-}
-
 .error {
     border-color: #e53e3e !important;
     background-color: #fff5f5 !important;
@@ -180,4 +158,325 @@
     min-height: 150px;
     max-height: 300px;
     overflow-y: auto;
+}
+
+/* Quiz Section Styles */
+.quiz-section {
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+}
+
+.quiz-header {
+    margin-bottom: 2rem;
+    text-align: left;
+}
+
+.quiz-header h3 {
+    font-size: 1.5rem;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+}
+
+.quiz-description {
+    color: #718096;
+    font-size: 0.95rem;
+}
+
+.quiz-item {
+    margin-bottom: 2rem;
+}
+
+.question-wrapper {
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.question-number {
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 1.1rem;
+}
+
+.question-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+}
+
+.options-wrapper {
+    display: grid;
+    gap: 1rem;
+}
+
+.option-group {
+    display: grid;
+    grid-template-columns: 2.5rem auto 1fr;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+}
+
+.option-label {
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+    border-radius: 4px;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.option-group input[type="text"] {
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    width: 100%;
+}
+
+.option-group input[type="radio"] {
+    width: 1.25rem;
+    height: 1.25rem;
+    cursor: pointer;
+}
+
+/* Add these styles to your existing CSS */
+
+.quiz-section {
+    margin-top: 3rem;
+    padding: 2rem;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+}
+
+.quiz-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.quiz-header h3 {
+    font-size: 1.5rem;
+    color: #1a202c;
+    margin-bottom: 0.5rem;
+}
+
+.quiz-description {
+    color: #64748b;
+}
+
+.quiz-item {
+    margin-bottom: 2rem;
+}
+
+.question-card {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.question-header {
+    background: #f1f5f9;
+    padding: 1rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.question-number {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.question-body {
+    padding: 1.5rem;
+}
+
+.question-textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+    resize: vertical;
+}
+
+.answers-container {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.answer-group {
+    display: grid;
+    grid-template-columns: 2.5rem 2.5rem 1fr;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+}
+
+.answer-label {
+    font-weight: 600;
+    color: #3b82f6;
+    text-align: center;
+    width: 2rem;
+    height: 2rem;
+    line-height: 2rem;
+    background: #dbeafe;
+    border-radius: 4px;
+}
+
+.answer-group input[type="radio"] {
+    width: 1.25rem;
+    height: 1.25rem;
+    cursor: pointer;
+}
+
+.answer-group input[type="text"] {
+    padding: 0.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+
+.btn-add-question {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-remove-question {
+    padding: 0.75rem 1.25rem;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-add-question:hover {
+    background: #2563eb;
+}
+
+.btn-remove-question:hover {
+    background: #dc2626;
+}
+
+.question-footer {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Add hover effects */
+.answer-group:hover {
+    border-color: #3b82f6;
+    background: white;
+}
+
+.question-textarea:focus,
+.answer-group input[type="text"]:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Remove all section-related styles and keep only these editor styles */
+.editor-container {
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    margin-bottom: 2rem;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.ql-toolbar.ql-snow {
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border: none;
+    border-bottom: 2px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.ql-container.ql-snow {
+    border: none;
+    flex: 1;
+    overflow: visible;
+    min-height: 350px;
+}
+
+.ql-editor {
+    min-height: 350px;
+    padding: 1.5rem;
+}
+
+/* Add proper spacing for the last sections */
+.quiz-section:last-child,
+.case-study-section:last-child {
+    margin-bottom: 3rem;
+}
+
+/* Form actions positioning */
+.form-actions {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 2px solid #e2e8f0;
+}
+
+/* Fix content overflow issues */
+.ql-container.ql-snow,
+.form-input,
+textarea.form-input {
+    overflow: auto;
+    word-wrap: break-word;
+}
+
+/* Add responsive padding for smaller screens */
+@media (max-width: 768px) {
+    .module-creation-wrapper {
+        padding: 1rem;
+        margin: 1rem;
+    }
+    
+    .quiz-section,
+    .case-study-section {
+        padding: 1rem;
+    }
 }

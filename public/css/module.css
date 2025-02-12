@@ -126,10 +126,11 @@ input::-webkit-file-upload-button {
 .module-card {
     background: white;
     border-radius: 10px;
-    overflow: hidden;
+    overflow: visible; /* Changed from hidden */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease;
-    height: 300px;
+    min-height: 300px;
+    height: auto; /* Changed from fixed height */
     display: flex;
     flex-direction: column;
 }
@@ -159,12 +160,15 @@ input::-webkit-file-upload-button {
 
 .module-content p {
     color: #666;
-    flex-grow: 1;
     margin: 0.5rem 0;
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
+    overflow: visible; /* Changed from hidden */
+    display: block; /* Changed from -webkit-box */
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+    max-height: none; /* Remove any height restrictions */
 }
 
 .module-meta {
@@ -232,10 +236,27 @@ input::-webkit-file-upload-button {
 .section-content {
     line-height: 1.6;
     color: #2d3748;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: normal;
+    max-width: 100%;
+}
+
+.ql-editor {
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    min-height: 200px !important;
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+.ql-editor p {
+    margin-bottom: 1rem !important;
 }
 
 .section-content ul {
-    list-style-type: none; /* Changed from disc to none */
+    list-style-type: none;
     margin: 1rem 0;
     padding-left: 2rem;
 }
@@ -243,16 +264,151 @@ input::-webkit-file-upload-button {
 .section-content li {
     margin-bottom: 0.5rem;
     padding-left: 0.5rem;
-    position: relative; /* Added position relative */
+    position: relative;
 }
 
-/* Single bullet point style */
 .section-content li::before {
     content: "•";
     color: #4a5568;
     font-weight: bold;
     position: absolute;
     left: -1rem;
+}
+
+.module-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.module-section h2 {
+    color: #1f2937;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.case-study {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.case-study h3 {
+    color: #2d3748;
+    margin-bottom: 1rem;
+}
+
+.case-study-content {
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.qa-pair {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: white;
+    border-radius: 6px;
+}
+
+.btn-quiz {
+    padding: 0.8rem 1.5rem;
+    background: #6366f1;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.btn-quiz:hover {
+    background: #4f46e5;
+}
+
+.case-studies-section {
+    margin-top: 3rem;
+    border-top: 2px solid #e2e8f0;
+    padding-top: 2rem;
+}
+
+.discussion-questions {
+    margin-top: 2rem;
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 6px;
+}
+
+.discussion-questions h3 {
+    color: #1f2937;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.qa-pair {
+    background: white;
+    padding: 1.25rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+}
+
+.qa-pair .question {
+    margin-bottom: 0.75rem;
+    color: #1f2937;
+    font-size: 1.1rem;
+}
+
+.qa-pair .answer {
+    color: #4a5568;
+    padding-left: 1rem;
+    border-left: 3px solid #3b82f6;
+}
+
+.quiz-section {
+    margin-top: 3rem;
+    text-align: center;
+    padding: 2rem;
+    background: #f8fafc;
+    border-radius: 12px;
+}
+
+.quiz-info {
+    color: #4a5568;
+    margin-bottom: 1.5rem;
+}
+
+.btn-quiz {
+    display: inline-block;
+    padding: 1rem 2.5rem;
+    background: #3b82f6;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-quiz:hover {
+    background: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+}
+
+.quiz-preview {
+    text-align: center;
+    padding: 2rem;
+    background: #f8fafc;
+    border-radius: 6px;
+}
+
+.no-quiz {
+    color: #6b7280;
+    text-align: center;
+    font-style: italic;
 }
 
 @media (max-width: 1200px) {
@@ -279,4 +435,116 @@ input::-webkit-file-upload-button {
         height: auto;
         min-height: 300px;
     }
+}
+
+.case-study-section {
+    margin-top: 2rem;
+    padding: 2rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.case-study-content {
+    margin-bottom: 2rem;
+    line-height: 1.6;
+    color: #1f2937;
+}
+
+.discussion-questions {
+    margin-top: 2rem;
+}
+
+.qa-pair {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.question-header {
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    background: white;
+}
+
+.question-header:hover {
+    background: #f8fafc;
+}
+
+.toggle-btn {
+    padding: 0.5rem 1rem;
+    background: #e5e7eb;
+    border: none;
+    border-radius: 4px;
+    color: #4b5563;
+    cursor: pointer;
+    font-size: 0.875rem;
+}
+
+.toggle-btn:hover {
+    background: #d1d5db;
+}
+
+.answer {
+    padding: 1rem;
+    border-top: 1px solid #e5e7eb;
+    background: white;
+    color: #4b5563;
+}
+
+.quiz-button-container {
+    text-align: center;
+    margin: 2rem 0;
+}
+
+.btn-quiz {
+    display: inline-block;
+    padding: 1rem 2rem;
+    background: #3b82f6;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.btn-quiz:hover {
+    background: #2563eb;
+}
+
+.section-content h1,
+.section-content .ql-header-1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 1.5rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.section-content h2,
+.section-content .ql-header-2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 1.5rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.section-content h3,
+.section-content .ql-header-3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 1.25rem 0 0.75rem;
+}
+
+.btn-quiz:hover {
+    background: #2563eb;
 }

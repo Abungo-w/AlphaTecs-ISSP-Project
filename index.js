@@ -10,6 +10,7 @@ const flash = require('connect-flash');
 const { uploadprofileimage } = require("./upload_module.js");
 const fs = require('fs');
 const fsPromises = require('fs').promises;
+const initializeDataFolders = require('./utils/initDataFolders');
 
 // Initialize courses array at the top level
 let courses = [];
@@ -20,7 +21,7 @@ app.use(express.static(path.join(__dirname, "modules")));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-// Session configuration
+// Update session configuration
 const sessionConfig = {
     name: 'sessionId',
     secret: "secret",
@@ -28,9 +29,11 @@ const sessionConfig = {
     saveUninitialized: false,
     cookie: {
         httpOnly: true,
-        secure: false,
-        maxAge: 24 * 60 * 60 * 1000,
-    }
+        secure: false,  // Set to true only in production with HTTPS
+        maxAge: 24 * 60 * 60 * 1000,  // 24 hours
+        sameSite: 'strict'
+    },
+    rolling: true  // Reset maxAge on every response
 };
 
 app.use(session(sessionConfig));
@@ -46,6 +49,15 @@ app.use(passport.session());
 app.use(flash());
 app.use(Controller.flaskmessage);
 app.use(Controller.user);
+
+(async () => {
+    try {
+        await initializeDataFolders();
+        console.log('Data folders initialized');
+    } catch (error) {
+        console.error('Failed to initialize data folders:', error);
+    }
+})();
 
 app.get("/", Controller.index);
 
@@ -116,21 +128,30 @@ app.get("/modules", ensureAuthenticated, (req, res) => {
   });
 });
 
-// Add DELETE route for modules
-app.delete('/modules/:moduleCode', ensureAdmin, (req, res) => {
-    const moduleCode = req.params.moduleCode;
-    const moduleFile = path.join(__dirname, 'modules', `${moduleCode}.json`);
-    
+// Update DELETE route for modules
+app.delete('/modules/:moduleCode', ensureAuthenticated, ensureAdmin, async (req, res) => {
     try {
-        if (fs.existsSync(moduleFile)) {
-            fs.unlinkSync(moduleFile);
-            res.status(200).send('Module deleted');
-        } else {
-            res.status(404).send('Module not found');
+        const moduleCode = req.params.moduleCode;
+        const moduleFile = path.join(__dirname, 'modules', `${moduleCode}.json`);
+        
+        if (!fs.existsSync(moduleFile)) {
+            return res.status(404).json({ success: false, error: 'Module not found' });
         }
+
+        await fsPromises.unlink(moduleFile);
+        
+        // Save session before sending response
+        req.session.save((err) => {
+            if (err) {
+                console.error('Session save error:', err);
+                return res.status(500).json({ success: false, error: 'Session error' });
+            }
+            res.json({ success: true, message: 'Module deleted successfully' });
+        });
+
     } catch (error) {
         console.error('Error deleting module:', error);
-        res.status(500).send('Error deleting module');
+        res.status(500).json({ success: false, error: 'Failed to delete module' });
     }
 });
 
@@ -139,8 +160,8 @@ app.get('/modules/create', ensureAdmin, (req, res) => {
     try {
         res.render('modules/create_module', { 
             title: 'Create New Module',
-            layout: false, // Add this line to bypass layout
-            user: req.user // Pass user data for admin check in template
+            user: req.user,
+            layout: true  // Changed from false to true
         });
     } catch (error) {
         console.error('Error rendering create module page:', error);
@@ -148,6 +169,7 @@ app.get('/modules/create', ensureAdmin, (req, res) => {
     }
 });
 
+// Update the module detail route to handle content properly
 app.get("/modules/:id", ensureAuthenticated, (req, res) => {
   const moduleId = req.params.id;
   const moduleFile = path.join(__dirname, 'modules', `${moduleId}.json`);
@@ -158,23 +180,38 @@ app.get("/modules/:id", ensureAuthenticated, (req, res) => {
 
   try {
     const moduleContent = JSON.parse(fs.readFileSync(moduleFile, 'utf-8'));
-    if (req.headers.accept && req.headers.accept.includes('application/json')) {
-      res.json(moduleContent);
-    } else {
-      res.render("module-detail", { module: moduleContent });
-    }
+    
+    // Make sure all required data is available
+    moduleContent.content = moduleContent.content || '';
+    moduleContent.caseStudyContent = moduleContent.caseStudyContent || '';
+    moduleContent.caseStudyQuestions = moduleContent.caseStudyQuestions || [];
+    moduleContent.quiz = moduleContent.quiz || [];
+
+    // Log the data to check what's being passed to the template
+    console.log('Module Data:', {
+      title: moduleContent.title,
+      hasCaseStudy: Boolean(moduleContent.caseStudyContent),
+      hasQuiz: Boolean(moduleContent.quiz.length),
+      questionCount: moduleContent.caseStudyQuestions.length
+    });
+
+    res.render("module-detail", { 
+      module: moduleContent,
+      user: req.user,
+      layout: false
+    });
   } catch (error) {
     console.error('Error loading module:', error);
     res.status(500).send('Error loading module: ' + error.message);
   }
 });
 
-app.get('/courses/create_course', ensureAdmin, (req, res) => {
-  res.render('courses/create_course', { additionalCSS: '/css/create_course' });
-});
+// Make sure this line appears before other routes that might conflict
+const courseRoutes = require('./routes/courses');
+app.use('/courses', courseRoutes);
 
 // Add a new route to get all modules for the datalist
-app.get('/api/modules', ensureAuthenticated, (req, res) => {
+app.get('/api/modules', (req, res) => {
     try {
         const moduleDir = path.join(__dirname, 'modules');
         const files = fs.readdirSync(moduleDir);
@@ -196,105 +233,28 @@ app.get('/api/modules', ensureAuthenticated, (req, res) => {
     }
 });
 
-// Updated course creation endpoint
-app.post('/courses', ensureAdmin, async (req, res) => {
+// Update the module info endpoint to read actual module files
+app.get('/api/modules/:moduleCode', (req, res) => {
     try {
-        // Basic validation
-        if (!req.body.courseCode || !req.body.title || !req.body.intro) {
-            req.flash('error', 'All fields are required');
-            return res.redirect('/courses/create_course');
+        const moduleCode = req.params.moduleCode;
+        const moduleFile = path.join(__dirname, 'modules', `${moduleCode}.json`);
+        
+        if (!fs.existsSync(moduleFile)) {
+            return res.status(404).json({ 
+                error: 'Module not found',
+                moduleCode: moduleCode 
+            });
         }
 
-        // Handle module codes properly
-        const rawModuleCodes = req.body.moduleCodes;
-        const moduleCodes = Array.isArray(rawModuleCodes) ? rawModuleCodes : [rawModuleCodes];
-        const validModuleCodes = moduleCodes.filter(Boolean).map(code => code.trim());
-
-        if (validModuleCodes.length === 0) {
-            req.flash('error', 'At least one valid module code is required');
-            return res.redirect('/courses/create_course');
-        }
-
-        // Create new course
-        const courseId = Date.now().toString();
-        const newCourse = {
-            id: courseId,
-            courseCode: req.body.courseCode,
-            title: req.body.title,
-            description: req.body.intro,
-            modules: [],
-            createdAt: new Date().toISOString()
-        };
-
-        // Add modules to course using async/await
-        const moduleDir = path.join(__dirname, 'modules');
-        for (const code of validModuleCodes) {
-            try {
-                const moduleFile = path.join(moduleDir, `${code}.json`);
-                const moduleContent = await fsPromises.readFile(moduleFile, 'utf-8');
-                const moduleData = JSON.parse(moduleContent);
-                
-                newCourse.modules.push({
-                    moduleCode: moduleData.moduleCode,
-                    title: moduleData.title,
-                    description: moduleData.description,
-                    difficulty: moduleData.difficulty,
-                    duration: moduleData.duration
-                });
-            } catch (error) {
-                req.flash('error', `Module not found: ${code}`);
-                return res.redirect('/courses/create_course');
-            }
-        }
-
-        // Save the course and redirect to view page
-        courses.push(newCourse);
-        req.flash('success', 'Course created successfully!');
-        return res.redirect(`/courses/${courseId}`);
+        const moduleData = JSON.parse(fs.readFileSync(moduleFile, 'utf-8'));
+        res.json(moduleData);
     } catch (error) {
-        console.error('Error creating course:', error);
-        req.flash('error', 'Failed to create course: ' + error.message);
-        return res.redirect('/courses/create_course');
+        console.error('Error loading module:', error);
+        res.status(500).json({ 
+            error: 'Error loading module',
+            moduleCode: req.params.moduleCode
+        });
     }
-});
-
-// Add endpoint to fetch module info
-app.get('/api/modules/:moduleCode', ensureAdmin, (req, res) => {
-  const moduleCode = req.params.moduleCode;
-  // Here you would typically fetch module info from your database
-  // For now, return dummy data
-  res.json({
-      moduleCode: moduleCode,
-      title: `Module ${moduleCode}`,
-      description: 'Module description would go here'
-  });
-});
-
-// Update courses list route
-app.get('/courses', ensureAuthenticated, (req, res) => {
-    const sortedCourses = [...courses].sort((a, b) => 
-        new Date(b.createdAt) - new Date(a.createdAt)
-    );
-    res.render('courses/list', { 
-        courses: sortedCourses,
-        user: req.user,
-        layout: true,
-        messages: req.flash()
-    });
-});
-
-// Update course viewing route
-app.get('/courses/:id', ensureAuthenticated, (req, res) => {
-    const course = courses.find(c => c.id === req.params.id);
-    if (!course) return res.status(404).send('Course not found');
-    
-    res.render('courses/view', { course });
-});
-
-// Delete course route (optional)
-app.post('/courses/:id/delete', ensureAdmin, (req, res) => {
-    courses = courses.filter(c => c.id !== req.params.id);
-    res.redirect('/courses');
 });
 
 // Module routes
@@ -351,15 +311,37 @@ app.post('/modules/create', ensureAdmin, (req, res) => {
             fs.mkdirSync(moduleDir);
         }
 
+        // Parse the form data
         const moduleData = {
             moduleCode: req.body.moduleCode,
             title: req.body.title,
             description: req.body.description || '',
             difficulty: req.body.difficulty || 'Beginner',
             duration: parseInt(req.body.duration) || 30,
-            sections: JSON.parse(req.body.sections || '[]'),
+            content: req.body.content,
+            // Handle case study data
+            caseStudyContent: req.body.caseStudy ? req.body.caseStudy[0].content : '',
+            caseStudyQuestions: req.body.caseStudy ? 
+                req.body.caseStudy[0].questions.map(q => ({
+                    question: q.question,
+                    answer: q.answer
+                })) : [],
+            // Handle quiz data
+            quiz: (req.body.quiz || []).map(q => ({
+                question: q.question,
+                options: q.options || {},
+                correctAnswer: q.correct
+            })),
             createdAt: new Date().toISOString()
         };
+
+        // Log data for debugging
+        console.log('Saving module data:', {
+            moduleCode: moduleData.moduleCode,
+            hasCaseStudy: Boolean(moduleData.caseStudyContent),
+            caseStudyQuestions: moduleData.caseStudyQuestions.length,
+            hasQuiz: moduleData.quiz.length
+        });
 
         const moduleFile = path.join(moduleDir, `${moduleData.moduleCode}.json`);
         fs.writeFileSync(moduleFile, JSON.stringify(moduleData, null, 2));
@@ -368,6 +350,65 @@ app.post('/modules/create', ensureAdmin, (req, res) => {
     } catch (error) {
         console.error('Error creating module:', error);
         res.status(500).send('Error creating module: ' + error.message);
+    }
+});
+
+// Quiz route
+app.get('/modules/:moduleCode/quiz', ensureAuthenticated, (req, res) => {
+    try {
+        const moduleCode = req.params.moduleCode;
+        const moduleFile = path.join(__dirname, 'modules', `${moduleCode}.json`);
+        
+        if (!fs.existsSync(moduleFile)) {
+            return res.status(404).send('Module not found');
+        }
+
+        const moduleContent = JSON.parse(fs.readFileSync(moduleFile, 'utf-8'));
+        
+        // Check if quiz exists
+        if (!moduleContent.quiz || moduleContent.quiz.length === 0) {
+            return res.redirect(`/modules/${moduleCode}`);
+        }
+
+        res.render('modules/quiz_view', {
+            module: moduleContent,
+            user: req.user
+        });
+
+    } catch (error) {
+        console.error('Error loading quiz:', error);
+        res.status(500).send('Error loading quiz: ' + error.message);
+    }
+});
+
+// Quiz submission route
+app.post('/modules/:moduleCode/quiz', ensureAuthenticated, (req, res) => {
+    try {
+        const moduleCode = req.params.moduleCode;
+        const moduleFile = path.join(__dirname, 'modules', `${moduleCode}.json`);
+        const answers = req.body.answers;
+
+        if (!fs.existsSync(moduleFile)) {
+            return res.status(404).json({ error: 'Module not found' });
+        }
+
+        const moduleContent = JSON.parse(fs.readFileSync(moduleFile, 'utf-8'));
+        
+        // Calculate score
+        const score = moduleContent.quiz.reduce((total, question, index) => {
+            return total + (answers[index] === question.correctAnswer ? 1 : 0);
+        }, 0);
+
+        // Send back results
+        res.json({
+            score: score,
+            total: moduleContent.quiz.length,
+            percentage: (score / moduleContent.quiz.length) * 100
+        });
+
+    } catch (error) {
+        console.error('Error processing quiz submission:', error);
+        res.status(500).json({ error: 'Error processing quiz submission' });
     }
 });
 

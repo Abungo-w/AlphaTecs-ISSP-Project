@@ -1,32 +1,68 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>All Courses</title>
+    <title>Courses</title>
     <link rel="stylesheet" href="/css/course_list.css">
 </head>
 <body>
     <div class="course-list-container">
         <div class="course-list-header">
-            <h1>All Courses</h1>
-            <a href="/courses/create_course" class="btn-primary">Create New Course</a>
+            <h1>Available Courses</h1>
+            <% if (user && user.role === 'admin') { %>
+                <a href="/courses/create_course" class="btn btn-primary">Create New Course</a>
+            <% } %>
         </div>
 
+        <% if (messages.success) { %>
+            <div class="alert alert-success">
+                <%= messages.success %>
+            </div>
+        <% } %>
+
         <div class="course-grid">
-            <% courses.forEach(course => { %>
-                <div class="course-card">
-                    <div class="course-card-content">
-                        <h3><%= course.title %></h3>
+            <% if (courses && courses.length > 0) { %>
+                <% courses.forEach(course => { %>
+                    <div class="course-card">
+                        <h2 class="course-title"><%= course.courseCode %> - <%= course.title %></h2>
                         <div class="course-meta">
-                            <span class="created-at">
-                                Created: <%= new Date(course.createdAt).toLocaleDateString() %>
-                            </span>
+                            <span>Created: <%= new Date(course.createdAt).toLocaleDateString() %></span>
                         </div>
-                        <p class="course-intro"><%= course.intro %></p>
-                        <a href="/courses/<%= course.id %>" class="btn-view">View Course</a>
+                        <a href="/courses/<%= course.courseCode %>" class="btn-view">View Course</a>
+                        <% if (user && user.role === 'admin') { %>
+                            <div class="admin-actions">
+                                <a href="/courses/<%= course.courseCode %>/edit" class="btn-edit">Edit</a>
+                                <button onclick="deleteCourse('<%= course.courseCode %>')" class="btn-delete">Delete</button>
+                            </div>
+                        <% } %>
                     </div>
-                </div>
-            <% }) %>
+                <% }); %>
+            <% } else { %>
+                <div class="no-courses">No courses available at the moment.</div>
+            <% } %>
         </div>
     </div>
+    <script>
+    async function deleteCourse(courseCode) {
+        if (confirm('Are you sure you want to delete this course? This action cannot be undone.')) {
+            try {
+                const response = await fetch(`/courses/${courseCode}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Failed to delete course');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error deleting course');
+            }
+        }
+    }
+    </script>
 </body>
 </html>

@@ -29,11 +29,14 @@
                             <h3><%= module.title %></h3>
                             <p><%= module.description %></p>
                             <div class="module-meta">
-                                <span class="module-code"><%= module.id %></span>
+                                <span class="module-code"><%= module.moduleCode %></span>
                                 <span class="difficulty"><%= module.difficulty %></span>
                                 <span class="duration"><%= module.duration %> mins</span>
                             </div>
-                            <button class="start-btn" onclick="startModule('<%= module.id %>')">Start Learning</button>
+                            <div class="module-actions">
+                                <button class="start-btn" onclick="startModule('<%= module.id %>')">Start Learning</button>
+                                <a href="/modules/<%= module.id %>/edit" class="edit-btn">Edit</a>
+                            </div>
                         </div>
                     </div>
                 <% }) %>

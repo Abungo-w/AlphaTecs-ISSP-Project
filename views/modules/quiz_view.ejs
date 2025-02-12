@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Module Quiz</title>
+    <link rel="stylesheet" href="/css/quiz_form.css">
+</head>
+<body>
+    <div class="quiz-view-container">
+        <div class="quiz-header">
+            <h1><%= module.title %> - Assessment</h1>
+            <p class="module-progress">Progress: Question <span id="currentQuestion">1</span> of <%= module.quiz.length %></p>
+        </div>
+
+        <div class="quiz-content">
+            <% module.quiz.forEach((question, index) => { %>
+                <div class="quiz-question <%= index === 0 ? 'active' : '' %>" data-question="<%= index + 1 %>">
+                    <div class="question-text">
+                        <h3>Question <%= index + 1 %></h3>
+                        <p><%= question.text %></p>
+                    </div>
+
+                    <div class="options-container">
+                        <% Object.entries(question.options).forEach(([key, value]) => { %>
+                            <div class="option-group">
+                                <input type="radio" 
+                                       name="question<%= index %>" 
+                                       value="<%= key %>"
+                                       id="q<%= index %>_<%= key %>">
+                                <label for="q<%= index %>_<%= key %>">
+                                    <%= value %>
+                                </label>
+                            </div>
+                        <% }) %>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+
+        <div class="quiz-navigation">
+            <button class="btn-prev" onclick="prevQuestion()" disabled>Previous</button>
+            <button class="btn-next" onclick="nextQuestion()">Next</button>
+            <button class="btn-submit" onclick="submitQuiz()" style="display: none;">Submit Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        let currentQuestionIndex = 0;
+        const totalQuestions = <%= module.quiz.length %>;
+
+        function showQuestion(index) {
+            document.querySelectorAll('.quiz-question').forEach(q => q.classList.remove('active'));
+            document.querySelector(`[data-question="${index + 1}"]`).classList.add('active');
+            document.getElementById('currentQuestion').textContent = index + 1;
+            
+            // Update button states
+            document.querySelector('.btn-prev').disabled = index === 0;
+            document.querySelector('.btn-next').style.display = index === totalQuestions - 1 ? 'none' : 'block';
+            document.querySelector('.btn-submit').style.display = index === totalQuestions - 1 ? 'block' : 'none';
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < totalQuestions - 1) {
+                currentQuestionIndex++;
+                showQuestion(currentQuestionIndex);
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                showQuestion(currentQuestionIndex);
+            }
+        }
+
+        function submitQuiz() {
+            // Implement quiz submission logic here
+        }
+    </script>
+</body>
+</html>

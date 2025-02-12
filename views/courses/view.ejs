@@ -1,49 +1,254 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title><%= course.title %></title>
+    <title>Course Details</title>
     <link rel="stylesheet" href="/css/course_view.css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div class="course-container">
-        <!-- Course Header -->
-        <div class="course-header">
-            <h1><%= course.title %></h1>
-            <div class="course-meta">
-                <span class="course-code">Course Code: <%= course.courseCode %></span>
-                <span class="created-at">Created: <%= new Date(course.createdAt).toLocaleDateString() %></span>
-            </div>
-        </div>
-
-        <!-- Course Description -->
-        <div class="course-description">
-            <%- course.description %>
-        </div>
-
-        <!-- Modules List -->
-        <div class="course-modules">
-            <h2>Course Modules</h2>
-            <div class="modules-list">
+    <div class="course-view-wrapper">
+        <!-- Sidebar Navigation -->
+        <nav class="course-sidebar">
+            <div class="nav-section">
+                <a href="#introduction" class="nav-item active">
+                    <span class="nav-number">1</span>
+                    Introduction
+                </a>
                 <% if (course.modules && course.modules.length > 0) { %>
-                    <% course.modules.forEach((module, index) => { %>
-                        <div class="module-card">
-                            <div class="module-header">
-                                <h3><%= module.title %></h3>
-                                <div class="module-meta">
-                                    <span class="module-code"><%= module.moduleCode %></span>
-                                    <span class="difficulty"><%= module.difficulty %></span>
-                                    <span class="duration"><%= module.duration %> mins</span>
-                                </div>
-                            </div>
-                            <p class="module-description"><%= module.description %></p>
-                            <a href="/modules/<%= module.moduleCode %>" class="btn-view-module">View Module Content</a>
-                        </div>
+                    <% course.modules.forEach((moduleCode, index) => { %>
+                        <a href="#module-<%= moduleCode %>" class="nav-item" data-module-nav="<%= moduleCode %>">
+                            <span class="nav-number"><%= index + 2 %></span>
+                            <span class="module-title">Loading...</span>
+                        </a>
                     <% }); %>
-                <% } else { %>
-                    <p class="no-modules">No modules available for this course.</p>
+                <% } %>
+                <a href="#summary" class="nav-item">
+                    <span class="nav-number"><%= (course.modules?.length || 0) + 2 %></span>
+                    Summary
+                </a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="course-view-container">
+            <div class="course-header">
+                <h1><%= course.title %></h1>
+                <div class="course-meta">
+                    <span class="course-code"><%= course.courseCode %></span>
+                    <span>Created: <%= new Date(course.createdAt).toLocaleDateString() %></span>
+                </div>
+                <% if (user && user.role === 'admin') { %>
+                    <div class="course-actions">
+                        <a href="/courses/<%= course.courseCode %>/edit" class="btn-edit">
+                            <i class="fas fa-edit"></i>
+                            <span>Edit Course</span>
+                        </a>
+                    </div>
                 <% } %>
             </div>
+
+            <!-- Introduction Section -->
+            <section id="introduction" class="course-section active">
+                <h2>Introduction</h2>
+                <div class="content ql-editor">
+                    <%- course.introduction %>
+                </div>
+            </section>
+
+            <!-- Modules Section -->
+            <% if (course.modules && course.modules.length > 0) { %>
+                <% course.modules.forEach((moduleCode, index) => { %>
+                    <section id="module-<%= moduleCode %>" class="course-section">
+                        <div class="module-header">
+                            <div class="module-header-content">
+                                <h2 class="module-title">Loading...</h2>
+                                <div class="module-meta">
+                                    <span class="module-code"><%= moduleCode %></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="module-content" data-module-code="<%= moduleCode %>">
+                            <div class="loading">Loading module content...</div>
+                        </div>
+                    </section>
+                <% }); %>
+            <% } else { %>
+                <div class="no-modules">
+                    No modules assigned to this course.
+                </div>
+            <% } %>
+
+            <!-- Summary Section -->
+            <section id="summary" class="course-section">
+                <h2>Course Summary</h2>
+                <div class="content ql-editor">
+                    <%- course.summary %>
+                </div>
+            </section>
         </div>
     </div>
+
+    <style>
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #718096;
+        }
+        
+        .error {
+            color: #e53e3e;
+            padding: 1rem;
+            background: #fff5f5;
+            border-radius: 4px;
+            margin-top: 1rem;
+        }
+    </style>
+
+    <script>
+        // Handle sidebar navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                // Remove active class from all nav items and sections
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                document.querySelectorAll('.course-section').forEach(s => s.classList.remove('active'));
+
+                // Add active class to clicked item
+                this.classList.add('active');
+
+                // Show selected section
+                const targetId = this.getAttribute('href').substring(1);
+                const targetSection = document.getElementById(targetId);
+                if (targetSection) {
+                    targetSection.classList.add('active');
+                    targetSection.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Improved module content loading
+        async function loadModuleContent(moduleCode) {
+            const moduleContent = document.querySelector(`[data-module-code="${moduleCode}"]`);
+            const moduleNav = document.querySelector(`[data-module-nav="${moduleCode}"] .module-title`);
+            const moduleTitle = document.querySelector(`#module-${moduleCode} h2`);
+            
+            if (!moduleContent) return;
+
+            try {
+                const response = await fetch(`/api/modules/${moduleCode}`);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to load module');
+                }
+
+                // Update the navigation and section titles
+                if (moduleNav) moduleNav.textContent = data.title;
+                if (moduleTitle) moduleTitle.textContent = data.title;
+                
+                // Updated content formatting for consistent heading styles
+                moduleContent.innerHTML = `
+                    <div class="module-content-section">
+                        <div class="module-info">
+                            <p><strong>Duration:</strong> ${data.duration || 'N/A'} minutes</p>
+                            <p><strong>Difficulty:</strong> ${data.difficulty || 'N/A'}</p>
+                        </div>
+                        <div class="module-content-body">
+                            ${data.content
+                                .replace(/^(\d+)\.\s+/gm, '<h2>$1. ') // Convert numbered headings to h2 while keeping numbers
+                                .replace(/\n(?=\d+\.)/g, '</h2>\n') // Close h2 tags before new sections
+                                .replace(/^(Key points|Stat Alert|Interesting Tidbit):/gm, '<strong>$1:</strong>') // Format sub-headings
+                                .replace(/\n\n+/g, '\n') // Remove extra line breaks
+                            }
+                        </div>
+                        <div class="module-actions">
+                            <div class="navigation-buttons">
+                                <button onclick="loadPreviousModule('${moduleCode}')" class="btn-prev" ${!data.prevModule ? 'disabled' : ''}>
+                                    <i class="fas fa-arrow-left"></i> Previous
+                                </button>
+                                <button onclick="loadNextModule('${moduleCode}')" class="btn-next" ${!data.nextModule ? 'disabled' : ''}>
+                                    Next <i class="fas fa-arrow-right"></i>
+                                </button>
+                            </div>
+                            ${data.quiz && data.quiz.length > 0 ? `
+                                <button onclick="openQuiz('${moduleCode}')" class="btn-quiz">
+                                    <i class="fas fa-question-circle"></i>
+                                    Take Quiz (${data.quiz.length} questions)
+                                </button>
+                            ` : ''}
+                        </div>
+                        <div class="case-study-section">
+                            <h3><i class="fas fa-book-reader"></i> Case Study</h3>
+                            <div class="case-study-content">
+                                ${data.caseStudyContent || 'No case study available.'}
+                            </div>
+                            ${data.caseStudyQuestions ? `
+                                <div class="case-study-questions">
+                                    ${data.caseStudyQuestions.map((q, index) => `
+                                        <div class="question-item">
+                                            <div class="question-header" onclick="toggleAnswer(${index})">
+                                                <span>Question ${index + 1}: ${q.question}</span>
+                                                <i class="fas fa-chevron-down"></i>
+                                            </div>
+                                            <div class="answer" id="answer-${index}">
+                                                ${q.answer}
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+
+                // Add event listeners for question toggles
+                document.querySelectorAll('.question-header').forEach((header, index) => {
+                    header.addEventListener('click', () => toggleAnswer(index));
+                });
+            } catch (error) {
+                console.error(`Error loading module ${moduleCode}:`, error);
+                if (moduleNav) moduleNav.textContent = `Module ${moduleCode}`;
+                if (moduleTitle) moduleTitle.textContent = `Module ${moduleCode}`;
+                moduleContent.innerHTML = `
+                    <div class="error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>Error loading module content. The module may not exist or there was a problem loading it.</p>
+                        <button onclick="loadModuleContent('${moduleCode}')" class="btn-retry">
+                            <i class="fas fa-redo"></i> Retry
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function toggleAnswer(index) {
+            const answer = document.getElementById(`answer-${index}`);
+            const header = answer.previousElementSibling;
+            const isActive = answer.classList.contains('active');
+            
+            // Close all answers
+            document.querySelectorAll('.answer').forEach(a => a.classList.remove('active'));
+            document.querySelectorAll('.question-header').forEach(h => h.classList.remove('active'));
+            
+            // Open clicked answer if it wasn't active
+            if (!isActive) {
+                answer.classList.add('active');
+                header.classList.add('active');
+            }
+        }
+
+        function openQuiz(moduleCode) {
+            window.location.href = `/modules/${moduleCode}/quiz`;
+        }
+
+        // Load content for all modules
+        document.querySelectorAll('[data-module-code]').forEach(moduleSection => {
+            const moduleCode = moduleSection.dataset.moduleCode;
+            loadModuleContent(moduleCode);
+        });
+    </script>
+    <script src="https://kit.fontawesome.com/your-font-awesome-kit.js"></script>
 </body>
 </html>

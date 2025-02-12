@@ -35,9 +35,25 @@ app.use(express.urlencoded({ extended: true }));
 app.post('/modules', upload.single('file'), (req, res) => {
     if (!req.file) return res.status(400).send('No file uploaded');
     try {
-        processFile(req.file.path, req.file.filename);
-        res.send({ message: 'Module created successfully' });
+        const moduleData = JSON.parse(fs.readFileSync(req.file.path, 'utf-8'));
+        
+        // Ensure proper structure for case study and quiz
+        const processedData = {
+            ...moduleData,
+            caseStudy: {
+                content: moduleData.caseStudyContent || '',
+                questions: moduleData.caseStudyQuestions || []
+            },
+            quiz: moduleData.quiz || []
+        };
+
+        // Save processed module
+        const modulePath = path.join(moduleDir, `${req.file.filename}.json`);
+        fs.writeFileSync(modulePath, JSON.stringify(processedData, null, 2));
+        
+        res.send({ message: 'Module created successfully', data: processedData });
     } catch (error) {
+        console.error('Error processing module:', error);
         res.status(500).send(error.message);
     }
 });
@@ -75,12 +91,58 @@ app.get('/modules/:id', (req, res) => {
     
     try {
         const moduleContent = JSON.parse(fs.readFileSync(modulePath, 'utf-8'));
-        res.render('module-detail', { module: moduleContent });
+        console.log('Raw module content:', moduleContent);
+        
+        // Create complete module data structure
+        const moduleData = {
+            ...moduleContent,
+            // Ensure all required fields exist with proper defaults
+            id: moduleContent.id || req.params.id,
+            title: moduleContent.title || 'Untitled Module',
+            moduleCode: moduleContent.moduleCode || '',
+            content: moduleContent.content || '',
+            duration: moduleContent.duration || 0,
+            description: moduleContent.description || '',
+            // Case study specific fields
+            caseStudyContent: moduleContent.caseStudy?.content || moduleContent.caseStudyContent || '',
+            caseStudyQuestions: moduleContent.caseStudy?.questions || moduleContent.caseStudyQuestions || [],
+            // Quiz specific fields
+            quiz: moduleContent.quiz || []
+        };
+        
+        console.log('Processed module data:', moduleData);
+        res.render('module-detail', { module: moduleData });
     } catch (error) {
+        console.error('Error loading module:', error);
         res.status(500).render('error', { 
             message: 'Error loading module',
             error: { status: 500, stack: error.message }
         });
+    }
+});
+// Add this debug route to check module data
+app.get('/modules/:id/debug', (req, res) => {
+    const modulePath = path.join(moduleDir, `${req.params.id}.json`);
+    
+    if (!fs.existsSync(modulePath)) {
+        return res.status(404).json({ error: 'Module file not found' });
+    }
+    
+    try {
+        const rawData = fs.readFileSync(modulePath, 'utf-8');
+        const moduleContent = JSON.parse(rawData);
+        res.json({
+            raw: moduleContent,
+            processed: {
+                ...moduleContent,
+                id: moduleContent.id || req.params.id,
+                caseStudyContent: moduleContent.caseStudy?.content || moduleContent.caseStudyContent || '',
+                caseStudyQuestions: moduleContent.caseStudy?.questions || moduleContent.caseStudyQuestions || [],
+                quiz: moduleContent.quiz || []
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 });
 // Delete a module
