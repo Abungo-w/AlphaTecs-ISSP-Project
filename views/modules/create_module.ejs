@@ -266,19 +266,77 @@
 
             function prepareSubmission() {
                 try {
-                    document.getElementById('hiddenModuleContent').value = editors.moduleEditor.root.innerHTML;
-                    
-                    document.querySelectorAll('.case-study-box').forEach((box, index) => {
-                        const scenarioEditor = editors[`scenario${index}`];
-                        if (scenarioEditor) {
-                            document.getElementById(`hiddenScenario${index}`).value = scenarioEditor.root.innerHTML;
+                    // Get the module data
+                    const moduleData = {
+                        moduleCode: document.getElementById('moduleCode').value,
+                        title: document.getElementById('title').value,
+                        description: document.getElementById('description').value,
+                        duration: parseInt(document.getElementById('duration').value),
+                        content: editors.moduleEditor.root.innerHTML,
+                        
+                        // Process case studies
+                        caseStudies: Array.from(document.querySelectorAll('.case-study-box')).map((box, index) => ({
+                            title: box.querySelector(`input[name="caseStudy[${index}][title]"]`).value,
+                            content: editors[`scenario${index}`].root.innerHTML,
+                            questions: Array.from(box.querySelectorAll('.question-box')).map(qBox => ({
+                                question: qBox.querySelector('input[type="text"]').value,
+                                answer: qBox.querySelector('textarea').value
+                            }))
+                        })),
+
+                        // Process quiz questions
+                        quiz: Array.from(document.querySelectorAll('.question-wrapper')).map(wrapper => {
+                            const question = wrapper.querySelector('input[type="text"]').value;
+                            const options = Array.from(wrapper.querySelectorAll('.option-group input[type="text"]')).map(opt => opt.value);
+                            const correctAnswer = wrapper.querySelector('input[type="radio"]:checked')?.value;
+                            
+                            if (!question || !options.every(opt => opt) || !correctAnswer) {
+                                throw new Error('Please fill out all quiz questions completely');
+                            }
+
+                            return {
+                                question: question,
+                                options: options,
+                                correctAnswer: correctAnswer === 'A' ? 0 : correctAnswer === 'B' ? 1 : correctAnswer === 'C' ? 2 : 3
+                            };
+                        })
+                    };
+
+                    console.log('Sending data:', moduleData); // Debug log
+
+                    // Send data to server
+                    fetch('/modules/create', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(moduleData)
+                    })
+                    .then(async response => {
+                        const contentType = response.headers.get('content-type');
+                        if (!contentType || !contentType.includes('application/json')) {
+                            throw new Error('Received non-JSON response from server');
                         }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            window.location.href = `/modules/${data.moduleId}`;
+                        } else {
+                            throw new Error(data.message || 'Unknown error occurred');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error creating module: ' + error.message);
                     });
-                    return true;
+
                 } catch (error) {
-                    console.error('Error preparing submission:', error);
-                    return false;
+                    alert(error.message);
                 }
+
+                return false; // Prevent traditional form submission
             }
         </script>
     </div>

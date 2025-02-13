@@ -171,39 +171,51 @@ app.get('/modules/create', ensureAdmin, (req, res) => {
 
 // Update the module detail route to handle content properly
 app.get("/modules/:id", ensureAuthenticated, (req, res) => {
-  const moduleId = req.params.id;
-  const moduleFile = path.join(__dirname, 'modules', `${moduleId}.json`);
-  
-  if (!fs.existsSync(moduleFile)) {
-    return res.status(404).send('Module not found');
-  }
-
-  try {
-    const moduleContent = JSON.parse(fs.readFileSync(moduleFile, 'utf-8'));
+    const moduleId = req.params.id;
+    const moduleFile = path.join(__dirname, 'modules', `${moduleId}.json`);
     
-    // Make sure all required data is available
-    moduleContent.content = moduleContent.content || '';
-    moduleContent.caseStudyContent = moduleContent.caseStudyContent || '';
-    moduleContent.caseStudyQuestions = moduleContent.caseStudyQuestions || [];
-    moduleContent.quiz = moduleContent.quiz || [];
+    if (!fs.existsSync(moduleFile)) {
+        return res.status(404).send('Module not found');
+    }
 
-    // Log the data to check what's being passed to the template
-    console.log('Module Data:', {
-      title: moduleContent.title,
-      hasCaseStudy: Boolean(moduleContent.caseStudyContent),
-      hasQuiz: Boolean(moduleContent.quiz.length),
-      questionCount: moduleContent.caseStudyQuestions.length
-    });
+    try {
+        const moduleContent = JSON.parse(fs.readFileSync(moduleFile, 'utf-8'));
+        console.log('Raw module content:', moduleContent);
 
-    res.render("module-detail", { 
-      module: moduleContent,
-      user: req.user,
-      layout: false
-    });
-  } catch (error) {
-    console.error('Error loading module:', error);
-    res.status(500).send('Error loading module: ' + error.message);
-  }
+        // Structure the module data
+        const moduleData = {
+            ...moduleContent,
+            caseStudy: moduleContent.caseStudy || {
+                content: moduleContent.caseStudyContent || '',
+                questions: moduleContent.caseStudyQuestions || []
+            },
+            quiz: moduleContent.quiz || [],
+            // Add visibility flags
+            hasCaseStudy: Boolean(
+                (moduleContent.caseStudy?.content) || 
+                (moduleContent.caseStudy?.questions?.length > 0)
+            ),
+            hasQuiz: Boolean(moduleContent.quiz?.length > 0)
+        };
+
+        console.log('Structured module data:', {
+            title: moduleData.title,
+            hasCaseStudy: moduleData.hasCaseStudy,
+            hasQuiz: moduleData.hasQuiz,
+            caseStudyContent: Boolean(moduleData.caseStudy.content),
+            questionCount: moduleData.caseStudy.questions.length,
+            quizCount: moduleData.quiz.length
+        });
+
+        res.render("module-detail", { 
+            module: moduleData,
+            user: req.user,
+            layout: false
+        });
+    } catch (error) {
+        console.error('Error loading module:', error);
+        res.status(500).send('Error loading module: ' + error.message);
+    }
 });
 
 // Make sure this line appears before other routes that might conflict
@@ -311,7 +323,24 @@ app.post('/modules/create', ensureAdmin, (req, res) => {
             fs.mkdirSync(moduleDir);
         }
 
-        // Parse the form data
+        // Process case study data
+        const caseStudyData = {
+            content: req.body.caseStudyContent || '',
+            questions: Array.isArray(req.body.caseStudyQuestions) ? 
+                req.body.caseStudyQuestions.map(q => ({
+                    question: q.question || '',
+                    answer: q.answer || ''
+                })).filter(q => q.question && q.answer) : []
+        };
+
+        // Process quiz data
+        const quizData = Array.isArray(req.body.quizQuestions) ? 
+            req.body.quizQuestions.map(q => ({
+                question: q.question || '',
+                options: q.options || [],
+                correct: q.correctAnswer || ''
+            })).filter(q => q.question && q.options.length > 0 && q.correct) : [];
+
         const moduleData = {
             moduleCode: req.body.moduleCode,
             title: req.body.title,
@@ -319,28 +348,21 @@ app.post('/modules/create', ensureAdmin, (req, res) => {
             difficulty: req.body.difficulty || 'Beginner',
             duration: parseInt(req.body.duration) || 30,
             content: req.body.content,
-            // Handle case study data
-            caseStudyContent: req.body.caseStudy ? req.body.caseStudy[0].content : '',
-            caseStudyQuestions: req.body.caseStudy ? 
-                req.body.caseStudy[0].questions.map(q => ({
-                    question: q.question,
-                    answer: q.answer
-                })) : [],
-            // Handle quiz data
-            quiz: (req.body.quiz || []).map(q => ({
-                question: q.question,
-                options: q.options || {},
-                correctAnswer: q.correct
-            })),
-            createdAt: new Date().toISOString()
+            // Structured data
+            caseStudy: caseStudyData,
+            quiz: quizData,
+            createdAt: new Date().toISOString(),
+            // Add flags
+            hasCaseStudy: Boolean(caseStudyData.content || caseStudyData.questions.length),
+            hasQuiz: Boolean(quizData.length)
         };
 
-        // Log data for debugging
-        console.log('Saving module data:', {
-            moduleCode: moduleData.moduleCode,
-            hasCaseStudy: Boolean(moduleData.caseStudyContent),
-            caseStudyQuestions: moduleData.caseStudyQuestions.length,
-            hasQuiz: moduleData.quiz.length
+        console.log('Saving module with data:', {
+            title: moduleData.title,
+            hasCaseStudy: moduleData.hasCaseStudy,
+            hasQuiz: moduleData.hasQuiz,
+            caseStudyQuestions: caseStudyData.questions.length,
+            quizQuestions: quizData.length
         });
 
         const moduleFile = path.join(moduleDir, `${moduleData.moduleCode}.json`);

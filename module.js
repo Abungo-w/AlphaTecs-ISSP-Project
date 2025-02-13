@@ -57,6 +57,56 @@ app.post('/modules', upload.single('file'), (req, res) => {
         res.status(500).send(error.message);
     }
 });
+
+// Update the module creation route to handle structured JSON data
+app.post('/modules/create', express.json({limit: '50mb'}), (req, res) => {
+    try {
+        console.log('Received data:', req.body); // Debug log
+
+        // Validate required fields
+        if (!req.body.moduleCode || !req.body.title || !req.body.content) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing required fields'
+            });
+        }
+
+        const moduleData = {
+            moduleCode: req.body.moduleCode,
+            title: req.body.title,
+            description: req.body.description || '',
+            duration: parseInt(req.body.duration) || 30,
+            content: req.body.content,
+            createdAt: new Date().toISOString(),
+            caseStudies: req.body.caseStudies || [],
+            quiz: req.body.quiz || []
+        };
+
+        // Generate unique ID for the module
+        const moduleId = `M-${Date.now()}`;
+        const modulePath = path.join(moduleDir, `${moduleId}.json`);
+        
+        // Save the module
+        fs.writeFileSync(modulePath, JSON.stringify(moduleData, null, 2));
+        
+        // Force JSON response
+        res.setHeader('Content-Type', 'application/json');
+        return res.json({
+            success: true,
+            moduleId: moduleId,
+            message: 'Module created successfully'
+        });
+
+    } catch (error) {
+        console.error('Error creating module:', error);
+        res.setHeader('Content-Type', 'application/json');
+        return res.status(500).json({
+            success: false,
+            message: error.message || 'Error creating module'
+        });
+    }
+});
+
 // Get all learning modules
 app.get('/modules/', (req, res) => {
     fs.readdir(moduleDir, (err, files) => {
@@ -91,27 +141,23 @@ app.get('/modules/:id', (req, res) => {
     
     try {
         const moduleContent = JSON.parse(fs.readFileSync(modulePath, 'utf-8'));
-        console.log('Raw module content:', moduleContent);
         
         // Create complete module data structure
         const moduleData = {
             ...moduleContent,
-            // Ensure all required fields exist with proper defaults
             id: moduleContent.id || req.params.id,
             title: moduleContent.title || 'Untitled Module',
             moduleCode: moduleContent.moduleCode || '',
             content: moduleContent.content || '',
             duration: moduleContent.duration || 0,
             description: moduleContent.description || '',
-            // Case study specific fields
-            caseStudyContent: moduleContent.caseStudy?.content || moduleContent.caseStudyContent || '',
-            caseStudyQuestions: moduleContent.caseStudy?.questions || moduleContent.caseStudyQuestions || [],
-            // Quiz specific fields
+            // Case studies array
+            caseStudies: moduleContent.caseStudies || [],
+            // Quiz array
             quiz: moduleContent.quiz || []
         };
         
-        console.log('Processed module data:', moduleData);
-        res.render('module-detail', { module: moduleData });
+        res.render('modules/view_module', { module: moduleData });
     } catch (error) {
         console.error('Error loading module:', error);
         res.status(500).render('error', { 
