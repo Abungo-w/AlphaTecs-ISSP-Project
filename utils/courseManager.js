@@ -61,7 +61,6 @@ class CourseManager {
 
     async getAllCourses() {
         const courses = await this.loadCourses();
-        console.log('Getting all courses:', courses);
         return courses;
     }
 

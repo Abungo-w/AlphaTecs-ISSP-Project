@@ -182,11 +182,11 @@
                         <div class="case-study-section">
                             <h3><i class="fas fa-book-reader"></i> Case Study</h3>
                             <div class="case-study-content">
-                                ${data.caseStudyContent || 'No case study available.'}
+                                ${data.caseStudy.content || 'No case study available.'}
                             </div>
-                            ${data.caseStudyQuestions ? `
+                            ${data.caseStudy.questions ? `
                                 <div class="case-study-questions">
-                                    ${data.caseStudyQuestions.map((q, index) => `
+                                    ${data.caseStudy.questions.map((q, index) => `
                                         <div class="question-item">
                                             <div class="question-header" onclick="toggleAnswer(${index})">
                                                 <span>Question ${index + 1}: ${q.question}</span>

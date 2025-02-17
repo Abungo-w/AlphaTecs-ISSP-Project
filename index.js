@@ -53,7 +53,6 @@ app.use(Controller.user);
 (async () => {
     try {
         await initializeDataFolders();
-        console.log('Data folders initialized');
     } catch (error) {
         console.error('Failed to initialize data folders:', error);
     }
@@ -180,7 +179,6 @@ app.get("/modules/:id", ensureAuthenticated, (req, res) => {
 
     try {
         const moduleContent = JSON.parse(fs.readFileSync(moduleFile, 'utf-8'));
-        console.log('Raw module content:', moduleContent);
 
         // Structure the module data
         const moduleData = {
@@ -198,14 +196,7 @@ app.get("/modules/:id", ensureAuthenticated, (req, res) => {
             hasQuiz: Boolean(moduleContent.quiz?.length > 0)
         };
 
-        console.log('Structured module data:', {
-            title: moduleData.title,
-            hasCaseStudy: moduleData.hasCaseStudy,
-            hasQuiz: moduleData.hasQuiz,
-            caseStudyContent: Boolean(moduleData.caseStudy.content),
-            questionCount: moduleData.caseStudy.questions.length,
-            quizCount: moduleData.quiz.length
-        });
+
 
         res.render("module-detail", { 
             module: moduleData,
@@ -357,13 +348,6 @@ app.post('/modules/create', ensureAdmin, (req, res) => {
             hasQuiz: Boolean(quizData.length)
         };
 
-        console.log('Saving module with data:', {
-            title: moduleData.title,
-            hasCaseStudy: moduleData.hasCaseStudy,
-            hasQuiz: moduleData.hasQuiz,
-            caseStudyQuestions: caseStudyData.questions.length,
-            quizQuestions: quizData.length
-        });
 
         const moduleFile = path.join(moduleDir, `${moduleData.moduleCode}.json`);
         fs.writeFileSync(moduleFile, JSON.stringify(moduleData, null, 2));
