@@ -1,6 +1,7 @@
 const fs = require('fs').promises;
 const path = require('path');
 const Course = require('../models/Course');
+const { db } = require('../prisma/database');
 
 class CourseManager {
     constructor() {
@@ -85,49 +86,24 @@ class CourseManager {
         if (!courseId) return null;
         
         const courses = await this.loadCourses();
-        console.log('Looking for course with ID:', courseId);
-        console.log('Available course IDs:', courses.map(c => c.id));
-        
-        // Try both string and direct comparison
         return courses.find(c => c.id === courseId || c.id === String(courseId));
     }
 
-    async updateCourse(courseId, courseData) {
+    async updateCourse(courseData) {
         try {
-            if (!courseId) {
-                throw new Error('Course ID is required');
-            }
-
             const courses = await this.loadCourses();
-            console.log('Updating course. Course ID:', courseId);
-            console.log('Current courses:', courses.map(c => ({id: c.id, code: c.courseCode})));
-
-            // Find course index using both string and direct comparison
-            const courseIndex = courses.findIndex(c => 
-                c.id === courseId || c.id === String(courseId)
-            );
-            
-            if (courseIndex === -1) {
-                throw new Error(`Course not found with ID: ${courseId}`);
+            const index = await courses.findIndex(c => c.courseCode === courseData.courseCode);
+            console.log('Index:', index);
+            if (index === -1) {
+                throw new Error('Course not found');
             }
-
-            // Process modules if they exist
-            if (courseData.modules) {
-                courseData.modules = this.processModules(courseData.modules);
-            }
-
-            // Update course while preserving original id
-            const updatedCourse = {
-                ...courses[courseIndex],
-                ...courseData,
-                id: courses[courseIndex].id // Ensure we keep the original ID
-            };
-
-            courses[courseIndex] = updatedCourse;
+            const updatedCourse = { ...courses[index], ...courseData };
+            courses[index] = updatedCourse;
             await this.saveCourses(courses);
-            
-            console.log('Course updated successfully:', updatedCourse);
             return updatedCourse;
+            
+
+            
         } catch (error) {
             console.error('Error in updateCourse:', error);
             throw error;

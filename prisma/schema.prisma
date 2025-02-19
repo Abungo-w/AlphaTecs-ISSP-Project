@@ -26,18 +26,21 @@ model User {
 
 model Module {
   id          String   @id @default(uuid())
+  moduleCode  String
   title       String
   description String
   difficulty  String
   duration    Int
   content     String
-  themes      Theme[]
+  course      Course[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
-model Theme {
-  id       String   @id @default(uuid())
-  name     String
+model Course {
+  courseCode       String   @id
+  title     String
+  introduction String
+  summary String
   modules  Module[]
 }

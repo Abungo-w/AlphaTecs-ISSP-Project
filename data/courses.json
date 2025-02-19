@@ -10,5 +10,16 @@
       "M-41-50-10"
     ],
     "createdAt": "2025-02-12T08:47:41.189Z"
+  },
+  {
+    "id": "1739971959240",
+    "courseCode": "C-66-66",
+    "title": "con cu",
+    "introduction": "<p>kekek</p>",
+    "summary": "<p>keke</p>",
+    "modules": [
+      "M-10-21-04"
+    ],
+    "createdAt": "2025-02-19T13:32:39.240Z"
   }
 ]
