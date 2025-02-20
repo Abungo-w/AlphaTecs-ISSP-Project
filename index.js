@@ -211,6 +211,7 @@ app.get("/modules/:id", ensureAuthenticated, (req, res) => {
 
 // Make sure this line appears before other routes that might conflict
 const courseRoutes = require('./routes/courses');
+const { title } = require("process");
 app.use('/courses', courseRoutes);
 
 // Add a new route to get all modules for the datalist
@@ -313,25 +314,27 @@ app.post('/modules/create', ensureAdmin, (req, res) => {
         if (!fs.existsSync(moduleDir)){
             fs.mkdirSync(moduleDir);
         }
-
+        console.log(req.body);
         // Process case study data
-        const caseStudyData = {
-            content: req.body.caseStudyContent || '',
-            questions: Array.isArray(req.body.caseStudyQuestions) ? 
-                req.body.caseStudyQuestions.map(q => ({
+        const caseStudyData = Array.isArray(req.body.caseStudies) ?
+            req.body.caseStudies.map(cs => ({
+            title: cs.title || '',
+            content: cs.content || '',
+            questions: Array.isArray(cs.questions) ? 
+                cs.questions.map(q => ({
                     question: q.question || '',
                     answer: q.answer || ''
                 })).filter(q => q.question && q.answer) : []
-        };
-
+        })).filter(cs => cs.content || cs.questions.length > 0) : [];
+        console.log(caseStudyData);
         // Process quiz data
-        const quizData = Array.isArray(req.body.quizQuestions) ? 
-            req.body.quizQuestions.map(q => ({
+        const quizData = Array.isArray(req.body.quiz) ? 
+            req.body.quiz.map(q => ({
                 question: q.question || '',
                 options: q.options || [],
                 correct: q.correctAnswer || ''
             })).filter(q => q.question && q.options.length > 0 && q.correct) : [];
-
+        console.log(quizData);
         const moduleData = {
             moduleCode: req.body.moduleCode,
             title: req.body.title,
@@ -344,7 +347,7 @@ app.post('/modules/create', ensureAdmin, (req, res) => {
             quiz: quizData,
             createdAt: new Date().toISOString(),
             // Add flags
-            hasCaseStudy: Boolean(caseStudyData.content || caseStudyData.questions.length),
+            hasCaseStudy: Boolean(caseStudyData.length),
             hasQuiz: Boolean(quizData.length)
         };
 
@@ -352,7 +355,7 @@ app.post('/modules/create', ensureAdmin, (req, res) => {
         const moduleFile = path.join(moduleDir, `${moduleData.moduleCode}.json`);
         fs.writeFileSync(moduleFile, JSON.stringify(moduleData, null, 2));
 
-        res.redirect('/modules');
+        res.status(200).json({ message: 'Module created successfully', success: true, moduleCode: moduleData.moduleCode });
     } catch (error) {
         console.error('Error creating module:', error);
         res.status(500).send('Error creating module: ' + error.message);

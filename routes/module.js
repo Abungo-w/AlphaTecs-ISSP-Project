@@ -13,7 +13,6 @@ app.post('/modules/create', ensureAdmin, (req, res) => {
             content: req.body.caseStudy,
             questions: req.body.caseStudyQuestions || []
         };
-
         const moduleData = {
             moduleCode: req.body.moduleCode,
             title: req.body.title,
