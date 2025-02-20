@@ -179,23 +179,17 @@ app.get("/modules/:id", ensureAuthenticated, (req, res) => {
 
     try {
         const moduleContent = JSON.parse(fs.readFileSync(moduleFile, 'utf-8'));
-
+        console.log(moduleContent);
         // Structure the module data
         const moduleData = {
             ...moduleContent,
-            caseStudy: moduleContent.caseStudy || {
-                content: moduleContent.caseStudyContent || '',
-                questions: moduleContent.caseStudyQuestions || []
-            },
+            caseStudy: moduleContent.caseStudy,
             quiz: moduleContent.quiz || [],
             // Add visibility flags
-            hasCaseStudy: Boolean(
-                (moduleContent.caseStudy?.content) || 
-                (moduleContent.caseStudy?.questions?.length > 0)
-            ),
-            hasQuiz: Boolean(moduleContent.quiz?.length > 0)
+            hasCaseStudy: moduleContent.hasCaseStudy,
+            hasQuiz: moduleContent.hasQuiz
         };
-
+        console.log(moduleData);
 
 
         res.render("module-detail", { 

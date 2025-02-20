@@ -31,26 +31,28 @@
             <% if (module.hasCaseStudy) { %>
                 <div class="case-study-section">
                     <h2>Case Study</h2>
-                    <% if (module.caseStudy && module.caseStudy.content) { %>
+                    <% for (caseStudy of module.caseStudy) { %>
+                        <h3><%= caseStudy.title %></h3>
                         <div class="case-study-content ql-editor">
-                            <%- module.caseStudy.content %>
+                            <%- caseStudy.content %>
                         </div>
-                    <% } %>
                     
-                    <% if (module.caseStudy && module.caseStudy.questions && module.caseStudy.questions.length > 0) { %>
+                    <% if (caseStudy.questions.length > 0) { %>
                         <div class="discussion-questions">
                             <h3>Discussion Questions</h3>
-                            <% module.caseStudy.questions.forEach((qa, index) => { %>
+                            <% caseStudy.questions.forEach((qa, index) => { %>
                                 <div class="qa-pair">
                                     <div class="question">
                                         <strong>Question <%= index + 1 %>:</strong> <%= qa.question %>
                                     </div>
+                                    <button class = "toggle-btn" onclick="toggleAnswer(this)">Show Answer</button>
                                     <div class="answer">
                                         <strong>Answer:</strong> <%= qa.answer %>
                                     </div>
                                 </div>
                             <% }); %>
                         </div>
+                    <% } %>
                     <% } %>
                 </div>
             <% } %>
@@ -210,6 +212,26 @@
             text-align: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+        .toggle-btn {
+            padding: 0.5rem 1rem;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+        
+        .toggle-btn:hover {
+            background: #2563eb;
+        }
+        
+        .answer {
+            padding: 1rem;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            display: none;
+        }
     </style>
 
     <script>
@@ -219,9 +241,8 @@
             alert('Quiz submitted!');
         });
 
-        function toggleAnswer(index) {
-            const answer = document.getElementById(`answer-${index}`);
-            const button = answer.previousElementSibling.querySelector('.toggle-btn');
+        function toggleAnswer(button) {
+            const answer = button.nextElementSibling;
             if (answer.style.display === 'none') {
                 answer.style.display = 'block';
                 button.textContent = 'Hide Answer';
