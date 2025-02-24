@@ -30,30 +30,27 @@
             <!-- Case Study Section -->
             <% if (module.hasCaseStudy) { %>
                 <div class="case-study-section">
-                    <h2>Case Study</h2>
-                    <% for (caseStudy of module.caseStudy) { %>
-                        <h3><%= caseStudy.title %></h3>
-                        <div class="case-study-content ql-editor">
-                            <%- caseStudy.content %>
-                        </div>
-                    
-                    <% if (caseStudy.questions.length > 0) { %>
-                        <div class="discussion-questions">
-                            <h3>Discussion Questions</h3>
-                            <% caseStudy.questions.forEach((qa, index) => { %>
-                                <div class="qa-pair">
-                                    <div class="question">
-                                        <strong>Question <%= index + 1 %>:</strong> <%= qa.question %>
+                    <% module.caseStudy.forEach((study, index) => { %>
+                        <div class="case-study">
+                            <h3><%= study.title %></h3>
+                            <div class="case-study-content"><%- study.content %></div>
+                            
+                            <div class="discussion-questions">
+                                <h3>Discussion Questions</h3>
+                                <% study.questions.forEach((qa, qIndex) => { %>
+                                    <div class="qa-pair">
+                                        <div class="question-header" onclick="event.stopPropagation()">
+                                            <p class="question"><%= qa.question %></p>
+                                            <button class="toggle-btn" onclick="toggleAnswer(this)">Show Answer</button>
+                                        </div>
+                                        <div class="answer" style="display: none;">
+                                            <%= qa.answer %>
+                                        </div>
                                     </div>
-                                    <button class = "toggle-btn" onclick="toggleAnswer(this)">Show Answer</button>
-                                    <div class="answer">
-                                        <strong>Answer:</strong> <%= qa.answer %>
-                                    </div>
-                                </div>
-                            <% }); %>
+                                <% }) %>
+                            </div>
                         </div>
-                    <% } %>
-                    <% } %>
+                    <% }) %>
                 </div>
             <% } %>
 
@@ -242,14 +239,11 @@
         });
 
         function toggleAnswer(button) {
-            const answer = button.nextElementSibling;
-            if (answer.style.display === 'none') {
-                answer.style.display = 'block';
-                button.textContent = 'Hide Answer';
-            } else {
-                answer.style.display = 'none';
-                button.textContent = 'Show Answer';
-            }
+            const answerDiv = button.closest('.qa-pair').querySelector('.answer');
+            const isHidden = answerDiv.style.display === 'none';
+            
+            answerDiv.style.display = isHidden ? 'block' : 'none';
+            button.textContent = isHidden ? 'Hide Answer' : 'Show Answer';
         }
 
         function startQuiz() {

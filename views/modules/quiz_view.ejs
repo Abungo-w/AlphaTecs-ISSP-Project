@@ -3,49 +3,63 @@
 <head>
     <title>Module Quiz</title>
     <link rel="stylesheet" href="/css/quiz_form.css">
+    <!-- Add Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 </head>
 <body>
     <div class="quiz-view-container">
         <div class="quiz-header">
             <h1><%= module.title %> - Assessment</h1>
-            <p class="module-progress">Progress: Question <span id="currentQuestion">1</span> of <%= module.quiz.length %></p>
+            <p class="module-progress">Question <span id="currentQuestion">1</span> of <%= module.quiz.length %></p>
         </div>
 
-        <div class="quiz-content">
+        <form id="quizForm" class="quiz-content">
             <% module.quiz.forEach((question, index) => { %>
                 <div class="quiz-question <%= index === 0 ? 'active' : '' %>" data-question="<%= index + 1 %>">
                     <div class="question-text">
                         <h3>Question <%= index + 1 %></h3>
-                        <p><%= question.text %></p>
+                        <p><%= question.question %></p>
                     </div>
 
                     <div class="options-container">
                         <% Object.entries(question.options).forEach(([key, value]) => { %>
-                            <div class="option-group">
+                            <label class="option-group" for="q<%= index %>_<%= key %>">
                                 <input type="radio" 
-                                       name="question<%= index %>" 
+                                       name="answers[<%= index %>]" 
                                        value="<%= key %>"
-                                       id="q<%= index %>_<%= key %>">
-                                <label for="q<%= index %>_<%= key %>">
-                                    <%= value %>
-                                </label>
-                            </div>
+                                       id="q<%= index %>_<%= key %>"
+                                       required>
+                                <span class="option-text"><%= value %></span>
+                            </label>
                         <% }) %>
                     </div>
                 </div>
             <% }) %>
-        </div>
+        </form>
 
         <div class="quiz-navigation">
-            <button class="btn-prev" onclick="prevQuestion()" disabled>Previous</button>
-            <button class="btn-next" onclick="nextQuestion()">Next</button>
-            <button class="btn-submit" onclick="submitQuiz()" style="display: none;">Submit Quiz</button>
+            <button class="btn-nav btn-prev" onclick="prevQuestion()" disabled>Previous</button>
+            <button class="btn-nav btn-next" onclick="nextQuestion()">Next</button>
+            <button class="btn-nav btn-submit" onclick="submitQuiz()" style="display: none;">Submit Quiz</button>
+        </div>
+
+        <div id="quizResults" class="quiz-results" style="display: none;">
+            <h2>Quiz Results</h2>
+            <div class="score-container">
+                <p>Your Score: <span id="scoreValue">0</span>/<span id="totalQuestions">0</span></p>
+                <p>Percentage: <span id="percentageValue">0</span>%</p>
+            </div>
+            <div class="quiz-actions">
+                <button class="btn-retry" onclick="window.location.reload()">Try Again</button>
+                <button class="btn-return" onclick="returnToModule()">Return to Module</button>
+            </div>
         </div>
     </div>
 
     <script>
         let currentQuestionIndex = 0;
         const totalQuestions = <%= module.quiz.length %>;
+        const moduleCode = '<%= module.moduleCode %>';
 
         function showQuestion(index) {
             document.querySelectorAll('.quiz-question').forEach(q => q.classList.remove('active'));
@@ -54,11 +68,19 @@
             
             // Update button states
             document.querySelector('.btn-prev').disabled = index === 0;
-            document.querySelector('.btn-next').style.display = index === totalQuestions - 1 ? 'none' : 'block';
-            document.querySelector('.btn-submit').style.display = index === totalQuestions - 1 ? 'block' : 'none';
+            document.querySelector('.btn-next').style.display = index === totalQuestions - 1 ? 'none' : 'inline-block';
+            document.querySelector('.btn-submit').style.display = index === totalQuestions - 1 ? 'inline-block' : 'none';
         }
 
         function nextQuestion() {
+            const currentQuestion = document.querySelector(`.quiz-question[data-question="${currentQuestionIndex + 1}"]`);
+            const selectedAnswer = currentQuestion.querySelector('input[type="radio"]:checked');
+            
+            if (!selectedAnswer) {
+                alert('Please select an answer before proceeding.');
+                return;
+            }
+
             if (currentQuestionIndex < totalQuestions - 1) {
                 currentQuestionIndex++;
                 showQuestion(currentQuestionIndex);
@@ -72,9 +94,101 @@
             }
         }
 
-        function submitQuiz() {
-            // Implement quiz submission logic here
+        async function submitQuiz() {
+            const form = document.getElementById('quizForm');
+            const answers = {};
+            
+            // Collect all answers
+            form.querySelectorAll('input[type="radio"]:checked').forEach(input => {
+                const questionIndex = input.name.match(/\d+/)[0];
+                answers[questionIndex] = parseInt(input.value) || input.value;
+            });
+
+            // Validate all questions are answered
+            if (Object.keys(answers).length !== totalQuestions) {
+                alert('Please answer all questions before submitting.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/modules/${moduleCode}/quiz`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ answers })
+                });
+
+                if (!response.ok) throw new Error('Failed to submit quiz');
+
+                const results = await response.json();
+                
+                // Show results
+                document.getElementById('scoreValue').textContent = results.score;
+                document.getElementById('totalQuestions').textContent = results.total;
+                document.getElementById('percentageValue').textContent = Math.round(results.percentage);
+                
+                // Hide quiz and show results
+                document.getElementById('quizForm').style.display = 'none';
+                document.querySelector('.quiz-navigation').style.display = 'none';
+                document.getElementById('quizResults').style.display = 'block';
+
+                // Check score and show appropriate celebration
+                if (results.percentage === 100) {
+                    celebrateSuccess();
+                }
+                
+            } catch (error) {
+                console.error('Error submitting quiz:', error);
+                alert('Failed to submit quiz. Please try again.');
+            }
         }
+
+        function celebrateSuccess() {
+            // Trigger confetti
+            var count = 200;
+            var defaults = {
+                origin: { y: 0.7 }
+            };
+
+            function fire(particleRatio, opts) {
+                confetti({
+                    ...defaults,
+                    ...opts,
+                    particleCount: Math.floor(count * particleRatio)
+                });
+            }
+
+            fire(0.25, {
+                spread: 26,
+                startVelocity: 55,
+            });
+            fire(0.2, {
+                spread: 60,
+            });
+            fire(0.35, {
+                spread: 100,
+                decay: 0.91,
+                scalar: 0.8
+            });
+            fire(0.1, {
+                spread: 120,
+                startVelocity: 25,
+                decay: 0.92,
+                scalar: 1.2
+            });
+            fire(0.1, {
+                spread: 120,
+                startVelocity: 45,
+            });
+        }
+
+        function returnToModule() {
+            window.location.href = `/modules/${moduleCode}`;
+        }
+
+        // Initialize
+        showQuestion(0);
     </script>
 </body>
 </html>

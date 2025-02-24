@@ -468,12 +468,7 @@ input::-webkit-file-upload-button {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    cursor: pointer;
     background: white;
-}
-
-.question-header:hover {
-    background: #f8fafc;
 }
 
 .toggle-btn {
@@ -484,6 +479,7 @@ input::-webkit-file-upload-button {
     color: #4b5563;
     cursor: pointer;
     font-size: 0.875rem;
+    transition: all 0.2s;
 }
 
 .toggle-btn:hover {
