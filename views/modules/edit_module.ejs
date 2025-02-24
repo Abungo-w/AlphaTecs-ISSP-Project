@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Module</title>
+    <link rel="stylesheet" href="/css/module_create.css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="module-creation-wrapper">
+        <div class="module-creation-header">
+            <h1>Edit Module</h1>
+        </div>
+
+        <form id="editModuleForm" class="module-form">
+            <div class="form-group">
+                <label for="moduleCode">Module Code</label>
+                <div class="field-description">A unique identifier for this module</div>
+                <input type="text" id="moduleCode" name="moduleCode" class="form-input" value="<%= module.moduleCode %>" readonly required>
+            </div>
+
+            <div class="form-group">
+                <label for="title">Module Title</label>
+                <div class="field-description">The title of your module</div>
+                <input type="text" id="title" name="title" class="form-input" value="<%= module.title %>" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Module Description</label>
+                <div class="field-description">A brief overview of what this module covers</div>
+                <div id="description-editor" class="editor-container"><%- module.description %></div>
+                <input type="hidden" name="description" id="description-hidden">
+            </div>
+
+            <div class="form-group">
+                <label for="duration">Duration (minutes)</label>
+                <div class="field-description">Estimated time to complete this module</div>
+                <input type="number" id="duration" name="duration" class="form-input" value="<%= module.duration %>" required>
+            </div>
+
+            <div class="form-group">
+                <label for="content">Module Content</label>
+                <div class="field-description">The main content of your module</div>
+                <div id="content-editor" class="editor-container"><%- module.content %></div>
+                <input type="hidden" name="content" id="content-hidden">
+            </div>
+
+            <div id="caseStudiesContainer">
+                <div class="case-study-container">
+                    <h2>Case Study 1</h2>
+                    <div class="case-study">
+                        <button type="button" class="btn-remove-case-study" onclick="removeCaseStudy(this)">×</button>
+                        <h3>Create Case Study</h3>
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" class="form-input" name="caseStudyTitle" placeholder="Title" 
+                                value="<%= module.caseStudy && module.caseStudy[0] ? module.caseStudy[0].title : '' %>">
+                        </div>
+                        <div class="form-group">
+                            <label>Scenario</label>
+                            <textarea class="form-input" name="caseStudyContent" placeholder="Scenario"><%= module.caseStudy && module.caseStudy[0] ? module.caseStudy[0].content : '' %></textarea>
+                        </div>
+                        
+                        <div class="discussion-questions">
+                            <h3>Discussion Questions</h3>
+                            <div class="questions-container"> <!-- Changed from id="questionsContainer" to class -->
+                                <% if (module.caseStudy && module.caseStudy[0] && module.caseStudy[0].questions) { %>
+                                    <% module.caseStudy[0].questions.forEach((q, index) => { %>
+                                        <div class="question-item">
+                                            <div class="question-number">Q<%= index + 1 %></div>
+                                            <button type="button" class="btn-remove" onclick="removeQuestion(this)">×</button>
+                                            <div class="discussion-input-group">
+                                                <label>Question:</label>
+                                                <input type="text" class="form-input" name="question[]" placeholder="Enter your question" value="<%= q.question %>">
+                                            </div>
+                                            <div class="discussion-input-group">
+                                                <label>Answer:</label>
+                                                <textarea class="form-input" name="answer[]" placeholder="Enter key discussion points and potential answers"><%= q.answer %></textarea>
+                                            </div>
+                                        </div>
+                                    <% }) %>
+                                <% } %>
+                            </div>
+                            <button type="button" class="btn-add" onclick="addQuestion(this)">Add Another Question</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn-add-case-study" onclick="addCaseStudy()">Add Another Case Study</button>
+
+            <div class="quiz-section">
+                <h2>Module Assessment</h2>
+                <p class="section-description">Create quiz questions for this module</p>
+                <div id="quizContainer">
+                    <% if (module.quiz && module.quiz.length > 0) { %>
+                        <% module.quiz.forEach((q, index) => { %>
+                            <div class="quiz-question">
+                                <div class="question-header">Question <%= index + 1 %></div>
+                                <button type="button" class="btn-remove" onclick="removeQuizQuestion(this)">×</button>
+                                <div class="form-group">
+                                    <input type="text" class="form-input question-text" placeholder="Enter your question here" value="<%= q.question %>">
+                                    <div class="options-container">
+                                        <% ['A', 'B', 'C', 'D'].forEach((letter, i) => { %>
+                                            <div class="option-group">
+                                                <div class="option-label"><%= letter %></div>
+                                                <input type="radio" name="correct-<%= index %>" value="<%= letter %>" 
+                                                    <%= q.correct === letter ? 'checked' : '' %>>
+                                                <input type="text" class="form-input option-text" 
+                                                    placeholder="Option <%= letter %>" 
+                                                    value="<%= q.options[i] || '' %>">
+                                            </div>
+                                        <% }) %>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }) %>
+                    <% } %>
+                </div>
+                <button type="button" class="btn-add" onclick="addQuizQuestion()">Add Another Question</button>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-cancel" onclick="window.location.href='/modules'">Cancel</button>
+                <button type="submit" class="btn-save">Save Changes</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script>
+        // Initialize Quill editors with the same options as create page
+        const quillOptions = {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    ['bold', 'italic', 'underline'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['link', 'image'],
+                    ['clean']
+                ]
+            }
+        };
+
+        const descriptionEditor = new Quill('#description-editor', quillOptions);
+        const contentEditor = new Quill('#content-editor', quillOptions);
+        const caseStudyEditors = [];
+
+        // Initialize existing case study editors
+        document.querySelectorAll('.case-study-editor').forEach(editor => {
+            caseStudyEditors.push(new Quill(editor, quillOptions));
+        });
+
+        // Update form submission handler
+        document.getElementById('editModuleForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Collect case study data
+            const caseStudies = Array.from(document.querySelectorAll('.case-study')).map(cs => {
+                const questions = Array.from(cs.querySelectorAll('.question-item')).map(q => ({
+                    question: q.querySelector('input[name="question[]"]').value,
+                    answer: q.querySelector('textarea[name="answer[]"]').value
+                }));
+
+                return {
+                    title: cs.querySelector('input[name="caseStudyTitle"]').value,
+                    content: cs.querySelector('textarea[name="caseStudyContent"]').value,
+                    questions: questions
+                };
+            });
+
+            // Collect quiz data
+            const quiz = collectQuizData();
+
+            const formData = {
+                moduleCode: document.getElementById('moduleCode').value,
+                title: document.getElementById('title').value,
+                description: descriptionEditor.root.innerHTML,
+                content: contentEditor.root.innerHTML,
+                duration: parseInt(document.getElementById('duration').value),
+                caseStudy: caseStudies,
+                quiz: quiz
+            };
+
+            try {
+                const response = await fetch(`/modules/${formData.moduleCode}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    alert('Module updated successfully!');
+                    window.location.href = `/modules/${formData.moduleCode}`; // Redirect to module view
+                } else {
+                    const error = await response.json();
+                    alert(error.message || 'Error updating module');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error updating module');
+            }
+        });
+
+        // Add handlers for adding new case studies and quiz questions
+        function addQuestion(button) {
+            // Find the containing case study first
+            const caseStudy = button.closest('.case-study');
+            // Then find the questions container within this case study
+            const container = caseStudy.querySelector('.questions-container'); // Changed from '#questionsContainer'
+            const questionCount = container.children.length + 1;
+            
+            const questionHTML = `
+                <div class="question-item">
+                    <div class="question-number">Q${questionCount}</div>
+                    <button type="button" class="btn-remove" onclick="removeQuestion(this)">×</button>
+                    <div class="discussion-input-group">
+                        <label>Question:</label>
+                        <input type="text" class="form-input" name="question[]" placeholder="Enter your question">
+                    </div>
+                    <div class="discussion-input-group">
+                        <label>Answer:</label>
+                        <textarea class="form-input" name="answer[]" placeholder="Enter key discussion points and potential answers"></textarea>
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', questionHTML);
+            updateQuestionNumbers(container);
+        }
+
+        function updateQuestionNumbers(container) {
+            // Update question numbers within the specific container
+            const questions = container.querySelectorAll('.question-item');
+            questions.forEach((q, index) => {
+                q.querySelector('.question-number').textContent = `Q${index + 1}`;
+            });
+        }
+
+        function removeQuestion(button) {
+            const questionItem = button.closest('.question-item');
+            if (!questionItem.matches(':first-child')) {
+                questionItem.remove();
+                updateQuestionNumbers();
+            }
+        }
+
+        function updateQuestionNumbers() {
+            const questions = document.querySelectorAll('.question-item');
+            questions.forEach((q, index) => {
+                q.querySelector('.question-number').textContent = `Q${index + 1}`;
+            });
+        }
+
+        function addQuizQuestion() {
+            const container = document.getElementById('quizContainer');
+            const questionCount = container.children.length;
+            
+            const questionHTML = `
+                <div class="quiz-question">
+                    <div class="question-header">Question ${questionCount + 1}</div>
+                    <button type="button" class="btn-remove" onclick="removeQuizQuestion(this)">×</button>
+                    <div class="form-group">
+                        <input type="text" class="form-input question-text" placeholder="Enter your question here">
+                        <div class="options-container">
+                            ${['A', 'B', 'C', 'D'].map(letter => `
+                                <div class="option-group">
+                                    <div class="option-label">${letter}</div>
+                                    <input type="radio" name="correct-${questionCount}" value="${letter}">
+                                    <input type="text" class="form-input option-text" placeholder="Option ${letter}">
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', questionHTML);
+        }
+
+        function removeQuizQuestion(button) {
+            const quizContainer = document.getElementById('quizContainer');
+            const question = button.closest('.quiz-question');
+            
+            // Only allow removal if there's more than one question and it's not the first one
+            if (quizContainer.children.length > 1 && !question.matches(':first-child')) {
+                question.remove();
+                updateQuizNumbers();
+            }
+        }
+
+        function updateQuizNumbers() {
+            const questions = document.querySelectorAll('.quiz-question');
+            questions.forEach((q, index) => {
+                q.querySelector('.question-header').textContent = `Question ${index + 1}`;
+                q.querySelectorAll('input[type="radio"]').forEach(radio => {
+                    radio.name = `correct-${index}`;
+                });
+            });
+        }
+
+        function addCaseStudy() {
+            const container = document.getElementById('caseStudiesContainer');
+            const caseStudyCount = container.children.length + 1;
+            
+            const caseStudyHTML = `
+                <div class="case-study-container">
+                    <h2>Case Study ${caseStudyCount}</h2>
+                    <div class="case-study">
+                        <button type="button" class="btn-remove-case-study" onclick="removeCaseStudy(this)">×</button>
+                        <h3>Create Case Study</h3>
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" class="form-input" name="caseStudyTitle" placeholder="Title">
+                        </div>
+                        <div class="form-group">
+                            <label>Scenario</label>
+                            <textarea class="form-input" name="caseStudyContent" placeholder="Scenario"></textarea>
+                        </div>
+                        
+                        <div class="discussion-questions">
+                            <h3>Discussion Questions</h3>
+                            <div class="questions-container">
+                                <div class="question-item">
+                                    <div class="question-number">Q1</div>
+                                    <div class="discussion-input-group">
+                                        <label>Question:</label>
+                                        <input type="text" class="form-input" name="question[]" placeholder="Enter your question">
+                                    </div>
+                                    <div class="discussion-input-group">
+                                        <label>Answer:</label>
+                                        <textarea class="form-input" name="answer[]" placeholder="Enter key discussion points and potential answers"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-add" onclick="addQuestion(this)">Add Another Question</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', caseStudyHTML);
+        }
+
+        function removeCaseStudy(button) {
+            const caseStudyContainer = button.closest('.case-study-container');
+            if (!caseStudyContainer.matches(':first-child')) {
+                caseStudyContainer.remove();
+                updateCaseStudyNumbers();
+            }
+        }
+
+        function updateCaseStudyNumbers() {
+            const caseStudies = document.querySelectorAll('.case-study-container');
+            caseStudies.forEach((cs, index) => {
+                cs.querySelector('h2').textContent = `Case Study ${index + 1}`;
+            });
+        }
+
+        function collectQuizData() {
+            return Array.from(document.querySelectorAll('.quiz-question')).map((q, index) => {
+                const optionInputs = q.querySelectorAll('.option-text');
+                const options = Array.from(optionInputs).map(input => input.value);
+                const correctRadio = q.querySelector(`input[name="correct-${index}"]:checked`);
+                
+                return {
+                    question: q.querySelector('.question-text').value,
+                    options: options,
+                    correct: correctRadio ? correctRadio.value : ''
+                };
+            });
+        }
+    </script>
+</body>
+</html>

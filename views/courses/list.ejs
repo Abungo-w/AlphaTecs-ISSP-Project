@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Courses</title>
-    <link rel="stylesheet" href="/css/course_list.css">
+    <title>Available Courses</title>
+    <link rel="stylesheet" href="/css/courses.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="course-list-container">
         <div class="course-list-header">
             <h1>Available Courses</h1>
             <% if (user && user.role === 'admin') { %>
-                <a href="/courses/create_course" class="btn btn-primary">Create New Course</a>
+                <a href="/courses/create_course" class="btn-create">
+                    <i class="fas fa-plus"></i>
+                    Create New Course
+                </a>
             <% } %>
         </div>
 
@@ -23,21 +27,49 @@
             <% if (courses && courses.length > 0) { %>
                 <% courses.forEach(course => { %>
                     <div class="course-card">
-                        <h2 class="course-title"><%= course.courseCode %> - <%= course.title %></h2>
-                        <div class="course-meta">
-                            <span>Created: <%= new Date(course.createdAt).toLocaleDateString() %></span>
-                        </div>
-                        <a href="/courses/<%= course.courseCode %>" class="btn-view">View Course</a>
-                        <% if (user && user.role === 'admin') { %>
-                            <div class="admin-actions">
-                                <a href="/courses/<%= course.courseCode %>/edit" class="btn-edit">Edit</a>
-                                <button onclick="deleteCourse('<%= course.courseCode %>')" class="btn-delete">Delete</button>
+                        <div class="course-header">
+                            <div class="course-meta">
+                                <span class="course-code"><%= course.courseCode %></span>
+                                <span class="course-date">
+                                    <i class="far fa-calendar-alt"></i>
+                                    <%= new Date(course.createdAt).toLocaleDateString() %>
+                                </span>
                             </div>
-                        <% } %>
+                            <h2 class="course-title"><%= course.title %></h2>
+                        </div>
+                        
+                        <div class="course-content">
+                            <div class="course-modules">
+                                <i class="fas fa-book-reader"></i>
+                                <%= course.modules ? course.modules.length : 0 %> Modules
+                            </div>
+                            <div class="course-actions">
+                                <a href="/courses/<%= course.courseCode %>" class="btn-view">
+                                    <i class="fas fa-eye"></i>
+                                    View Course
+                                </a>
+                                <% if (user && user.role === 'admin') { %>
+                                    <a href="/courses/<%= course.courseCode %>/edit" class="btn-edit">
+                                        <i class="fas fa-edit"></i>
+                                        Edit
+                                    </a>
+                                    <button onclick="deleteCourse('<%= course.courseCode %>')" class="btn-delete">
+                                        <i class="fas fa-trash-alt"></i>
+                                        Delete
+                                    </button>
+                                <% } %>
+                            </div>
+                        </div>
                     </div>
                 <% }); %>
             <% } else { %>
-                <div class="no-courses">No courses available at the moment.</div>
+                <div class="no-courses">
+                    <i class="fas fa-graduation-cap"></i>
+                    <p>No courses available yet.</p>
+                    <% if (user && user.role === 'admin') { %>
+                        <a href="/courses/create_course" class="btn-create">Create your first course</a>
+                    <% } %>
+                </div>
             <% } %>
         </div>
     </div>

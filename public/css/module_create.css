@@ -18,9 +18,15 @@
 }
 
 .form-group {
-    margin-bottom: 3rem;  /* Increased from 2rem */
+    margin-bottom: 2rem;
     padding-bottom: 1rem;
     border-bottom: 1px solid #e2e8f0;
+}
+
+.form-group:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
 }
 
 .form-group label {
@@ -479,4 +485,430 @@ textarea.form-input {
     .case-study-section {
         padding: 1rem;
     }
+}
+
+/* Quiz Question Styles - Updated */
+.quiz-question {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.quiz-question .btn-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    margin-top: 1rem;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    width: auto;
+    height: auto;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quiz-question .btn-remove:hover {
+    background: #dc2626;
+}
+
+.options-container {
+    margin: 1.5rem 0;
+}
+
+/* Case Study Section - Updated */
+.case-studies {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.case-study {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.case-study h3 {
+    color: #2d3748;
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+}
+
+.case-study-container h2 {
+    color: #2d3748;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.discussion-questions {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.discussion-questions h3 {
+    color: #2d3748;
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.question-item {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.discussion-input-group {
+    margin-bottom: 1rem;
+}
+
+.discussion-input-group label {
+    display: block;
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 0.5rem;
+}
+
+.discussion-input-group:last-child {
+    margin-bottom: 0;
+}
+
+.btn-add-case-study {
+    width: 100%;
+    padding: 1rem;
+    background: transparent;
+    color: #48bb78;
+    border: 2px dashed #48bb78;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 1rem;
+    margin: 2rem 0;
+}
+
+.btn-add-case-study:hover {
+    background: rgba(72, 187, 120, 0.1);
+}
+
+.case-study-container {
+    position: relative;
+    margin-bottom: 2rem;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 2rem;
+}
+
+.case-study-container h2 {
+    color: #2d3748;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.case-study {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 2rem;
+    position: relative;
+}
+
+.case-study h3 {
+    color: #2d3748;
+    font-size: 1.3rem;
+    margin-bottom: 2rem;
+}
+
+.discussion-questions {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.question-item {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.question-number {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 1rem;
+}
+
+.btn-remove-case-study {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 30px;
+    height: 30px;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: background 0.2s;
+}
+
+.btn-remove-case-study:hover {
+    background: #dc2626;
+}
+
+.case-study-container:first-child .btn-remove-case-study {
+    display: none;
+}
+
+.discussion-input-group {
+    margin-bottom: 1.5rem;
+}
+
+.discussion-input-group:last-child {
+    margin-bottom: 0;
+}
+
+.btn-add-case-study {
+    width: 100%;
+    padding: 1rem;
+    background: transparent;
+    color: #48bb78;
+    border: 2px dashed #48bb78;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 1rem;
+    margin: 2rem 0;
+}
+
+.btn-add-case-study:hover {
+    background: rgba(72, 187, 120, 0.1);
+}
+
+/* Style for the Add Another Case Study button */
+.btn-add-case-study {
+    width: 100%;
+    padding: 1rem;
+    background: transparent;
+    color: #48bb78;
+    border: 2px dashed #48bb78;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin: 2rem 0;
+}
+
+.btn-add-case-study:hover {
+    background: rgba(72, 187, 120, 0.1);
+}
+
+/* Form Action Buttons */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 2px solid #e2e8f0;
+}
+
+.btn-cancel, .btn-save {
+    padding: 0.75rem 2rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-cancel {
+    background: #e2e8f0;
+    color: #4a5568;
+    border: none;
+}
+
+.btn-cancel:hover {
+    background: #cbd5e0;
+}
+
+.btn-save {
+    background: #4299e1;
+    color: white;
+    border: none;
+}
+
+.btn-save:hover {
+    background: #3182ce;
+}
+
+/* Add Question Button */
+.btn-add {
+    width: 100%;
+    padding: 0.75rem;
+    background: #48bb78;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin: 1rem 0;
+}
+
+.btn-add:hover {
+    background: #38a169;
+}
+
+/* Remove Buttons */
+.btn-remove {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 30px;
+    height: 30px;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn-remove:hover {
+    background: #dc2626;
+}
+
+/* Add Case Study Button */
+.btn-add-case-study {
+    width: 100%;
+    padding: 1rem;
+    background: transparent;
+    color: #48bb78;
+    border: 2px dashed #48bb78;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin: 2rem 0;
+    font-size: 1rem;
+}
+
+.btn-add-case-study:hover {
+    background: rgba(72, 187, 120, 0.1);
+}
+
+/* Case Study Container */
+.case-study-container {
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.case-study {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 2rem;
+    position: relative;
+}
+
+/* Question Item Styling */
+.question-item {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 2rem;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.question-item:last-child {
+    margin-bottom: 0;
+}
+
+/* Discussion Questions Section */
+.discussion-questions {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+/* Quiz Question Styles - Fixed */
+.quiz-question {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 2rem;
+    padding-top: 3.5rem;  /* Increased top padding to prevent clipping */
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.quiz-question .btn-remove {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 30px;
+    height: 30px;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: background 0.2s;
+    padding: 0;
+    z-index: 10;
+}
+
+.quiz-question:first-child .btn-remove {
+    display: none;  /* Hide remove button for first question */
+}
+
+.quiz-question .btn-remove:hover {
+    background: #dc2626;
 }

@@ -12,7 +12,9 @@
     <div class="module-detail-container">
         <div class="module-header">
             <h1><%= module.title %></h1>
-            <p class="description"><%= module.description %></p>
+            <div class="module-description">
+                <%= module.description.replace(/<[^>]*>/g, '') %>
+            </div>
             <div class="module-meta">
                 <span class="duration"><%= module.duration %> minutes</span>
                 <span class="difficulty"><%= module.difficulty %></span>
@@ -248,6 +250,13 @@
 
         function startQuiz() {
             window.location.href = `/modules/<%= module.moduleCode %>/quiz`;
+        }
+
+        // Add helper function to strip HTML
+        function stripHtml(html) {
+            const tmp = document.createElement('div');
+            tmp.innerHTML = html;
+            return tmp.textContent || tmp.innerText || '';
         }
     </script>
 </body>

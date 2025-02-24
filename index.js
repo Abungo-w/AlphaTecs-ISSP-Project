@@ -107,7 +107,8 @@ app.get("/modules", ensureAuthenticated, (req, res) => {
           return {
             moduleCode: content.moduleCode,
             title: content.title,
-            description: content.description,
+            // Strip HTML tags from description
+            description: content.description.replace(/<[^>]*>/g, ''),
             difficulty: content.difficulty,
             duration: content.duration,
             createdAt: content.createdAt
@@ -168,6 +169,56 @@ app.get('/modules/create', ensureAdmin, (req, res) => {
     }
 });
 
+// Add this route BEFORE the /modules/:id route
+app.get('/modules/:moduleCode/edit', ensureAdmin, (req, res) => {
+    try {
+        const moduleCode = req.params.moduleCode;
+        const moduleFile = path.join(__dirname, 'modules', `${moduleCode}.json`);
+        
+        if (!fs.existsSync(moduleFile)) {
+            return res.status(404).send('Module not found');
+        }
+
+        const moduleData = JSON.parse(fs.readFileSync(moduleFile, 'utf-8'));
+        
+        res.render('modules/edit_module', { 
+            module: moduleData,
+            user: req.user
+        });
+    } catch (error) {
+        console.error('Error loading module for editing:', error);
+        res.status(500).send('Error loading module for editing');
+    }
+});
+
+// Add PUT route to handle module updates
+app.put('/modules/:moduleCode', ensureAdmin, async (req, res) => {
+    try {
+        const moduleCode = req.params.moduleCode;
+        const moduleFile = path.join(__dirname, 'modules', `${moduleCode}.json`);
+        
+        if (!fs.existsSync(moduleFile)) {
+            return res.status(404).json({ error: 'Module not found' });
+        }
+
+        // Get existing module data
+        const existingModule = JSON.parse(await fsPromises.readFile(moduleFile, 'utf-8'));
+
+        const updatedModule = {
+            ...existingModule,
+            ...req.body,
+            updatedAt: new Date().toISOString()
+        };
+
+        await fsPromises.writeFile(moduleFile, JSON.stringify(updatedModule, null, 2));
+        
+        res.json({ success: true, message: 'Module updated successfully' });
+    } catch (error) {
+        console.error('Error updating module:', error);
+        res.status(500).json({ error: 'Failed to update module' });
+    }
+});
+
 // Update the module detail route to handle content properly
 app.get("/modules/:id", ensureAuthenticated, (req, res) => {
     const moduleId = req.params.id;
@@ -179,18 +230,15 @@ app.get("/modules/:id", ensureAuthenticated, (req, res) => {
 
     try {
         const moduleContent = JSON.parse(fs.readFileSync(moduleFile, 'utf-8'));
-        console.log(moduleContent);
-        // Structure the module data
+        // Structure the module data and strip HTML from description
         const moduleData = {
             ...moduleContent,
+            description: moduleContent.description.replace(/<[^>]*>/g, ''),
             caseStudy: moduleContent.caseStudy,
             quiz: moduleContent.quiz || [],
-            // Add visibility flags
             hasCaseStudy: moduleContent.hasCaseStudy,
             hasQuiz: moduleContent.hasQuiz
         };
-        console.log(moduleData);
-
 
         res.render("module-detail", { 
             module: moduleData,
@@ -384,12 +432,12 @@ app.get('/modules/:moduleCode/quiz', ensureAuthenticated, (req, res) => {
     }
 });
 
-// Quiz submission route
+// Update the quiz submission route
 app.post('/modules/:moduleCode/quiz', ensureAuthenticated, (req, res) => {
     try {
         const moduleCode = req.params.moduleCode;
         const moduleFile = path.join(__dirname, 'modules', `${moduleCode}.json`);
-        const answers = req.body.answers;
+        const userAnswers = req.body.answers;
 
         if (!fs.existsSync(moduleFile)) {
             return res.status(404).json({ error: 'Module not found' });
@@ -397,16 +445,30 @@ app.post('/modules/:moduleCode/quiz', ensureAuthenticated, (req, res) => {
 
         const moduleContent = JSON.parse(fs.readFileSync(moduleFile, 'utf-8'));
         
-        // Calculate score
-        const score = moduleContent.quiz.reduce((total, question, index) => {
-            return total + (answers[index] === question.correctAnswer ? 1 : 0);
-        }, 0);
+        // Initialize score
+        let score = 0;
+        const total = moduleContent.quiz.length;
 
-        // Send back results
+        // Compare answers
+        moduleContent.quiz.forEach((question, index) => {
+            if (userAnswers[index] && userAnswers[index] === question.correct) {
+                score++;
+            }
+            console.log(`Question ${index + 1}:`, {
+                userAnswer: userAnswers[index],
+                correctAnswer: question.correct,
+                isCorrect: userAnswers[index] === question.correct
+            });
+        });
+
+        // Calculate percentage
+        const percentage = Math.round((score / total) * 100);
+
+        // Send response
         res.json({
-            score: score,
-            total: moduleContent.quiz.length,
-            percentage: (score / moduleContent.quiz.length) * 100
+            score,
+            total,
+            percentage
         });
 
     } catch (error) {

@@ -25,12 +25,22 @@
                             <span>Difficulty: <%= module.difficulty %></span>
                             <span>Duration: <%= module.duration %> minutes</span>
                         </div>
-                        <p><%= module.description %></p>
+                        <div class="module-description">
+                            <%= module.description.replace(/<[^>]*>/g, '') %> <!-- Strip HTML tags -->
+                        </div>
                         <div class="module-actions">
-                            <a href="/modules/<%= module.moduleCode %>" class="btn-view">View Module</a>
+                            <a href="/modules/<%= module.moduleCode %>" class="btn-view">
+                                <i class="fas fa-eye"></i>
+                                View
+                            </a>
                             <% if (user && user.role === 'admin') { %>
-                                <button class="btn-delete" onclick="deleteModule('<%= module.moduleCode %>')">
-                                    <i class="fas fa-trash"></i> Delete
+                                <a href="/modules/<%= module.moduleCode %>/edit" class="btn-edit">
+                                    <i class="fas fa-edit"></i>
+                                    Edit
+                                </a>
+                                <button onclick="deleteModule('<%= module.moduleCode %>')" class="btn-delete">
+                                    <i class="fas fa-trash-alt"></i>
+                                    Delete
                                 </button>
                             <% } %>
                         </div>
@@ -79,6 +89,13 @@
                 console.error('Error:', error);
                 alert(error.message || 'Error deleting module');
             }
+        }
+
+        // Add helper function to strip HTML
+        function stripHtml(html) {
+            const tmp = document.createElement('div');
+            tmp.innerHTML = html;
+            return tmp.textContent || tmp.innerText || '';
         }
     </script>
 </body>
