@@ -404,11 +404,19 @@ app.post('/modules/create', ensureAdmin, (req, res) => {
     }
 });
 
-// Quiz route
+// Quiz route - update to handle source parameters
 app.get('/modules/:moduleCode/quiz', ensureAuthenticated, (req, res) => {
     try {
         const moduleCode = req.params.moduleCode;
         const moduleFile = path.join(__dirname, 'modules', `${moduleCode}.json`);
+        
+        // Get source information from query parameters
+        const sourceInfo = {
+            source: req.query.source || null,
+            courseCode: req.query.courseCode || null
+        };
+
+        console.log("Quiz source info:", sourceInfo); // Add debug logging
         
         if (!fs.existsSync(moduleFile)) {
             return res.status(404).send('Module not found');
@@ -423,7 +431,8 @@ app.get('/modules/:moduleCode/quiz', ensureAuthenticated, (req, res) => {
 
         res.render('modules/quiz_view', {
             module: moduleContent,
-            user: req.user
+            user: req.user,
+            sourceInfo: sourceInfo  // Pass source info to the template
         });
 
     } catch (error) {
