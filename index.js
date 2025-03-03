@@ -15,6 +15,27 @@ const initializeDataFolders = require('./utils/initDataFolders');
 // Initialize courses array at the top level
 let courses = [];
 
+// Function to load courses from JSON file
+function loadCourses() {
+    try {
+        const coursesFile = path.join(__dirname, 'data', 'courses.json');
+        if (fs.existsSync(coursesFile)) {
+            const coursesData = fs.readFileSync(coursesFile, 'utf8');
+            courses = JSON.parse(coursesData);
+            console.log(`Loaded ${courses.length} courses from file`);
+        } else {
+            console.log('No courses file found, initializing empty courses array');
+            courses = [];
+        }
+    } catch (error) {
+        console.error('Error loading courses:', error);
+        courses = [];
+    }
+}
+
+// Load courses when server starts
+loadCourses();
+
 // Basic middleware setup
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(path.join(__dirname, "modules")));
@@ -71,8 +92,13 @@ app.post("/login", passport.authenticate("local", {
 
 app.get("/logout", Controller.logout);
 
-// Update home route to include courses
+// Update home route to include courses and set currentPage
 app.get("/home", ensureAuthenticated, (req, res) => {
+    // Ensure courses are loaded
+    if (courses.length === 0) {
+        loadCourses();
+    }
+    
     const sortedCourses = [...courses].sort((a, b) => 
         new Date(b.createdAt) - new Date(a.createdAt)
     );
@@ -80,11 +106,51 @@ app.get("/home", ensureAuthenticated, (req, res) => {
     res.render("home", {
         user: req.user,
         courses: sortedCourses,
-        featuredCourses: sortedCourses.slice(0, 3)
+        layout: true,
+        currentPage: 'home'  // Add currentPage for navbar active state
     });
 });
 
-app.get("/admin", ensureAdmin, Controller.admin);
+app.get("/admin", ensureAdmin, (req, res) => {
+    Controller.admin(req, res, 'admin'); // Pass currentPage
+});
+
+app.get("/modules", ensureAuthenticated, (req, res) => {
+  const moduleDir = path.join(__dirname, 'modules');
+  
+  fs.readdir(moduleDir, (err, files) => {
+    if (err) return res.status(500).send('Error reading modules');
+    
+    const modules = files
+      .filter(file => file.endsWith('.json'))
+      .map(file => {
+        try {
+          const content = JSON.parse(fs.readFileSync(path.join(moduleDir, file), 'utf-8'));
+          return {
+            moduleCode: content.moduleCode,
+            title: content.title,
+            // Strip HTML tags from description
+            description: content.description.replace(/<[^>]*>/g, ''),
+            difficulty: content.difficulty,
+            duration: content.duration,
+            createdAt: content.createdAt
+          };
+        } catch (error) {
+          console.error(`Error reading module file ${file}:`, error);
+          return null;
+        }
+      })
+      .filter(module => module !== null)
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    
+    res.render("modules/list", { 
+      modules,
+      user: req.user,
+      currentPage: 'modules'  // Add currentPage for navbar active state
+    });
+  });
+});
+
 app.get("/admin/revoke/:id", ensureAdmin, Controller.revoke);
 
 app.get("/course", ensureAdmin, Controller.course);

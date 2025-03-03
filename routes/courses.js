@@ -2,6 +2,23 @@ const express = require('express');
 const router = express.Router();
 const courseManager = require('../utils/courseManager');
 const { ensureAdmin } = require('../middleware/checkAuth');
+const path = require('path');
+const fs = require('fs');
+const { ensureAuthenticated } = require('../middleware/checkAuth');
+
+// Get courses data
+function getCourses() {
+    try {
+        const coursesFile = path.join(__dirname, '../data', 'courses.json');
+        if (fs.existsSync(coursesFile)) {
+            return JSON.parse(fs.readFileSync(coursesFile, 'utf8'));
+        }
+        return [];
+    } catch (error) {
+        console.error('Error reading courses:', error);
+        return [];
+    }
+}
 
 // Show create form - Admin only
 router.get('/create_course', ensureAdmin, async (req, res) => {
@@ -23,7 +40,8 @@ router.get('/', async (req, res) => {
         const courses = await courseManager.getAllCourses();
         res.render('courses/list', { 
             courses,
-            user: req.user || null
+            user: req.user || null,
+            currentPage: 'courses'  // Add currentPage for navbar active state
         });
     } catch (error) {
         res.status(500).send('Error loading courses');
@@ -128,18 +146,85 @@ router.put('/:id', async (req, res) => {
 });
 
 // Get single course - Public access
-router.get('/:courseCode', async (req, res) => {
+router.get('/:courseCode', ensureAuthenticated, (req, res) => {
     try {
-        const course = await courseManager.getCourse(req.params.courseCode);
+        const courses = getCourses();
+        const course = courses.find(c => c.courseCode === req.params.courseCode);
+        
         if (!course) {
             return res.status(404).send('Course not found');
         }
-        res.render('courses/view', { 
+        
+        res.render('courses/view', {
             course,
-            user: req.user || null
+            user: req.user,
+            currentPage: 'courses'  // Add currentPage for navbar active state
         });
     } catch (error) {
-        res.status(500).send('Error loading course');
+        console.error('Error loading course:', error);
+        res.status(500).send('Error loading course details');
+    }
+});
+
+// Course details page
+router.get('/:courseCode/details', ensureAuthenticated, async (req, res) => {
+    try {
+        const courses = getCourses();
+        const course = courses.find(c => c.courseCode === req.params.courseCode);
+        
+        if (!course) {
+            return res.status(404).send('Course not found');
+        }
+        
+        // Fetch module details for this course if they exist
+        let modules = [];
+        if (course.modules && course.modules.length > 0) {
+            const moduleDir = path.join(__dirname, '../modules');
+            
+            // Process each module code and get module details
+            modules = course.modules.map(moduleCode => {
+                try {
+                    const moduleFile = path.join(moduleDir, `${moduleCode}.json`);
+                    if (fs.existsSync(moduleFile)) {
+                        const moduleData = JSON.parse(fs.readFileSync(moduleFile, 'utf8'));
+                        return {
+                            moduleCode: moduleData.moduleCode,
+                            title: moduleData.title,
+                            description: moduleData.description,
+                            difficulty: moduleData.difficulty,
+                            duration: moduleData.duration,
+                            hasQuiz: moduleData.hasQuiz || false,
+                            hasCaseStudy: moduleData.hasCaseStudy || false
+                        };
+                    } else {
+                        return {
+                            moduleCode,
+                            title: 'Module not found',
+                            description: 'This module could not be loaded.',
+                            difficulty: 'N/A',
+                            duration: 0
+                        };
+                    }
+                } catch (error) {
+                    console.error(`Error loading module ${moduleCode}:`, error);
+                    return {
+                        moduleCode,
+                        title: 'Error loading module',
+                        description: 'There was an error loading this module.',
+                        difficulty: 'N/A',
+                        duration: 0
+                    };
+                }
+            });
+        }
+        
+        res.render('course_detail', {
+            course: { ...course, modules },
+            user: req.user
+        });
+    } catch (error) {
+        console.error('Error loading course details:', error);
+        res.status(500).send('Error loading course details');
     }
 });
 
