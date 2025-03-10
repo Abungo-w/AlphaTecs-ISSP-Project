@@ -34,10 +34,23 @@ model Module {
   themes      Theme[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  question    Quiz[] @default(null)
 }
 
 model Theme {
   id       String   @id @default(uuid())
   name     String
   modules  Module[]
+}
+
+model Quiz {
+  id             Int     @id @default(autoincrement())
+  question       String
+  option1        String
+  option2        String
+  option3        String
+  option4        String
+  correct_option String 
+  moduleId       Int
+  module         Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
 }
