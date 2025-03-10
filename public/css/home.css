@@ -192,4 +192,14 @@ body {
     .all-modules .module-grid {
         grid-template-columns: 1fr;
     }
+
+    .admin-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .btn-admin {
+        width: 100%;
+        max-width: none;
+    }
 }
