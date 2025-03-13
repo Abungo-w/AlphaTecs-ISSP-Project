@@ -22,6 +22,8 @@ model User {
   notifications String? @default("all")
   privacy String? @default("public")
   createdAt DateTime @default(now())
+  progress Progress[]
+
 }
 
 model Module {
@@ -35,6 +37,8 @@ model Module {
   course      Course[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  progress Progress[]
+
 }
 
 model Course {
@@ -43,4 +47,15 @@ model Course {
   introduction String
   summary String
   modules  Module[]
+}
+
+model Progress {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  moduleId  String
+  progress  Int
+  user      User     @relation(fields: [userId], references: [id])
+  module    Module   @relation(fields: [moduleId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
