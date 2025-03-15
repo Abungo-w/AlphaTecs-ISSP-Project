@@ -65,7 +65,22 @@ let Controller = {
             })
             .filter(module => module !== null);
 
-        res.render("home", { user: req.user, modules: modules });
+        // Get all courses
+        const allCourses = modules;
+        
+        // Sort courses by creation date (newest first)
+        const sortedCourses = [...allCourses].sort((a, b) => 
+          new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        
+        // Get featured courses (latest 3 courses)
+        const featuredCourses = sortedCourses.slice(0, 3);
+        
+        res.render("home", {
+          user: req.user,
+          courses: allCourses,
+          featuredCourses: featuredCourses
+        });
     } catch (error) {
         console.error('Error loading modules:', error);
         res.render("home", { user: req.user, modules: [] });

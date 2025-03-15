@@ -1,0 +1,124 @@
+/* ...existing code... */
+
+.form-section {
+    margin-top: 2rem;
+    padding: 2rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.form-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #2d3748;
+    margin-bottom: 1.5rem;
+}
+
+.form-section h3 i {
+    color: #4299e1;
+}
+
+.case-study-section {
+    margin-top: 2rem;
+    padding: 2rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.discussion-questions-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.question-answer-pair {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.question-group, .answer-group {
+    margin-bottom: 1rem;
+}
+
+.answer-editor {
+    height: 150px;
+    margin-top: 0.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    background: white;
+}
+
+.btn-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: #4299e1;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-add:hover {
+    background: #3182ce;
+    transform: translateY(-1px);
+}
+
+.btn-remove {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.5rem;
+    background: #e53e3e;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: all 0.2s;
+}
+
+.btn-remove:hover {
+    opacity: 1;
+    transform: translateY(-1px);
+}
+
+#caseStudyEditor {
+    height: 200px;
+    margin-bottom: 1rem;
+    background: white;
+}
+
+.rich-text-editor {
+    min-height: 200px;
+    margin-bottom: 1rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+}
+
+#caseStudyContent {
+    min-height: 250px; /* Make case study editor taller */
+}
+
+.ql-container {
+    font-size: 1.1rem;
+    font-family: inherit;
+}
+
+.form-text {
+    color: #718096;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+/* ...existing code... */

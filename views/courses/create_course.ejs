@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create New Course</title>
+    <link rel="stylesheet" href="/css/create_course.css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+</head>
+<body>
+    <div class="course-creation-wrapper">
+        <% if (messages.error) { %>
+            <div class="alert alert-danger">
+                <%= messages.error %>
+            </div>
+        <% } %>
+        <% if (messages.success) { %>
+            <div class="alert alert-success">
+                <%= messages.success %>
+            </div>
+        <% } %>
+
+        <!-- Progress bar -->
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-step" data-step="1">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Course Info</div>
+                </div>
+                <div class="progress-step" data-step="2">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Introduction</div>
+                </div>
+                <div class="progress-step" data-step="3">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Modules</div>
+                </div>
+                <div class="progress-step" data-step="4">
+                    <div class="step-number">4</div>
+                    <div class="step-title">Summary</div>
+                </div>
+            </div>
+        </div>
+
+        <form action="/courses" method="POST" onsubmit="return validateAndSubmit()" enctype="application/x-www-form-urlencoded">
+            <!-- Page 1: Course Info -->
+            <div class="form-page" id="page1">
+                <h2>Course Information</h2>
+                <div class="form-section">
+                    <label for="courseCode">Course Code</label>
+                    <p class="field-description">Format: C-XX-XX</p>
+                    <input type="text" id="courseCode" name="courseCode" required pattern="C-\d{2}-\d{2}" placeholder="C-45-64">
+                </div>
+
+                <div class="form-section">
+                    <label for="title">Course Title</label>
+                    <input type="text" id="title" name="title" required>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" onclick="nextPage(1)" class="btn-next">Next</button>
+                </div>
+            </div>
+
+            <!-- Page 2: Introduction -->
+            <div class="form-page" id="page2" style="display: none;">
+                <h2>Course Introduction</h2>
+                <div class="form-section">
+                    <div id="intro-editor"></div>
+                    <input type="hidden" name="hidden-intro" id="hidden-intro">
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" onclick="prevPage(2)" class="btn-prev">Previous</button>
+                    <button type="button" onclick="nextPage(2)" class="btn-next">Next</button>
+                </div>
+            </div>
+
+            <!-- Page 3: Modules -->
+            <div class="form-page" id="page3" style="display: none;">
+                <h2>Course Modules</h2>
+                <div class="form-section">
+                    <label>Course Modules</label>
+                    <p class="field-description">Add modules to your course (minimum 1 required)</p>
+                    <div id="module-list">
+                        <div class="module-input-group">
+                            <select name="moduleCodes[]" 
+                                   class="form-input module-select" 
+                                   required>
+                                <option value="">Select a module...</option>
+                            </select>
+                            <button type="button" class="btn-remove" onclick="removeModule(this)">Remove</button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-add" onclick="addModule()">Add Another Module</button>
+                </div>
+                <div class="form-actions">
+                    <button type="button" onclick="prevPage(3)" class="btn-prev">Previous</button>
+                    <button type="button" onclick="nextPage(3)" class="btn-next">Next</button>
+                </div>
+            </div>
+
+            <!-- Page 4: Summary -->
+            <div class="form-page" id="page4" style="display: none;">
+                <h2>Course Summary</h2>
+                <div class="form-section">
+                    <div id="summary-editor"></div>
+                    <input type="hidden" name="hidden-summary" id="hidden-summary">
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" onclick="prevPage(4)" class="btn-prev">Previous</button>
+                    <button type="submit" class="btn-submit">Create Course</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <datalist id="modulesList">
+        <!-- Will be populated with available modules -->
+    </datalist>
+
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script>
+        let currentPage = 1;
+        let introEditor, summaryEditor;
+
+        // Initialize editors and page handling
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Quill editors
+            introEditor = new Quill('#intro-editor', {
+                theme: 'snow',
+                placeholder: 'Write your course introduction...',
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline'],
+                        [{ 'header': [1, 2, false] }],
+                        ['link', 'image'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }]
+                    ]
+                }
+            });
+
+            summaryEditor = new Quill('#summary-editor', {
+                theme: 'snow',
+                placeholder: 'Write your course summary...',
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline'],
+                        [{ 'header': [1, 2, false] }],
+                        ['link', 'image'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }]
+                    ]
+                }
+            });
+
+            // Load modules
+            loadAvailableModules();
+
+            // Set initial progress state
+            updateProgress(1);
+        });
+
+        function nextPage(currentPageNum) {
+            if (validatePage(currentPageNum)) {
+                document.getElementById(`page${currentPageNum}`).style.display = 'none';
+                document.getElementById(`page${currentPageNum + 1}`).style.display = 'block';
+                updateProgress(currentPageNum + 1);
+                currentPage = currentPageNum + 1;
+            }
+        }
+
+        function prevPage(currentPageNum) {
+            document.getElementById(`page${currentPageNum}`).style.display = 'none';
+            document.getElementById(`page${currentPageNum - 1}`).style.display = 'block';
+            updateProgress(currentPageNum - 1);
+            currentPage = currentPageNum - 1;
+        }
+
+        function updateProgress(pageNum) {
+            document.querySelectorAll('.progress-step').forEach(step => {
+                step.classList.remove('active');
+                if (parseInt(step.dataset.step) <= pageNum) {
+                    step.classList.add('active');
+                }
+            });
+        }
+
+        function validatePage(pageNum) {
+            switch(pageNum) {
+                case 1:
+                    return document.getElementById('courseCode').checkValidity() && 
+                           document.getElementById('title').checkValidity();
+                case 2:
+                    return introEditor.getText().trim().length > 0;
+                case 3:
+                    const moduleSelects = document.querySelectorAll('select[name="moduleCodes[]"]');
+                    const selectedModules = Array.from(moduleSelects)
+                        .map(select => select.value)
+                        .filter(value => value);
+                    return selectedModules.length > 0;
+                default:
+                    return true;
+            }
+        }
+
+        function validateAndSubmit() {
+            // Get the content from Quill editors
+            const introContent = introEditor.root.innerHTML;
+            const summaryContent = summaryEditor.root.innerHTML;
+
+            // Set hidden field values
+            document.getElementById('hidden-intro').value = introContent;
+            document.getElementById('hidden-summary').value = summaryContent;
+
+            // Validate required fields
+            if (!document.getElementById('courseCode').value ||
+                !document.getElementById('title').value) {
+                alert('Course code and title are required');
+                return false;
+            }
+
+            if (introContent.trim() === '<p><br></p>') {
+                alert('Introduction is required');
+                return false;
+            }
+
+            if (summaryContent.trim() === '<p><br></p>') {
+                alert('Summary is required');
+                return false;
+            }
+
+            // Validate modules
+            const moduleSelects = document.querySelectorAll('select[name="moduleCodes[]"]');
+            const selectedModules = Array.from(moduleSelects)
+                .map(select => select.value)
+                .filter(value => value);
+
+            if (selectedModules.length === 0) {
+                alert('Please select at least one module');
+                return false;
+            }
+
+            console.log('Form submission data:', {
+                courseCode: document.getElementById('courseCode').value,
+                title: document.getElementById('title').value,
+                intro: introContent,
+                summary: summaryContent,
+                modules: selectedModules
+            });
+
+            return true;
+        }
+
+        // Simplified module loading function
+        async function loadAvailableModules() {
+            try {
+                const response = await fetch('/api/modules');
+                if (!response.ok) throw new Error('Failed to fetch modules');
+                
+                const modules = await response.json();
+                window.availableModules = modules;
+                
+                const initialSelect = document.querySelector('.module-select');
+                populateModuleSelect(initialSelect);
+            } catch (error) {
+                console.error('Error loading modules:', error);
+            }
+        }
+
+        function populateModuleSelect(selectElement) {
+            selectElement.innerHTML = '<option value="">Select a module...</option>';
+            if (window.availableModules) {
+                window.availableModules.forEach(module => {
+                    const option = document.createElement('option');
+                    option.value = module.code;
+                    option.textContent = `${module.code} - ${module.title}`;
+                    selectElement.appendChild(option);
+                });
+            }
+        }
+
+        function addModule() {
+            const moduleList = document.getElementById('module-list');
+            const newModule = document.createElement('div');
+            newModule.className = 'module-input-group';
+            newModule.innerHTML = `
+                <select name="moduleCodes[]" class="form-input module-select" required>
+                    <option value="">Select a module...</option>
+                </select>
+                <button type="button" class="btn-remove" onclick="removeModule(this)">Remove</button>
+            `;
+            moduleList.appendChild(newModule);
+            populateModuleSelect(newModule.querySelector('.module-select'));
+        }
+
+        function removeModule(button) {
+            const moduleGroups = document.querySelectorAll('.module-input-group');
+            if (moduleGroups.length > 1) {
+                button.closest('.module-input-group').remove();
+            } else {
+                alert('At least one module is required');
+            }
+        }
+    </script>
+</body>
+</html>

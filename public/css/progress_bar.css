@@ -1,0 +1,27 @@
+
+.progress-section {
+    margin-top: 2rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.progress-bar {
+    width: 100%;
+    background: #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progress {
+    height: 20px;
+    background: #48bb78;
+    width: 0;
+}
+
+#progress-text {
+    text-align: center;
+    font-weight: bold;
+}
