@@ -146,6 +146,31 @@ body {
     background: #2a5298;
 }
 
+.admin-actions {
+    margin-top: 2rem;
+    text-align: center;
+    padding: 1rem;
+}
+
+.btn-admin {
+    display: inline-block;
+    padding: 1rem 2rem;
+    background: #4299e1;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-admin:hover {
+    background: #3182ce;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
     .path-grid {
@@ -166,5 +191,15 @@ body {
 
     .all-modules .module-grid {
         grid-template-columns: 1fr;
+    }
+
+    .admin-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .btn-admin {
+        width: 100%;
+        max-width: none;
     }
 }

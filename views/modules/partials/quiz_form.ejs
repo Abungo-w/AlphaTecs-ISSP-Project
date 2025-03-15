@@ -1,0 +1,94 @@
+<div class="quiz-section">
+    <div class="quiz-header">
+        <h3>Module Assessment</h3>
+        <p class="quiz-description">Create quiz questions for this module</p>
+    </div>
+    
+    <div id="quiz-container">
+        <div class="question-wrapper">
+            <div class="question-number">Question 1</div>
+            <input type="text" name="quiz[0][question]" class="question-input" 
+                   placeholder="Enter your question here" required>
+            
+            <div class="options-wrapper">
+                <div class="option-group">
+                    <div class="option-label">A</div>
+                    <input type="radio" name="quiz[0][correct]" value="A" required>
+                    <input type="text" name="quiz[0][options][A]" placeholder="Option A" required>
+                </div>
+                <div class="option-group">
+                    <div class="option-label">B</div>
+                    <input type="radio" name="quiz[0][correct]" value="B">
+                    <input type="text" name="quiz[0][options][B]" placeholder="Option B" required>
+                </div>
+                <div class="option-group">
+                    <div class="option-label">C</div>
+                    <input type="radio" name="quiz[0][correct]" value="C">
+                    <input type="text" name="quiz[0][options][C]" placeholder="Option C" required>
+                </div>
+                <div class="option-group">
+                    <div class="option-label">D</div>
+                    <input type="radio" name="quiz[0][correct]" value="D">
+                    <input type="text" name="quiz[0][options][D]" placeholder="Option D" required>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <button type="button" class="btn-add" onclick="addQuizQuestion()">
+        Add Another Question
+    </button>
+</div>
+
+<script>
+function addQuizQuestion() {
+    const container = document.getElementById('quiz-container');
+    const questionCount = container.children.length;
+    
+    const newQuestion = document.createElement('div');
+    newQuestion.className = 'question-wrapper';
+    newQuestion.innerHTML = `
+        <div class="question-header">
+            <div class="question-number">Question ${questionCount + 1}</div>
+            <button type="button" class="btn-remove" onclick="removeQuestion(this)">×</button>
+        </div>
+        <input type="text" name="quiz[${questionCount}][question]" class="question-input" 
+               placeholder="Enter your question here" required>
+        
+        <div class="options-wrapper">
+            <div class="option-group">
+                <div class="option-label">A</div>
+                <input type="radio" name="quiz[${questionCount}][correct]" value="A" required>
+                <input type="text" name="quiz[${questionCount}][options][A]" placeholder="Option A" required>
+            </div>
+            <div class="option-group">
+                <div class="option-label">B</div>
+                <input type="radio" name="quiz[${questionCount}][correct]" value="B">
+                <input type="text" name="quiz[${questionCount}][options][B]" placeholder="Option B" required>
+            </div>
+            <div class="option-group">
+                <div class="option-label">C</div>
+                <input type="radio" name="quiz[${questionCount}][correct]" value="C">
+                <input type="text" name="quiz[${questionCount}][options][C]" placeholder="Option C" required>
+            </div>
+            <div class="option-group">
+                <div class="option-label">D</div>
+                <input type="radio" name="quiz[${questionCount}][correct]" value="D">
+                <input type="text" name="quiz[${questionCount}][options][D]" placeholder="Option D" required>
+            </div>
+        </div>
+    `;
+    container.appendChild(newQuestion);
+}
+
+function removeQuestion(button) {
+    button.closest('.question-wrapper').remove();
+    updateQuestionNumbers();
+}
+
+function updateQuestionNumbers() {
+    document.querySelectorAll('.question-number').forEach((el, index) => {
+        el.textContent = `Question ${index + 1}`;
+    });
+}
+</script>

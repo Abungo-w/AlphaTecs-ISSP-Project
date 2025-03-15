@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= module.title %> - Quiz</title>
+    <link rel="stylesheet" href="/css/module.css">
+    <link rel="stylesheet" href="/css/quiz.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="quiz-header">
+            <h1><%= module.title %> - Assessment</h1>
+            <p class="quiz-meta">
+                <span><i class="fas fa-question-circle"></i> <%= module.quiz.length %> questions</span>
+            </p>
+            <!-- Back button changes based on source -->
+            <% if (sourceInfo && sourceInfo.source === 'course') { %>
+                <a href="/courses/<%= sourceInfo.courseCode %>#module-<%= module.moduleCode %>" class="btn-back">
+                    <i class="fas fa-arrow-left"></i> Back to Course
+                </a>
+            <% } else { %>
+                <a href="/modules/<%= module.moduleCode %>" class="btn-back">
+                    <i class="fas fa-arrow-left"></i> Back to Module
+                </a>
+            <% } %>
+        </div>
+
+        <div class="quiz-content"></div>
+            <div class="quiz-intro" id="quiz-intro">
+                <h2>Module Assessment</h2>
+                <p>This quiz contains <%= module.quiz.length %> questions about <%= module.title %>.</p>
+                <p>Answer all questions to test your understanding of the module content.</p>
+                <button id="start-quiz" class="btn-start">Start Quiz</button>
+            </div>
+
+            <div id="quiz-form" class="quiz-form" style="display: none;">
+                <% module.quiz.forEach((question, index) => { %>
+                    <div class="quiz-question" id="question-<%= index %>" style="display: none;">
+                        <div class="question-number">Question <%= index + 1 %> of <%= module.quiz.length %></div>
+                        <h3><%= question.question %></h3>
+                        
+                        <div class="options">
+                            <% ['A', 'B', 'C', 'D'].forEach((letter, optIndex) => { %>
+                                <% if (question.options && question.options[optIndex]) { %>
+                                    <div class="option">
+                                        <input type="radio" name="answers[<%= index %>]" id="q<%= index %>-<%= letter %>" value="<%= letter %>">
+                                        <label for="q<%= index %>-<%= letter %>">
+                                            <span class="option-letter"><%= letter %></span>
+                                            <span class="option-text"><%= question.options[optIndex] %></span>
+                                        </label>
+                                    </div>
+                                <% } %>
+                            <% }) %>
+                        </div>
+                        
+                        <div class="question-navigation">
+                            <% if (index > 0) { %>
+                                <!-- Fixed: Properly closed button tag -->
+                                <button type="button" class="btn-prev" onclick="prevQuestion(<%= index %>)">
+                                    <i class="fas fa-arrow-left"></i> Previous
+                                </button>
+                            <% } %>
+                            
+                            <% if (index < module.quiz.length - 1) { %>
+                                <button type="button" class="btn-next" onclick="nextQuestion(<%= index %>)">
+                                    Next <i class="fas fa-arrow-right"></i>
+                                </button>
+                            <% } else { %>
+                                <button type="button" class="btn-submit" onclick="submitQuiz()">
+                                    Submit Quiz
+                                </button>
+                            <% } %>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+            
+            <div id="quiz-results" class="quiz-results" style="display: none;">
+                <h2>Quiz Results</h2>
+                <div id="results-content"></div>
+                
+                <div class="quiz-navigation">
+                    <!-- Return button changes based on source -->
+                    <button id="btn-return" class="btn-return">
+                        <i class="fas fa-arrow-left"></i> Return
+                    </button>
+                    
+                    <button onclick="retakeQuiz()" class="btn-retake">
+                        <i class="fas fa-redo"></i> Retake Quiz
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Add this custom modal structure just before the closing </div> of the quiz-container -->
+        <div class="modal-overlay" id="modal-overlay" style="display: none;"></div>
+        <div class="custom-modal" id="custom-modal" style="display: none;">
+            <div class="modal-header">
+                <h3>Unanswered Questions</h3>
+                <button class="modal-close" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- This will be filled dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="continueToUnanswered()">
+                    <i class="fas fa-pencil-alt"></i> Answer Questions
+                </button>
+                <button class="btn-primary" onclick="submitAnyway()">
+                    <i class="fas fa-check"></i> Submit Anyway
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Store source info for use in JavaScript
+        const sourceInfo = {
+            source: "<%= typeof sourceInfo !== 'undefined' && sourceInfo.source ? sourceInfo.source : 'module' %>",
+            courseCode: "<%= typeof sourceInfo !== 'undefined' && sourceInfo.courseCode ? sourceInfo.courseCode : '' %>",
+            moduleCode: "<%= module.moduleCode %>"
+        };
+        
+        console.log("Source Info in Quiz:", sourceInfo);
+        
+        // Quiz variables
+        let currentQuestion = 0;
+        const totalQuestions = <%= module.quiz.length %>;
+        
+        // Add these variables for the modal
+        let unansweredQuestionsList = [];
+        let proceedWithSubmit = false;
+        
+        // Start quiz and show first question
+        document.getElementById('start-quiz').addEventListener('click', function() {
+            document.getElementById('quiz-intro').style.display = 'none';
+            document.getElementById('quiz-form').style.display = 'block';
+            showQuestion(0);
+        });
+        
+        // Show a specific question
+        function showQuestion(index) {
+            // Hide all questions
+            document.querySelectorAll('.quiz-question').forEach(q => {
+                q.style.display = 'none';
+            });
+            
+            // Show the current question
+            document.getElementById(`question-${index}`).style.display = 'block';
+            currentQuestion = index;
+        }
+        
+        // Go to next question - No answer validation required
+        function nextQuestion(index) {
+            // Simply go to the next question without checking for answers
+            showQuestion(index + 1);
+        }
+        
+        // Go to previous question
+        function prevQuestion(index) {
+            showQuestion(index - 1);
+        }
+        
+        // Submit the quiz with improved validation using custom modal
+        function submitQuiz() {
+            const form = document.getElementById('quiz-form');
+            const answers = [];
+            unansweredQuestionsList = [];
+            
+            // Collect all answers
+            for (let i = 0; i < totalQuestions; i++) {
+                const selected = form.querySelector(`input[name="answers[${i}]"]:checked`);
+                answers.push(selected ? selected.value : null);
+                
+                // Track unanswered questions
+                if (!selected) {
+                    unansweredQuestionsList.push(i + 1); // +1 for human-readable question numbers
+                }
+            }
+            
+            // Check if any questions are unanswered
+            if (unansweredQuestionsList.length > 0) {
+                // Show custom modal instead of browser alert
+                showModal(unansweredQuestionsList);
+                return;
+            }
+            
+            // If all questions are answered or user confirmed, submit the quiz
+            submitQuizData(answers);
+        }
+        
+        // Show custom modal with unanswered questions
+        function showModal(unansweredQuestions) {
+            const modalBody = document.getElementById('modal-body');
+            let content = '';
+            
+            content += `<p>You have ${unansweredQuestions.length} unanswered question(s):</p>`;
+            
+            // List unanswered questions
+            content += '<div class="unanswered-list">';
+            unansweredQuestions.forEach(questionNum => {
+                content += `<div class="unanswered-item">Question ${questionNum}</div>`;
+            });
+            content += '</div>';
+            
+            content += '<p>Would you like to answer these questions or submit the quiz as is?</p>';
+            
+            modalBody.innerHTML = content;
+            
+            // Show the modal and overlay
+            document.getElementById('modal-overlay').style.display = 'block';
+            document.getElementById('custom-modal').style.display = 'block';
+            
+            // Add a slight animation
+            setTimeout(() => {
+                document.getElementById('custom-modal').classList.add('active');
+            }, 10);
+        }
+        
+        // Close modal
+        function closeModal() {
+            document.getElementById('custom-modal').classList.remove('active');
+            setTimeout(() => {
+                document.getElementById('modal-overlay').style.display = 'none';
+                document.getElementById('custom-modal').style.display = 'none';
+            }, 300);
+        }
+        
+        // Go to first unanswered question
+        function continueToUnanswered() {
+            closeModal();
+            if (unansweredQuestionsList.length > 0) {
+                // Navigate to the first unanswered question (index is questionNum - 1)
+                showQuestion(unansweredQuestionsList[0] - 1);
+            }
+        }
+        
+        // Submit quiz despite unanswered questions
+        function submitAnyway() {
+            closeModal();
+            
+            const form = document.getElementById('quiz-form');
+            const answers = [];
+            
+            // Recollect all answers
+            for (let i = 0; i < totalQuestions; i++) {
+                const selected = form.querySelector(`input[name="answers[${i}]"]:checked`);
+                answers.push(selected ? selected.value : null);
+            }
+            
+            // Submit the quiz
+            submitQuizData(answers);
+        }
+        
+        // Submit quiz data to server
+        function submitQuizData(answers) {
+            fetch(`/modules/<%= module.moduleCode %>/quiz`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ answers }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                showResults(data);
+            })
+            .catch(error => {
+                console.error('Error submitting quiz:', error);
+                // Show error in a nicer way instead of alert
+                const modalBody = document.getElementById('modal-body');
+                modalBody.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>There was an error submitting your quiz. Please try again.</p>
+                        <p class="error-detail">${error.message}</p>
+                    </div>
+                `;
+                
+                // Adjust footer buttons to have only "Close" option
+                const modalFooter = document.querySelector('.modal-footer');
+                modalFooter.innerHTML = `
+                    <button class="btn-primary" onclick="closeModal()">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                `;
+                
+                // Show the modal
+                document.getElementById('modal-overlay').style.display = 'block';
+                document.getElementById('custom-modal').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('custom-modal').classList.add('active');
+                }, 10);
+            });
+        }
+        
+        // Display quiz results
+        function showResults(data) {
+            const resultsDiv = document.getElementById('quiz-results');
+            const resultsContent = document.getElementById('results-content');
+            
+            document.getElementById('quiz-form').style.display = 'none';
+            
+            let resultHTML = '';
+            
+            // Create score circle
+            resultHTML += `
+                <div class="results-score">
+                    <div class="score-circle ${getScoreClass(data.percentage)}">
+                        <span class="score-percent">${data.percentage}%</span>
+                    </div>
+                    <p class="score-text">You scored ${data.score} out of ${data.total} questions correctly.</p>
+                </div>
+            `;
+            
+            // Add success/failure message
+            if (data.percentage >= 70) {
+                resultHTML += `
+                    <div class="result-message success">
+                        <i class="fas fa-check-circle"></i>
+                        <p>Congratulations! You passed the assessment.</p>
+                    </div>
+                `;
+            } else {
+                resultHTML += `
+                    <div class="result-message failure">
+                        <i class="fas fa-times-circle"></i>
+                        <p>You did not reach the passing score of 70%. Consider reviewing the module content and trying again.</p>
+                    </div>
+                `;
+            }
+            
+            resultsContent.innerHTML = resultHTML;
+            resultsDiv.style.display = 'block';
+            
+            // Update return button based on source
+            const returnButton = document.getElementById('btn-return');
+            returnButton.addEventListener('click', function() {
+                // Use direct location change for better compatibility
+                if (sourceInfo.source === 'course' && sourceInfo.courseCode) {
+                    window.location.href = `/courses/${sourceInfo.courseCode}#module-${sourceInfo.moduleCode}`;
+                } else {
+                    window.location.href = `/modules/${sourceInfo.moduleCode}`;
+                }
+            });
+            
+            // Update button text based on source
+            if (sourceInfo.source === 'course') {
+                returnButton.innerHTML = '<i class="fas fa-arrow-left"></i> Return to Course';
+            } else {
+                returnButton.innerHTML = '<i class="fas fa-arrow-left"></i> Return to Module';
+            }
+            
+            // Save to local storage
+            localStorage.setItem(`quiz-${sourceInfo.moduleCode}-taken`, 'true');
+            localStorage.setItem(`quiz-${sourceInfo.moduleCode}-score`, data.percentage);
+            
+            // If passed, trigger confetti
+            if (data.percentage >= 70) {
+                setTimeout(() => {
+                    if (typeof confetti !== 'undefined') {
+                        confetti({
+                            particleCount: 100,
+                            spread: 70,
+                            origin: { y: 0.6 }
+                        });
+                    }
+                }, 500);
+            }
+        }
+        
+        // Determine score class for styling
+        function getScoreClass(percentage) {
+            if (percentage >= 80) return 'excellent';
+            if (percentage >= 70) return 'good';
+            if (percentage >= 60) return 'average';
+            return 'poor';
+        }
+        
+        // Reset quiz for retake
+        function retakeQuiz() {
+            document.getElementById('quiz-results').style.display = 'none';
+            document.querySelectorAll('input[type="radio"]').forEach(input => {
+                input.checked = false;
+            });
+            document.getElementById('quiz-form').style.display = 'block';
+            showQuestion(0);
+        }
+    </script>
+
+    <style>
+        /* Add visual indicators for answered/unanswered questions */
+        .question-indicator {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .question-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #cbd5e0;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: #4a5568;
+            font-weight: bold;
+        }
+        
+        .question-dot.current {
+            border: 2px solid #3182ce;
+            transform: scale(1.2);
+        }
+        
+        .question-dot.answered {
+            background-color: #48bb78;
+            color: white;
+        }
+
+        /* Custom Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            backdrop-filter: blur(3px);
+        }
+
+        .custom-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 500px;
+            z-index: 1001;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .custom-modal.active {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #2d3748;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: #718096;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover {
+            color: #e53e3e;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            gap: 1rem;
+        }
+
+        .unanswered-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .unanswered-item {
+            background: #feebc8;
+            color: #9c4221;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .error-message {
+            text-align: center;
+            color: #e53e3e;
+        }
+
+        .error-message i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .error-detail {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 1rem;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            color: white;
+        }
+
+        .btn-primary {
+            background: #4299e1;
+        }
+
+        .btn-secondary {
+            background: #718096;
+        }
+
+        .btn-primary:hover,
+        .btn-secondary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary:hover {
+            background: #3182ce;
+        }
+
+        .btn-secondary:hover {
+            background: #4a5568;
+        }
+    </style>
+</body>
+</html>
