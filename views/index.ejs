@@ -7,47 +7,151 @@
     <div class="course-category">
         <h3>We Build a Customized Course for You</h3>
         <p>Explore personalized coaching solutions.</p>
-        <div class="course-list">
-            <div class="course-item">
+        <div class="course-list module-grid">
+            <div class="course-item module-card">
                 <img src="/Images/course1.jpg" alt="Course">
-                <h4>Course Title</h4>
-                <p>Short description goes here...</p>
+                <div class="module-content">
+                    <h4>Course Title</h4>
+                    <p>Short description goes here...</p>
+                </div>
             </div>
-            <div class="course-item">
+            <div class="course-item module-card">
                 <img src="/Images/course2.jpg" alt="Course">
-                <h4>Course Title</h4>
-                <p>Short description goes here...</p>
+                <div class="module-content">
+                    <h4>Course Title</h4>
+                    <p>Short description goes here...</p>
+                </div>
             </div>
-            <div class="course-item">
+            <div class="course-item module-card">
                 <img src="/Images/course3.jpg" alt="Course">
-                <h4>Course Title</h4>
-                <p>Short description goes here...</p>
+                <div class="module-content">
+                    <h4>Course Title</h4>
+                    <p>Short description goes here...</p>
+                </div>
             </div>
         </div>
-        <button>Instantly Created for You!</button>
+        <button class="start-btn small-btn">Instantly Created for You!</button>
     </div>
 
     <div class="course-category">
         <h3>You Select From Our Available Courses</h3>
         <p>Browse through our curated course options.</p>
-        <div class="course-list">
-            <div class="course-item">
+        <div class="course-list module-grid">
+            <div class="course-item module-card">
                 <img src="/Images/course4.jpg" alt="Course">
-                <h4>Course Title</h4>
-                <p>Short description goes here...</p>
+                <div class="module-content">
+                    <h4>Course Title</h4>
+                    <p>Short description goes here...</p>
+                </div>
             </div>
-            <div class="course-item">
+            <div class="course-item module-card">
                 <img src="/Images/course5.jpg" alt="Course">
-                <h4>Course Title</h4>
-                <p>Short description goes here...</p>
+                <div class="module-content">
+                    <h4>Course Title</h4>
+                    <p>Short description goes here...</p>
+                </div>
             </div>
-            <div class="course-item">
+            <div class="course-item module-card">
                 <img src="/Images/course6.jpg" alt="Course">
-                <h4>Course Title</h4>
-                <p>Short description goes here...</p>
+                <div class="module-content">
+                    <h4>Course Title</h4>
+                    <p>Short description goes here...</p>
+                </div>
             </div>
         </div>
-        <button>Review Our Courses</button>
+        <button class="start-btn small-btn">Review Our Courses</button>
     </div>
 </section>
+
+<style>
+    .hero-section {
+        text-align: center;
+        padding: 2rem;
+        background: #f8fafc;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+
+    .courses-section {
+        padding: 2rem 0;
+    }
+
+    .course-category {
+        margin-left: 5rem;
+        margin-bottom: 2rem;
+    }
+
+    .course-category h3 {
+        color: #2d3748;
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .course-category p {
+        color: #718096;
+        margin-bottom: 1rem;
+    }
+
+    .course-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .course-item {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .course-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .course-item img {
+        width: 100%;
+        height: auto;
+    }
+
+    .module-content {
+        padding: 1.5rem;
+    }
+
+    .module-content h4 {
+        color: #2d3748;
+        font-size: 1.25rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .module-content p {
+        color: #4a5568;
+        margin-bottom: 1rem;
+        line-height: 1.5;
+    }
+
+    .start-btn {
+        width: 100%;
+        padding: 0.75rem;
+        background: #4299e1;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+    .start-btn:hover {
+        background: #3182ce;
+    }
+
+    .small-btn {
+        width: auto;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+</style>
 

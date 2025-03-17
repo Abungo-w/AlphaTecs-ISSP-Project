@@ -180,7 +180,6 @@ button[type="submit"]:hover {
     .profile-header {
         grid-template-columns: 1fr;
         text-align: center;
-        margin: 20px;
     }
 
     .profile-picture {
@@ -190,24 +189,6 @@ button[type="submit"]:hover {
     .profile-settings {
         width: 95%;
         padding: 30px;
-    }
-
-    .profile-details-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .form-section {
-        padding: 20px;
-    }
-
-    .form-group input,
-    .form-group select {
-        padding: 10px;
-    }
-
-    button[type="submit"] {
-        padding: 12px;
-        font-size: 1rem;
     }
 }
 
