@@ -1,12 +1,6 @@
 module.exports = {
   ensureAuthenticated: function (req, res, next) {
-    console.log('Check auth - is authenticated:', !!req.isAuthenticated());
-    console.log('Session ID:', req.sessionID);
-    if (req.user) {
-      console.log('User in session:', req.user.username, '(ID:', req.user.id, ')');
-    } else {
-      console.log('No user in session');
-    }
+    // All console logs removed
     
     if (req.isAuthenticated()) {
       return next();
@@ -26,8 +20,7 @@ module.exports = {
   },
 
   ensureAdmin: function (req, res, next) {
-    console.log('Admin check - is authenticated:', !!req.isAuthenticated());
-    console.log('Admin check - user role:', req.user?.role);
+    // All console logs removed
     
     if (req.isAuthenticated() && req.user.role === "admin") {
       // Touch the session to keep it fresh

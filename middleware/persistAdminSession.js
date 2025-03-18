@@ -1,7 +1,7 @@
 /**
- * EXTREME SESSION PERSISTENCE MIDDLEWARE
- * This middleware takes radical measures to ensure admin users never lose their session
- * It's specifically designed to fix the persistent logout issue after course updates
+ * ADMIN SESSION PERSISTENCE MIDDLEWARE
+ * Core middleware that prevents admin users from losing their sessions
+ * Especially during course updates and other admin operations
  */
 
 const { db } = require('../prisma/database');
@@ -22,11 +22,12 @@ const persistAdminSession = async (req, res, next) => {
     
     // If this is a course edit operation, add special handling
     if (isCourseEditRoute) {
-        console.log('⚡ ADMIN PERSISTENCE ACTIVATED on course edit route:', req.originalUrl);
+        // Log only for course edit routes
+        console.log('⚡ Course edit route detected:', req.originalUrl);
         
         // If admin user exists in request, save their info
         if (req.user && req.user.role === 'admin') {
-            console.log('📝 Preserving admin user state for:', req.user.username || req.user.email);
+            // Console log removed
             
             // Store in memory
             activeAdmins.set(req.sessionID, {
@@ -59,7 +60,7 @@ const persistAdminSession = async (req, res, next) => {
         const originalEnd = res.end;
         res.end = function() {
             if (req.session && req.user && req.user.role === 'admin') {
-                console.log('🔒 Forcing session save before response end');
+                // Console log removed
                 
                 // Extra insurance: renew the session
                 req.session.touch();
@@ -92,7 +93,7 @@ const persistAdminSession = async (req, res, next) => {
         const appLocalsAdmin = req.app.locals.lastActiveAdmin;
         
         if (adminSession && Date.now() - adminSession.time < 4 * 60 * 60 * 1000) {
-            console.log('🚨 Recovering admin session from memory cache for session:', req.sessionID);
+            console.log('🚨 Recovering admin session from memory cache');
             req.user = adminSession.user;
             
             if (req.session.passport) {
@@ -103,7 +104,7 @@ const persistAdminSession = async (req, res, next) => {
         }
         // Try cookie recovery
         else if (adminCookie && Date.now() - adminCookie.time < 24 * 60 * 60 * 1000) {
-            console.log('🍪 Attempting admin recovery from cookie');
+            console.log('🍪 Recovering admin session from cookie');
             
             try {
                 const user = await db.user.findUnique({
@@ -111,7 +112,7 @@ const persistAdminSession = async (req, res, next) => {
                 });
                 
                 if (user && user.role === 'admin') {
-                    console.log('✅ Admin session recovered from cookie for:', user.username || user.email);
+                    // Console log removed
                     req.user = user;
                     
                     if (req.session) {

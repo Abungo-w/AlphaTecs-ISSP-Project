@@ -206,26 +206,43 @@
         // Load available modules and set selected ones
         async function loadModules() {
             try {
+                console.log("Loading modules...");
                 const response = await fetch('/api/modules');
+                if (!response.ok) {
+                    throw new Error(`Failed to load modules: ${response.status} ${response.statusText}`);
+                }
+                
                 const modules = await response.json();
-                window.availableModules = modules; // Store modules globally
+                console.log("Modules loaded:", modules);
                 
+                // Store globally for other functions to use
+                window.availableModules = modules;
+                
+                // Get all module select elements
                 const selects = document.querySelectorAll('.module-select');
-                const existingModules = <%- JSON.stringify(course.modules) %>;
                 
+                // Get existing modules from the course
+                const existingModules = <%- JSON.stringify(course.modules || []) %>;
+                console.log("Existing modules:", existingModules);
+                
+                // Populate each select with modules
                 selects.forEach((select, index) => {
                     populateModuleOptions(select, existingModules[index]);
                 });
             } catch (error) {
                 console.error('Error loading modules:', error);
+                alert('Failed to load modules: ' + error.message);
             }
         }
 
-        // Helper function to populate module options in select
+        // Helper function to populate module options
         function populateModuleOptions(select, selectedValue) {
             if (!window.availableModules) return;
             
+            // Clear existing options
             select.innerHTML = '<option value="">Select a module...</option>';
+            
+            // Add modules as options
             window.availableModules.forEach(module => {
                 const option = document.createElement('option');
                 option.value = module.code;
@@ -235,6 +252,30 @@
                 }
                 select.appendChild(option);
             });
+        }
+
+        // Add module to form
+        function addModule() {
+            const moduleList = document.getElementById('module-list');
+            const newModuleGroup = document.createElement('div');
+            newModuleGroup.className = 'module-input-group';
+            
+            const select = document.createElement('select');
+            select.name = 'moduleCodes[]';
+            select.className = 'module-select';
+            select.required = true;
+            
+            populateModuleOptions(select);
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'btn-remove';
+            removeBtn.innerHTML = '<i class="fas fa-times"></i> Remove';
+            removeBtn.onclick = function() { removeModule(this); };
+            
+            newModuleGroup.appendChild(select);
+            newModuleGroup.appendChild(removeBtn);
+            moduleList.appendChild(newModuleGroup);
         }
 
         // Add validation and form submission - with session preservation
@@ -278,33 +319,6 @@
             document.querySelector('form').appendChild(sessionField);
             
             return true;
-        }
-
-        function addModule() {
-            const moduleList = document.getElementById('module-list');
-            const newModuleGroup = document.createElement('div');
-            newModuleGroup.className = 'module-input-group';
-            
-            // Create new select
-            const select = document.createElement('select');
-            select.name = 'moduleCodes[]';
-            select.className = 'module-select';
-            select.required = true;
-            
-            // Populate options
-            populateModuleOptions(select);
-            
-            // Create remove button
-            const removeBtn = document.createElement('button');
-            removeBtn.type = 'button';
-            removeBtn.className = 'btn-remove';
-            removeBtn.innerHTML = '<i class="fas fa-times"></i> Remove';
-            removeBtn.onclick = function() { removeModule(this); };
-            
-            // Add elements to group
-            newModuleGroup.appendChild(select);
-            newModuleGroup.appendChild(removeBtn);
-            moduleList.appendChild(newModuleGroup);
         }
 
         function removeModule(button) {
@@ -433,19 +447,19 @@
         }, 30000); // Every 30 seconds
         
         // Initialize page
-        loadModules();
-    </script>
-
-    <!-- Add this script at the very end -->
-    <script>
-        // Check for auth recovery data on page load
         document.addEventListener('DOMContentLoaded', function() {
-            // Check for recovery token in query params (from redirects)
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('_statePreservation')) {
-                console.log('Found state preservation parameter');
-                localStorage.setItem('authState', urlParams.get('_statePreservation'));
-            }
+            // Load modules immediately when the page loads
+            loadModules();
+            
+            // Check for auth recovery data on page load
+            document.addEventListener('DOMContentLoaded', function() {
+                // Check for recovery token in query params (from redirects)
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.has('_statePreservation')) {
+                    console.log('Found state preservation parameter');
+                    localStorage.setItem('authState', urlParams.get('_statePreservation'));
+                }
+            });
         });
     </script>
 </body>

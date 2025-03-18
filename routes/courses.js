@@ -42,7 +42,6 @@ function getCourses() {
 
 // Show create form - Admin only
 router.get('/create_course', ensureAdmin, (req, res) => {
-    console.log('Admin in session:', req.user?.username);
     try {
         res.render('courses/create_course', { 
             messages: req.flash(),
@@ -106,7 +105,6 @@ router.post('/', ensureAdmin, async (req, res) => {
 
 // Get edit form - Admin only
 router.get('/:courseCode/edit', ensureAdmin, async (req, res) => {
-    console.log('Edit course request from:', req.user?.username);
     try {
         const course = await courseManager.getCourse(req.params.courseCode);
         if (!course) {
@@ -128,21 +126,15 @@ router.get('/:courseCode/edit', ensureAdmin, async (req, res) => {
     }
 });
 
-// Process edit - Using a JSON API approach with extreme session preservation
+// Process edit - Using a simpler, more reliable approach
 router.post('/:courseCode/edit', ensureAdmin, async (req, res) => {
-    console.log('EXTREME COURSE UPDATE HANDLER ACTIVATED');
-    console.log('User in request:', req.user ? `${req.user.username} (${req.user.id})` : 'NONE');
-    
-    // Handle JSON requests from our new frontend
-    const isJsonRequest = req.headers['content-type'] === 'application/json';
-    
     try {
         // Process module codes
         let moduleCodes;
         let title, introduction, summary;
         
         // Handle both traditional form and JSON requests
-        if (isJsonRequest) {
+        if (req.headers['content-type'] === 'application/json') {
             const data = req.body;
             moduleCodes = data['moduleCodes[]'];
             title = data.title;
@@ -170,9 +162,6 @@ router.post('/:courseCode/edit', ensureAdmin, async (req, res) => {
             moduleCodes: moduleCodes.filter(Boolean)
         };
         
-        console.log('Course data being updated:', courseData);
-        
-        // Update course
         await courseManager.updateCourse(courseData);
         
         // Set a success message that persists
@@ -183,7 +172,7 @@ router.post('/:courseCode/edit', ensureAdmin, async (req, res) => {
         await new Promise((resolve, reject) => {
             req.session.save((err) => {
                 if (err) {
-                    console.error('Error saving session in extreme handler:', err);
+                    console.error('Error saving session in course handler:', err);
                     reject(err);
                 } else {
                     resolve();
@@ -192,7 +181,7 @@ router.post('/:courseCode/edit', ensureAdmin, async (req, res) => {
         });
         
         // Handle JSON request differently
-        if (isJsonRequest) {
+        if (req.headers['content-type'] === 'application/json') {
             return res.json({
                 success: true,
                 message: 'Course updated successfully',
@@ -205,7 +194,7 @@ router.post('/:courseCode/edit', ensureAdmin, async (req, res) => {
     } catch (error) {
         console.error('Error updating course:', error);
         
-        if (isJsonRequest) {
+        if (req.headers['content-type'] === 'application/json') {
             return res.status(500).json({
                 success: false,
                 message: error.message || 'Failed to update course'
