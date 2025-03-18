@@ -240,7 +240,7 @@ router.get('/api/session-ping', (req, res) => {
 });
 
 // Get single course
-router.get('/:courseCode', ensureAuthenticated, (req, res) => {
+router.get('/:courseCode', ensureAuthenticated, async (req, res) => {
     try {
         const courses = getCourses();
         const course = courses.find(c => c.courseCode === req.params.courseCode);
@@ -248,9 +248,31 @@ router.get('/:courseCode', ensureAuthenticated, (req, res) => {
         if (!course) {
             return res.status(404).send('Course not found');
         }
+
+        // Load complete module data
+        const moduleDir = path.join(__dirname, '../modules');
+        let moduleDetails = [];
+        
+        if (course.modules?.length > 0) {
+            moduleDetails = await Promise.all(course.modules.map(async moduleCode => {
+                try {
+                    const moduleFile = path.join(moduleDir, `${moduleCode}.json`);
+                    if (!fs.existsSync(moduleFile)) {
+                        throw new Error('Module not found');
+                    }
+                    return JSON.parse(await fs.promises.readFile(moduleFile, 'utf8'));
+                } catch (error) {
+                    console.error(`Error loading module ${moduleCode}:`, error);
+                    return null;
+                }
+            }));
+        }
         
         res.render('courses/view', {
-            course,
+            course: {
+                ...course,
+                moduleDetails: moduleDetails.filter(Boolean)
+            },
             user: req.user,
             currentPage: 'courses'
         });
@@ -318,58 +340,53 @@ router.get('/:courseCode/details', ensureAuthenticated, async (req, res) => {
         const course = courses.find(c => c.courseCode === req.params.courseCode);
         
         if (!course) {
-            return res.status(404).send('Course not found');
+            req.flash('error', 'Course not found');
+            return res.redirect('/courses');
         }
         
-        // Fetch module details for this course if they exist
         let modules = [];
-        if (course.modules && course.modules.length > 0) {
+        if (course.modules?.length > 0) {
             const moduleDir = path.join(__dirname, '../modules');
             
-            // Process each module code and get module details
-            modules = course.modules.map(moduleCode => {
+            modules = await Promise.all(course.modules.map(async (moduleCode) => {
                 try {
                     const moduleFile = path.join(moduleDir, `${moduleCode}.json`);
-                    if (fs.existsSync(moduleFile)) {
-                        const moduleData = JSON.parse(fs.readFileSync(moduleFile, 'utf8'));
-                        return {
-                            moduleCode: moduleData.moduleCode,
-                            title: moduleData.title,
-                            description: moduleData.description,
-                            difficulty: moduleData.difficulty,
-                            duration: moduleData.duration,
-                            hasQuiz: moduleData.hasQuiz || false,
-                            hasCaseStudy: moduleData.hasCaseStudy || false
-                        };
-                    } else {
-                        return {
-                            moduleCode,
-                            title: 'Module not found',
-                            description: 'This module could not be loaded.',
-                            difficulty: 'N/A',
-                            duration: 0
-                        };
+                    if (!fs.existsSync(moduleFile)) {
+                        throw new Error('Module file not found');
                     }
+                    
+                    const moduleData = JSON.parse(await fs.promises.readFile(moduleFile, 'utf8'));
+                    return {
+                        moduleCode: moduleData.moduleCode,
+                        title: moduleData.title,
+                        description: moduleData.description,
+                        difficulty: moduleData.difficulty,
+                        duration: moduleData.duration,
+                        hasQuiz: moduleData.hasQuiz || false,
+                        hasCaseStudy: moduleData.hasCaseStudy || false
+                    };
                 } catch (error) {
                     console.error(`Error loading module ${moduleCode}:`, error);
                     return {
                         moduleCode,
-                        title: 'Error loading module',
-                        description: 'There was an error loading this module.',
+                        title: 'Error',
+                        description: 'Module could not be loaded',
                         difficulty: 'N/A',
                         duration: 0
                     };
                 }
-            });
+            }));
         }
         
         res.render('course_detail', {
             course: { ...course, modules },
-            user: req.user
+            user: req.user,
+            messages: req.flash()
         });
     } catch (error) {
         console.error('Error loading course details:', error);
-        res.status(500).send('Error loading course details');
+        req.flash('error', 'Failed to load course details');
+        res.redirect('/courses');
     }
 });
 

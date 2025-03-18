@@ -147,4 +147,23 @@ router.get('/modules', (req, res) => {
     }
 });
 
+// Add module content endpoint
+router.get('/modules/:moduleCode', (req, res) => {
+    try {
+        const moduleFile = path.join(__dirname, '..', 'modules', `${req.params.moduleCode}.json`);
+        
+        if (!fs.existsSync(moduleFile)) {
+            return res.status(404).json({ 
+                error: `Module ${req.params.moduleCode} not found` 
+            });
+        }
+        
+        const moduleContent = JSON.parse(fs.readFileSync(moduleFile, 'utf8'));
+        res.json(moduleContent);
+    } catch (error) {
+        console.error('Error loading module:', error);
+        res.status(500).json({ error: 'Error loading module content' });
+    }
+});
+
 module.exports = router;

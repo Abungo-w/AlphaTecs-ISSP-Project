@@ -9,8 +9,21 @@ const { db } = require('../prisma/database');
 // Store active admin sessions
 const activeAdmins = new Map();
 
+function cleanupAdminSession(sessionID) {
+    // Remove from active admins map
+    activeAdmins.delete(sessionID);
+}
+
 // Middleware to maintain admin sessions at all costs
 const persistAdminSession = async (req, res, next) => {
+    // Add logout path check at the beginning
+    if (req.path === '/logout') {
+        if (req.user?.role === 'admin') {
+            cleanupAdminSession(req.sessionID);
+        }
+        return next();
+    }
+    
     // Skip for static resources
     if (req.path.match(/\.(css|js|jpg|png|ico|svg)$/)) {
         return next();
@@ -144,4 +157,4 @@ const persistAdminSession = async (req, res, next) => {
     next();
 };
 
-module.exports = persistAdminSession;
+module.exports = { persistAdminSession, cleanupAdminSession };

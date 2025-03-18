@@ -292,4 +292,44 @@ router.get('/:id', ensureAuthenticated, (req, res) => {
     }
 });
 
+// API endpoint to get module data
+router.get('/api/:moduleCode', ensureAuthenticated, (req, res) => {
+    try {
+        const moduleFile = path.join(__dirname, '..', 'modules', `${req.params.moduleCode}.json`);
+        
+        if (!fs.existsSync(moduleFile)) {
+            return res.status(404).json({ error: 'Module not found' });
+        }
+
+        const moduleData = JSON.parse(fs.readFileSync(moduleFile, 'utf8'));
+        res.json(moduleData);
+    } catch (error) {
+        console.error('Error fetching module:', error);
+        res.status(500).json({ error: 'Failed to fetch module data' });
+    }
+});
+
+// Update single module view route
+router.get('/:id', ensureAuthenticated, (req, res) => {
+    try {
+        const moduleId = req.params.id;
+        const moduleFile = path.join(__dirname, '..', 'modules', `${moduleId}.json`);
+
+        if (!fs.existsSync(moduleFile)) {
+            return res.status(404).send('Module not found');
+        }
+
+        const moduleContent = JSON.parse(fs.readFileSync(moduleFile, 'utf-8'));
+        
+        res.render("modules/view", { 
+            module: moduleContent,
+            user: req.user,
+            currentPage: 'modules'
+        });
+    } catch (error) {
+        console.error('Error loading module:', error);
+        res.status(500).send('Error loading module: ' + error.message);
+    }
+});
+
 module.exports = router;

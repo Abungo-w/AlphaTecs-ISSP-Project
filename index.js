@@ -17,7 +17,7 @@ const { debugSession } = require('./utils/sessionHandler');
 const cookieParser = require('cookie-parser');
 
 // Import our primary session protection middleware
-const persistAdminSession = require('./middleware/persistAdminSession');
+const { persistAdminSession } = require('./middleware/persistAdminSession');
 const disableCache = require('./middleware/disableCache');
 
 // Import API routes
@@ -79,6 +79,22 @@ const sessionConfig = {
 app.use(session(sessionConfig));
 app.use(passport.initialize());
 app.use(passport.session());
+
+// Add session destroy override AFTER session initialization
+app.use((req, res, next) => {
+    if (req.session) {
+        const originalDestroy = req.session.destroy;
+        req.session.destroy = (callback) => {
+            if (req.user?.role === 'admin') {
+                console.log('Admin user logging out, cleaning up session data...');
+                delete req.app.locals.lastActiveAdmin;
+                res.clearCookie('admin_preserve');
+            }
+            return originalDestroy.call(req.session, callback);
+        };
+    }
+    next();
+});
 
 // Apply admin session persistence middleware - the most important one
 app.use(persistAdminSession);
