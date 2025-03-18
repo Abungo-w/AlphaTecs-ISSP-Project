@@ -4,8 +4,115 @@
     <title>Edit Course - <%= course.title %></title>
     <link rel="stylesheet" href="/css/create_course.css">
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <style>
+        .module-input-group {
+            display: flex;
+            margin-bottom: 10px;
+            gap: 10px;
+        }
+        
+        .module-select {
+            flex-grow: 1;
+        }
+        
+        .btn-remove {
+            background-color: #e53e3e;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0 10px;
+            cursor: pointer;
+        }
+        
+        .error {
+            border: 2px solid red;
+        }
+
+        .update-message {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Emergency session info panel */
+        .session-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #2d3748;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+        
+        .session-info p {
+            margin: 5px 0;
+        }
+
+        /* Session protection layer */
+        #sessionProtection {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.7);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            display: none;
+        }
+
+        #sessionProtection .spinner {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
+    <!-- Session information for debugging -->
+    <div class="session-info">
+        <p>User: <%= user ? user.username || user.email : 'Guest' %></p>
+        <p>Role: <%= user ? user.role : 'n/a' %></p>
+        <p>Session: <span id="session-status">Active</span></p>
+    </div>
+
+    <!-- Session protection overlay -->
+    <div id="sessionProtection">
+        <div class="spinner"></div>
+        <h2>Preserving your session</h2>
+        <p>Please wait while we process your update...</p>
+    </div>
+
     <div class="course-creation-wrapper">
         <h1>Edit Course: <%= course.courseCode %></h1>
 
@@ -13,7 +120,12 @@
             <div class="alert alert-danger"><%= messages.error %></div>
         <% } %>
 
-        <form action="/courses/<%= course.courseCode %>/edit" method="POST" onsubmit="return validateAndSubmit()">
+        <form id="courseForm">
+            <!-- Hidden admin data for emergency recovery -->
+            <input type="hidden" name="adminId" value="<%= user.id %>">
+            <input type="hidden" name="adminRole" value="<%= user.role %>">
+            <input type="hidden" name="adminSessionId" value="<%= typeof req !== 'undefined' && req.sessionID ? req.sessionID : '' %>">
+            
             <div class="form-section">
                 <label for="title">Course Title</label>
                 <input type="text" id="title" name="title" required value="<%= course.title %>">
@@ -52,9 +164,14 @@
 
             <div class="form-actions">
                 <a href="/courses/<%= course.courseCode %>" class="btn-cancel">Cancel</a>
-                <button type="submit" class="btn-submit">Update Course</button>
+                <button type="button" class="btn-submit" onclick="secureCourseUpdate()">Update Course</button>
             </div>
         </form>
+
+        <div id="updateMessage" class="update-message" style="display:none;">
+            <div class="spinner"></div>
+            <p>Updating course...</p>
+        </div>
     </div>
 
     <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
@@ -97,27 +214,68 @@
                 const existingModules = <%- JSON.stringify(course.modules) %>;
                 
                 selects.forEach((select, index) => {
-                    select.innerHTML = '<option value="">Select a module...</option>';
-                    modules.forEach(module => {
-                        const option = document.createElement('option');
-                        option.value = module.code;
-                        option.textContent = module.title;
-                        option.selected = module.code === existingModules[index];
-                        select.appendChild(option);
-                    });
+                    populateModuleOptions(select, existingModules[index]);
                 });
             } catch (error) {
                 console.error('Error loading modules:', error);
             }
         }
 
-        // Add validation and form submission
+        // Helper function to populate module options in select
+        function populateModuleOptions(select, selectedValue) {
+            if (!window.availableModules) return;
+            
+            select.innerHTML = '<option value="">Select a module...</option>';
+            window.availableModules.forEach(module => {
+                const option = document.createElement('option');
+                option.value = module.code;
+                option.textContent = `${module.code} - ${module.title}`;
+                if (module.code === selectedValue) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+        }
+
+        // Add validation and form submission - with session preservation
         function validateAndSubmit() {
+            // Check if there are any modules
+            const moduleSelects = document.querySelectorAll('select[name="moduleCodes[]"]');
+            if (moduleSelects.length === 0) {
+                alert('At least one module is required');
+                return false;
+            }
+            
+            // Check if all modules have values
+            let allValid = true;
+            moduleSelects.forEach(select => {
+                if (!select.value) {
+                    select.classList.add('error');
+                    allValid = false;
+                } else {
+                    select.classList.remove('error');
+                }
+            });
+            
+            if (!allValid) {
+                alert('Please select modules for all module inputs');
+                return false;
+            }
+            
             const introContent = introEditor.root.innerHTML;
             const summaryContent = summaryEditor.root.innerHTML;
             
             document.getElementById('hidden-intro').value = introContent;
             document.getElementById('hidden-summary').value = summaryContent;
+            
+            console.log('Form data modules:', Array.from(moduleSelects).map(s => s.value));
+            
+            // Add hidden field for session persistence
+            const sessionField = document.createElement('input');
+            sessionField.type = 'hidden';
+            sessionField.name = 'sessionPreserve';
+            sessionField.value = 'true';
+            document.querySelector('form').appendChild(sessionField);
             
             return true;
         }
@@ -127,22 +285,14 @@
             const newModuleGroup = document.createElement('div');
             newModuleGroup.className = 'module-input-group';
             
-            // Create new select with existing modules
+            // Create new select
             const select = document.createElement('select');
             select.name = 'moduleCodes[]';
             select.className = 'module-select';
             select.required = true;
-            select.innerHTML = `<option value="">Select a module...</option>`;
             
-            // Add available modules
-            if (window.availableModules) {
-                window.availableModules.forEach(module => {
-                    const option = document.createElement('option');
-                    option.value = module.code;
-                    option.textContent = module.title;
-                    select.appendChild(option);
-                });
-            }
+            // Populate options
+            populateModuleOptions(select);
             
             // Create remove button
             const removeBtn = document.createElement('button');
@@ -161,6 +311,7 @@
             const moduleGroup = button.closest('.module-input-group');
             const moduleList = document.getElementById('module-list');
             
+            // Ensure at least one module remains
             if (moduleList.children.length > 1) {
                 moduleGroup.remove();
             } else {
@@ -168,8 +319,134 @@
             }
         }
 
+        // BRAND NEW FUNCTION: Update the course WITHOUT losing session state
+        async function secureCourseUpdate() {
+            if (!validateForm()) {
+                return false;
+            }
+            
+            // Show session protection overlay
+            document.getElementById('sessionProtection').style.display = 'flex';
+            document.getElementById('session-status').textContent = 'Processing...';
+            
+            try {
+                // Prepare the data
+                const formData = {
+                    title: document.getElementById('title').value,
+                    'hidden-intro': introEditor.root.innerHTML,
+                    'hidden-summary': summaryEditor.root.innerHTML,
+                    'moduleCodes[]': []
+                };
+
+                // Get module codes
+                document.querySelectorAll('select[name="moduleCodes[]"]').forEach(select => {
+                    if (select.value) {
+                        formData['moduleCodes[]'].push(select.value);
+                    }
+                });
+
+                // Add admin data for recovery
+                formData.adminId = document.querySelector('input[name="adminId"]').value;
+                formData.adminRole = document.querySelector('input[name="adminRole"]').value;
+                formData.fromEditForm = true;
+
+                // Make the update request using fetch
+                const response = await fetch('/courses/<%= course.courseCode %>/edit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-ADMIN-PRESERVE': 'true'
+                    },
+                    body: JSON.stringify(formData),
+                    credentials: 'same-origin' // Important for cookies
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Store success indicator in localStorage
+                    localStorage.setItem('courseUpdateSuccess', 'true');
+                    
+                    // Use standard navigation which doesn't destroy the session
+                    window.location.href = result.redirectTo;
+                } else {
+                    throw new Error(result.message || 'Unknown error');
+                }
+            } catch (error) {
+                console.error('Update failed:', error);
+                alert('Error updating course: ' + error.message);
+                document.getElementById('sessionProtection').style.display = 'none';
+                document.getElementById('session-status').textContent = 'Error';
+            }
+        }
+        
+        // Add validation and form submission - with session preservation
+        function validateForm() {
+            // Check if there are any modules
+            const moduleSelects = document.querySelectorAll('select[name="moduleCodes[]"]');
+            if (moduleSelects.length === 0) {
+                alert('At least one module is required');
+                return false;
+            }
+            
+            // Check if all modules have values
+            let allValid = true;
+            moduleSelects.forEach(select => {
+                if (!select.value) {
+                    select.classList.add('error');
+                    allValid = false;
+                } else {
+                    select.classList.remove('error');
+                }
+            });
+            
+            if (!allValid) {
+                alert('Please select modules for all module inputs');
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Keep-alive ping to prevent session timeout
+        setInterval(() => {
+            fetch('/api/session-ping', { 
+                credentials: 'same-origin',
+                headers: { 'X-ADMIN-PRESERVE': 'true' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'active') {
+                    document.getElementById('session-status').textContent = 'Active';
+                } else {
+                    document.getElementById('session-status').textContent = 'Warning';
+                }
+            })
+            .catch(err => {
+                console.error('Session ping error:', err);
+                document.getElementById('session-status').textContent = 'Error';
+            });
+        }, 30000); // Every 30 seconds
+        
         // Initialize page
         loadModules();
+    </script>
+
+    <!-- Add this script at the very end -->
+    <script>
+        // Check for auth recovery data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for recovery token in query params (from redirects)
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('_statePreservation')) {
+                console.log('Found state preservation parameter');
+                localStorage.setItem('authState', urlParams.get('_statePreservation'));
+            }
+        });
     </script>
 </body>
 </html>

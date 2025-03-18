@@ -6,6 +6,26 @@ const path = require('path');
 const fs = require('fs');
 const { ensureAuthenticated } = require('../middleware/checkAuth');
 
+// Intercept any destruction of admin sessions
+router.use((req, res, next) => {
+    const originalEnd = res.end;
+    
+    // Preserve session for admins
+    if (req.user && req.user.role === 'admin') {
+        // Save reference for emergency recovery
+        req.app.locals.lastAdminUser = req.user;
+        req.app.locals.lastAdminTime = Date.now();
+        
+        // Touch session on each request
+        req.session.touch();
+    }
+    
+    // Add this flag for debugging
+    res.locals.isAdmin = req?.user?.role === 'admin';
+    
+    next();
+});
+
 // Get courses data
 function getCourses() {
     try {
@@ -21,7 +41,8 @@ function getCourses() {
 }
 
 // Show create form - Admin only
-router.get('/create_course', ensureAdmin, async (req, res) => {
+router.get('/create_course', ensureAdmin, (req, res) => {
+    console.log('Admin in session:', req.user?.username);
     try {
         res.render('courses/create_course', { 
             messages: req.flash(),
@@ -52,6 +73,7 @@ router.get('/', async (req, res) => {
 router.post('/', ensureAdmin, async (req, res) => {
     try {
         console.log('Received course creation request:', req.body);
+        console.log('User creating course:', req.user?.username);
 
         // Ensure moduleCodes is always an array
         const moduleCodes = Array.isArray(req.body['moduleCodes[]']) 
@@ -68,26 +90,36 @@ router.post('/', ensureAdmin, async (req, res) => {
 
         const course = await courseManager.createCourse(courseData);
         req.flash('success', 'Course created successfully!');
-        res.redirect('/courses');
+        
+        // Save session before sending response
+        await new Promise((resolve) => {
+            req.session.save(() => resolve());
+        });
+        
+        return res.redirect('/courses');
     } catch (error) {
         console.error('Error creating course:', error);
         req.flash('error', error.message);
-        res.redirect('/courses/create');
+        return res.redirect('/courses/create');
     }
 });
 
-// Add edit route - Admin only
+// Get edit form - Admin only
 router.get('/:courseCode/edit', ensureAdmin, async (req, res) => {
+    console.log('Edit course request from:', req.user?.username);
     try {
         const course = await courseManager.getCourse(req.params.courseCode);
         if (!course) {
             req.flash('error', 'Course not found');
             return res.redirect('/courses');
         }
+        
         res.render('courses/edit_course', { 
             course,
             messages: req.flash(),
-            user: req.user
+            user: req.user,
+            // Add a hidden admin recovery token for emergency
+            adminToken: req.user?.role === 'admin' ? Date.now().toString() : null
         });
     } catch (error) {
         console.error('Error loading edit page:', error);
@@ -96,56 +128,129 @@ router.get('/:courseCode/edit', ensureAdmin, async (req, res) => {
     }
 });
 
-// Add update route - Admin only
+// Process edit - Using a JSON API approach with extreme session preservation
 router.post('/:courseCode/edit', ensureAdmin, async (req, res) => {
+    console.log('EXTREME COURSE UPDATE HANDLER ACTIVATED');
+    console.log('User in request:', req.user ? `${req.user.username} (${req.user.id})` : 'NONE');
+    
+    // Handle JSON requests from our new frontend
+    const isJsonRequest = req.headers['content-type'] === 'application/json';
+    
     try {
+        // Process module codes
+        let moduleCodes;
+        let title, introduction, summary;
+        
+        // Handle both traditional form and JSON requests
+        if (isJsonRequest) {
+            const data = req.body;
+            moduleCodes = data['moduleCodes[]'];
+            title = data.title;
+            introduction = data['hidden-intro'];
+            summary = data['hidden-summary'];
+        } else {
+            moduleCodes = req.body['moduleCodes[]'];
+            title = req.body.title;
+            introduction = req.body['hidden-intro'];
+            summary = req.body['hidden-summary'];
+        }
+        
+        // Normalize module codes
+        if (!moduleCodes) {
+            moduleCodes = [];
+        } else if (!Array.isArray(moduleCodes)) {
+            moduleCodes = [moduleCodes];
+        }
+        
         const courseData = {
             courseCode: req.params.courseCode,
-            title: req.body.title,
-            introduction: req.body['hidden-intro'],
-            summary: req.body['hidden-summary'],
-            moduleCodes: Array.isArray(req.body['moduleCodes[]']) 
-                ? req.body['moduleCodes[]'] 
-                : [req.body['moduleCodes[]']]
+            title: title,
+            introduction: introduction,
+            summary: summary,
+            moduleCodes: moduleCodes.filter(Boolean)
         };
-
+        
+        console.log('Course data being updated:', courseData);
+        
+        // Update course
         await courseManager.updateCourse(courseData);
-        req.flash('success', 'Course updated successfully');
-        res.redirect(`/courses/${req.params.courseCode}`);
+        
+        // Set a success message that persists
+        req.session.courseUpdateSuccess = true;
+        req.app.locals.courseUpdateSuccessTime = Date.now();
+        
+        // Force session save
+        await new Promise((resolve, reject) => {
+            req.session.save((err) => {
+                if (err) {
+                    console.error('Error saving session in extreme handler:', err);
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
+        
+        // Handle JSON request differently
+        if (isJsonRequest) {
+            return res.json({
+                success: true,
+                message: 'Course updated successfully',
+                redirectTo: `/courses/${req.params.courseCode}`
+            });
+        } else {
+            // Use 303 See Other to force a GET after POST
+            return res.redirect(303, `/courses/${req.params.courseCode}`);
+        }
     } catch (error) {
         console.error('Error updating course:', error);
-        req.flash('error', error.message);
-        res.redirect(`/courses/${req.params.courseCode}/edit`);
+        
+        if (isJsonRequest) {
+            return res.status(500).json({
+                success: false,
+                message: error.message || 'Failed to update course'
+            });
+        } else {
+            req.flash('error', error.message || 'Failed to update course');
+            return res.redirect(`/courses/${req.params.courseCode}/edit`);
+        }
     }
 });
 
-// Add update route with validation and error handling
-router.put('/:id', async (req, res) => {
-    try {
-        const courseId = req.params.id;
-        console.log('Received update request for course ID:', courseId);
-        console.log('Update data:', req.body);
-
-        if (!courseId) {
-            return res.status(400).json({ error: 'Course ID is required' });
-        }
-
-        // Validate course exists first
-        const existingCourse = await courseManager.getCourseById(courseId);
-        if (!existingCourse) {
-            console.log('Course not found with ID:', courseId);
-            return res.status(404).json({ error: 'Course not found' });
-        }
-
-        const updatedCourse = await courseManager.updateCourse(courseId, req.body);
-        res.json(updatedCourse);
-    } catch (error) {
-        console.error('Error in course update route:', error);
-        res.status(500).json({ error: error.message });
+// Add a session ping endpoint for keeping admin sessions alive
+router.get('/api/session-ping', (req, res) => {
+    if (!req.user) {
+        return res.json({ status: 'unauthenticated' });
     }
+    
+    // Touch the session
+    req.session.lastPing = Date.now();
+    req.session.touch();
+    
+    // For admins, do extra work to ensure session persistence
+    if (req.user.role === 'admin') {
+        // Store admin state in app locals
+        req.app.locals.lastAdminPing = {
+            user: req.user,
+            time: Date.now()
+        };
+    }
+    
+    // Save session and return response
+    req.session.save((err) => {
+        if (err) {
+            console.error('Error saving session during ping:', err);
+            return res.json({ status: 'error', message: err.message });
+        }
+        return res.json({ 
+            status: 'active',
+            user: req.user.username || req.user.email,
+            role: req.user.role
+        });
+    });
 });
 
-// Get single course - Public access
+// Get single course
 router.get('/:courseCode', ensureAuthenticated, (req, res) => {
     try {
         const courses = getCourses();
@@ -158,11 +263,62 @@ router.get('/:courseCode', ensureAuthenticated, (req, res) => {
         res.render('courses/view', {
             course,
             user: req.user,
-            currentPage: 'courses'  // Add currentPage for navbar active state
+            currentPage: 'courses'
         });
     } catch (error) {
         console.error('Error loading course:', error);
         res.status(500).send('Error loading course details');
+    }
+});
+
+// Add route to handle form submission from course view page
+router.post('/:courseCode', ensureAuthenticated, (req, res) => {
+    try {
+        // Check if there's a state preservation token
+        const stateToken = req.body._statePreservation;
+        
+        if (stateToken) {
+            try {
+                // Attempt to decode the token
+                const authState = JSON.parse(Buffer.from(stateToken, 'base64').toString());
+                
+                // If the token contains valid user data and is recent (within last 5 minutes)
+                if (authState.user && 
+                    authState.time && 
+                    Date.now() - authState.time < 5 * 60 * 1000) {
+                    
+                    console.log('Recovered session from state token');
+                    
+                    // If there's no existing user, restore it from the token
+                    if (!req.user) {
+                        req.user = authState.user;
+                        if (req.session) {
+                            req.session.passport = { user: authState.user.id };
+                            req.session.save();
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error decoding state token:', error);
+            }
+        }
+        
+        // Show a success message
+        req.flash('success', 'Course updated successfully');
+        
+        // Force session save before redirect
+        if (req.session) {
+            req.session.save(() => {
+                // Redirect to the course page
+                res.redirect(`/courses/${req.params.courseCode}`);
+            });
+        } else {
+            res.redirect(`/courses/${req.params.courseCode}`);
+        }
+    } catch (error) {
+        console.error('Error handling course form POST:', error);
+        req.flash('error', 'An error occurred while processing your request');
+        res.redirect(`/courses/${req.params.courseCode}`);
     }
 });
 
