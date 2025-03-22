@@ -43,9 +43,64 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Function to save progress to the server
+    async function saveProgress() 
+    {
+        try {
+            const progressBar = document.getElementById('progress-bar');
+            const progress    = parseInt(progressBar.style.width, 10); // Get current progress percentage
+
+            const response = await fetch('/progress/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    userId: "<%= user.id %>", // Pass userId dynamically
+                    moduleId: "<%= course.courseCode %>", // Pass moduleId dynamically
+                    progress: progress
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to save progress');
+            }
+        } catch (error) {
+            console.error('Error saving progress:', error);
+        }
+    }
+
+    // Function to restore progress
+    async function restoreProgress() {
+        try {
+            const response = await fetch(`/progress/get?userId=${window.userId}&moduleId=${window.moduleId}`);
+            if (!response.ok) throw new Error('Failed to fetch progress');
+
+            const data = await response.json();
+            if (data.progress) {
+                const targetScroll = (data.progress / 100) * (document.documentElement.scrollHeight - window.innerHeight);
+                window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+            }
+        } catch (error) {
+            console.error('Error restoring progress:', error);
+        }
+    }
+
+    // Save progress when the user navigates away or closes the page
+    window.addEventListener('beforeunload', saveProgress);
+
+    
+
+    window.userId   = "<%= user.id %>"; // Pass userId to the client
+    window.moduleId = "<%= course.courseCode %>"; // Pass moduleId to the client
+
+
      // Attach scroll and load event listeners
     document.addEventListener('scroll', updateProgressBar);
     document.addEventListener('load', updateProgressBar);
+
+    // Restore progress on page load
+    restoreProgress();
 
 });
 

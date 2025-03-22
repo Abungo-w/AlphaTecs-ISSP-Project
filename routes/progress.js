@@ -15,6 +15,7 @@ router.post('/update', async (req, res) => {
         });
         res.json(updatedProgress);
     } catch (error) {
+        console.error('Error updating progress:', error);
         res.status(500).json({ error: 'Failed to update progress' });
     }
 });
