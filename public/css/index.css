@@ -1,0 +1,86 @@
+.hero-section {
+    text-align: center;
+    padding: 2rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.courses-section {
+    padding: 2rem 0;
+}
+
+.course-category {
+    margin-left: 5rem;
+    margin-bottom: 2rem;
+}
+
+.course-category h3 {
+    color: #2d3748;
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.course-category p {
+    color: #718096;
+    margin-bottom: 1rem;
+}
+
+.course-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.course-item {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    padding: 1rem; /* Add padding inside the module for text */
+}
+
+.course-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.course-item img {
+    width: 100%;
+    height: auto;
+}
+
+.module-content {
+    padding: 1.5rem;
+}
+
+.module-content h4 {
+    color: #2d3748;
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+}
+
+.module-content p {
+    color: #4a5568;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+button {
+    width: 10cm; 
+    padding: 0.5rem 1rem; 
+    background: #4299e1;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    margin-top: 1rem;
+}
+
+button:hover {
+    background: #3182ce;
+}
+
