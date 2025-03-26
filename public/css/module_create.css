@@ -1,0 +1,914 @@
+.module-creation-wrapper {
+    max-width: 1200px;  /* Increased from 1000px */
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.module-creation-header {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.module-creation-header h1 {
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+}
+
+.form-group {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.form-group:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #2d3748;
+}
+
+.field-description {
+    color: #718096;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    transition: border-color 0.2s;
+    background: #f8fafc;
+    overflow: auto;
+    word-wrap: break-word;
+}
+
+.form-group textarea {
+    resize: vertical;
+    max-height: 200px;
+    min-height: 100px;
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+    background: #f8fafc;
+    overflow-y: auto;
+    line-height: 1.5;
+}
+
+.form-group textarea:focus {
+    outline: none;
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.btn-remove {
+    background: #e53e3e;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    width: 30px;
+    height: 30px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.btn-remove:hover {
+    background: #c53030;
+}
+
+.btn-add {
+    width: 100%;
+    padding: 0.75rem;
+    background: #48bb78;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.btn-add:hover {
+    background: #38a169;
+}
+
+.btn-primary {
+    background: #4299e1;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    font-size: 1rem;
+    width: 100%;
+    margin-bottom: 2rem;
+}
+
+/* Quill editor styles */
+.ql-container {
+    min-height: 200px;
+    font-size: 1rem;
+}
+
+.ql-toolbar {
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+.ql-container {
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.duration-inputs {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.duration-input {
+    width: 100px !important;
+}
+
+.duration-unit {
+    color: #4a5568;
+    font-weight: 500;
+}
+
+.error {
+    border-color: #e53e3e !important;
+    background-color: #fff5f5 !important;
+}
+
+/* Adjust Quill editor height */
+.ql-container.ql-snow {
+    min-height: 150px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* Quiz Section Styles */
+.quiz-section {
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+}
+
+.quiz-header {
+    margin-bottom: 2rem;
+    text-align: left;
+}
+
+.quiz-header h3 {
+    font-size: 1.5rem;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+}
+
+.quiz-description {
+    color: #718096;
+    font-size: 0.95rem;
+}
+
+.quiz-item {
+    margin-bottom: 2rem;
+}
+
+.question-wrapper {
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.question-number {
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 1.1rem;
+}
+
+.question-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+}
+
+.options-wrapper {
+    display: grid;
+    gap: 1rem;
+}
+
+.option-group {
+    display: grid;
+    grid-template-columns: 2.5rem auto 1fr;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+}
+
+.option-label {
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+    border-radius: 4px;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.option-group input[type="text"] {
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    width: 100%;
+}
+
+.option-group input[type="radio"] {
+    width: 1.25rem;
+    height: 1.25rem;
+    cursor: pointer;
+}
+
+/* Add these styles to your existing CSS */
+
+.quiz-section {
+    margin-top: 3rem;
+    padding: 2rem;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+}
+
+.quiz-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.quiz-header h3 {
+    font-size: 1.5rem;
+    color: #1a202c;
+    margin-bottom: 0.5rem;
+}
+
+.quiz-description {
+    color: #64748b;
+}
+
+.quiz-item {
+    margin-bottom: 2rem;
+}
+
+.question-card {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.question-header {
+    background: #f1f5f9;
+    padding: 1rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.question-number {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.question-body {
+    padding: 1.5rem;
+}
+
+.question-textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+    resize: vertical;
+}
+
+.answers-container {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.answer-group {
+    display: grid;
+    grid-template-columns: 2.5rem 2.5rem 1fr;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+}
+
+.answer-label {
+    font-weight: 600;
+    color: #3b82f6;
+    text-align: center;
+    width: 2rem;
+    height: 2rem;
+    line-height: 2rem;
+    background: #dbeafe;
+    border-radius: 4px;
+}
+
+.answer-group input[type="radio"] {
+    width: 1.25rem;
+    height: 1.25rem;
+    cursor: pointer;
+}
+
+.answer-group input[type="text"] {
+    padding: 0.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+
+.btn-add-question {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-remove-question {
+    padding: 0.75rem 1.25rem;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-add-question:hover {
+    background: #2563eb;
+}
+
+.btn-remove-question:hover {
+    background: #dc2626;
+}
+
+.question-footer {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Add hover effects */
+.answer-group:hover {
+    border-color: #3b82f6;
+    background: white;
+}
+
+.question-textarea:focus,
+.answer-group input[type="text"]:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Remove all section-related styles and keep only these editor styles */
+.editor-container {
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    margin-bottom: 2rem;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.ql-toolbar.ql-snow {
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border: none;
+    border-bottom: 2px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.ql-container.ql-snow {
+    border: none;
+    flex: 1;
+    overflow: visible;
+    min-height: 350px;
+}
+
+.ql-editor {
+    min-height: 350px;
+    padding: 1.5rem;
+}
+
+/* Add proper spacing for the last sections */
+.quiz-section:last-child,
+.case-study-section:last-child {
+    margin-bottom: 3rem;
+}
+
+/* Form actions positioning */
+.form-actions {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 2px solid #e2e8f0;
+}
+
+/* Fix content overflow issues */
+.ql-container.ql-snow,
+.form-input,
+textarea.form-input {
+    overflow: auto;
+    word-wrap: break-word;
+}
+
+/* Add responsive padding for smaller screens */
+@media (max-width: 768px) {
+    .module-creation-wrapper {
+        padding: 1rem;
+        margin: 1rem;
+    }
+    
+    .quiz-section,
+    .case-study-section {
+        padding: 1rem;
+    }
+}
+
+/* Quiz Question Styles - Updated */
+.quiz-question {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.quiz-question .btn-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    margin-top: 1rem;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    width: auto;
+    height: auto;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quiz-question .btn-remove:hover {
+    background: #dc2626;
+}
+
+.options-container {
+    margin: 1.5rem 0;
+}
+
+/* Case Study Section - Updated */
+.case-studies {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.case-study {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.case-study h3 {
+    color: #2d3748;
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+}
+
+.case-study-container h2 {
+    color: #2d3748;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.discussion-questions {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.discussion-questions h3 {
+    color: #2d3748;
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.question-item {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.discussion-input-group {
+    margin-bottom: 1rem;
+}
+
+.discussion-input-group label {
+    display: block;
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 0.5rem;
+}
+
+.discussion-input-group:last-child {
+    margin-bottom: 0;
+}
+
+.btn-add-case-study {
+    width: 100%;
+    padding: 1rem;
+    background: transparent;
+    color: #48bb78;
+    border: 2px dashed #48bb78;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 1rem;
+    margin: 2rem 0;
+}
+
+.btn-add-case-study:hover {
+    background: rgba(72, 187, 120, 0.1);
+}
+
+.case-study-container {
+    position: relative;
+    margin-bottom: 2rem;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 2rem;
+}
+
+.case-study-container h2 {
+    color: #2d3748;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.case-study {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 2rem;
+    position: relative;
+}
+
+.case-study h3 {
+    color: #2d3748;
+    font-size: 1.3rem;
+    margin-bottom: 2rem;
+}
+
+.discussion-questions {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.question-item {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.question-number {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 1rem;
+}
+
+.btn-remove-case-study {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 30px;
+    height: 30px;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: background 0.2s;
+}
+
+.btn-remove-case-study:hover {
+    background: #dc2626;
+}
+
+.case-study-container:first-child .btn-remove-case-study {
+    display: none;
+}
+
+.discussion-input-group {
+    margin-bottom: 1.5rem;
+}
+
+.discussion-input-group:last-child {
+    margin-bottom: 0;
+}
+
+.btn-add-case-study {
+    width: 100%;
+    padding: 1rem;
+    background: transparent;
+    color: #48bb78;
+    border: 2px dashed #48bb78;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 1rem;
+    margin: 2rem 0;
+}
+
+.btn-add-case-study:hover {
+    background: rgba(72, 187, 120, 0.1);
+}
+
+/* Style for the Add Another Case Study button */
+.btn-add-case-study {
+    width: 100%;
+    padding: 1rem;
+    background: transparent;
+    color: #48bb78;
+    border: 2px dashed #48bb78;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin: 2rem 0;
+}
+
+.btn-add-case-study:hover {
+    background: rgba(72, 187, 120, 0.1);
+}
+
+/* Form Action Buttons */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 2px solid #e2e8f0;
+}
+
+.btn-cancel, .btn-save {
+    padding: 0.75rem 2rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-cancel {
+    background: #e2e8f0;
+    color: #4a5568;
+    border: none;
+}
+
+.btn-cancel:hover {
+    background: #cbd5e0;
+}
+
+.btn-save {
+    background: #4299e1;
+    color: white;
+    border: none;
+}
+
+.btn-save:hover {
+    background: #3182ce;
+}
+
+/* Add Question Button */
+.btn-add {
+    width: 100%;
+    padding: 0.75rem;
+    background: #48bb78;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin: 1rem 0;
+}
+
+.btn-add:hover {
+    background: #38a169;
+}
+
+/* Remove Buttons */
+.btn-remove {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 30px;
+    height: 30px;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn-remove:hover {
+    background: #dc2626;
+}
+
+/* Add Case Study Button */
+.btn-add-case-study {
+    width: 100%;
+    padding: 1rem;
+    background: transparent;
+    color: #48bb78;
+    border: 2px dashed #48bb78;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin: 2rem 0;
+    font-size: 1rem;
+}
+
+.btn-add-case-study:hover {
+    background: rgba(72, 187, 120, 0.1);
+}
+
+/* Case Study Container */
+.case-study-container {
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.case-study {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 2rem;
+    position: relative;
+}
+
+/* Question Item Styling */
+.question-item {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 2rem;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.question-item:last-child {
+    margin-bottom: 0;
+}
+
+/* Discussion Questions Section */
+.discussion-questions {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+/* Quiz Question Styles - Fixed */
+.quiz-question {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 2rem;
+    padding-top: 3.5rem;  /* Increased top padding to prevent clipping */
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.quiz-question .btn-remove {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 30px;
+    height: 30px;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: background 0.2s;
+    padding: 0;
+    z-index: 10;
+}
+
+.quiz-question:first-child .btn-remove {
+    display: none;  /* Hide remove button for first question */
+}
+
+.quiz-question .btn-remove:hover {
+    background: #dc2626;
+}

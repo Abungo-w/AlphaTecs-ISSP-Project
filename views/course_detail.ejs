@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= course.title %></title>
+    <link rel="stylesheet" href="/css/course_detail.css">
+</head>
+<body>
+    <div class="course-view-wrapper">
+        <!-- Sidebar Navigation -->
+        <div class="course-sidebar">
+            <div class="nav-section">
+                <a href="#introduction" class="nav-item">Introduction</a>
+                <% course.modules.forEach((module, index) => { %>
+                    <a href="#module-<%= module.moduleCode %>" class="nav-item">
+                        Module <%= index + 1 %>: <%= module.title %>
+                    </a>
+                <% }) %>
+                <a href="#summary" class="nav-item">Summary</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="course-content">
+            <div class="course-header">
+                <h1 class="course-title"><%= course.title %></h1>
+                <div class="course-meta">
+                    <span>Course Code: <%= course.courseCode %></span>
+                    <span>Modules: <%= course.modules.length %></span>
+                </div>
+            </div>
+
+            <!-- Introduction Section -->
+            <section id="introduction" class="module-section">
+                <h2>Introduction</h2>
+                <div class="module-content"><%- course.introduction %></div>
+            </section>
+
+            <!-- Module Sections -->
+            <% course.modules.forEach((module, index) => { %>
+                <section id="module-<%= module.moduleCode %>" class="module-section">
+                    <div class="module-header">
+                        <div class="module-header-content">
+                            <h2 class="module-title">Module <%= index + 1 %>: <%= module.title %></h2>
+                            <div class="module-meta">
+                                <span><i class="fas fa-clock"></i> <%= module.duration %> minutes</span>
+                                <span><i class="fas fa-signal"></i> <%= module.difficulty %></span>
+                                <span><i class="fas fa-code"></i> <%= module.moduleCode %></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="module-content-wrapper">
+                        <div class="module-description">
+                            <%= module.description.replace(/<[^>]*>/g, '') %>
+                        </div>
+
+                        <div class="module-features">
+                            <% if (module.hasQuiz) { %>
+                                <div class="feature-badge">
+                                    <i class="fas fa-tasks"></i> Quiz Available
+                                </div>
+                            <% } %>
+                            <% if (module.hasCaseStudy) { %>
+                                <div class="feature-badge">
+                                    <i class="fas fa-book"></i> Case Study Available
+                                </div>
+                            <% } %>
+                        </div>
+
+                        <div class="module-actions">
+                            <a href="/modules/<%= module.moduleCode %>" class="btn btn-primary">
+                                <i class="fas fa-book-open"></i>
+                                View Module Content
+                            </a>
+                            <% if (module.hasQuiz) { %>
+                                <a href="/modules/<%= module.moduleCode %>/quiz" class="btn btn-secondary">
+                                    <i class="fas fa-tasks"></i>
+                                    Take Assessment
+                                </a>
+                            <% } %>
+                        </div>
+                    </div>
+                </section>
+            <% }) %>
+
+            <!-- Summary Section -->
+            <section id="summary" class="module-section">
+                <h2>Course Summary</h2>
+                <div class="module-content"><%- course.summary %></div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        // Highlight active section in sidebar based on scroll position
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('section');
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            function updateActiveSection() {
+                let currentSectionId = '';
+                sections.forEach(section => {
+                    const rect = section.getBoundingClientRect();
+                    if (rect.top <= 100) {
+                        currentSectionId = section.id;
+                    }
+                });
+
+                navItems.forEach(item => {
+                    if (item.getAttribute('href') === `#${currentSectionId}`) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            }
+
+            window.addEventListener('scroll', updateActiveSection);
+            updateActiveSection();
+        });
+    </script>
+</body>
+</html>

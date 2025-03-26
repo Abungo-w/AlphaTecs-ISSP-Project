@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Learning Modules</title>
+    <title>Learning Courses</title>
     <link rel="stylesheet" href="/css/module.css">
 </head>
 <body>
-    <%- include('./navbar.ejs') %>
     
     <div class="hero-section">
         <div class="hero-content">
-            <h1>Learning Modules</h1>
-            <p>Explore our curated collection of learning materials</p>
+            <h1>All Learning Courses</h1>
+            <p>Browse through our complete collection of learning courses</p>
         </div>
     </div>
 
@@ -30,15 +29,19 @@
                             <h3><%= module.title %></h3>
                             <p><%= module.description %></p>
                             <div class="module-meta">
+                                <span class="module-code"><%= module.moduleCode %></span>
                                 <span class="difficulty"><%= module.difficulty %></span>
                                 <span class="duration"><%= module.duration %> mins</span>
                             </div>
-                            <button class="start-btn" onclick="startModule('<%= module.id %>')">Start Learning</button>
+                            <div class="module-actions">
+                                <button class="start-btn" onclick="startModule('<%= module.id %>')">Start Learning</button>
+                                <a href="/modules/<%= module.id %>/edit" class="edit-btn">Edit</a>
+                            </div>
                         </div>
                     </div>
                 <% }) %>
             <% } else { %>
-                <p class="no-modules">No modules available at the moment.</p>
+                <p class="no-modules">No courses available at the moment.</p>
             <% } %>
         </div>
     </div>

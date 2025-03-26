@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= module.title %></title>
+    <link rel="stylesheet" href="/css/module.css">
+</head>
+<body>
+    <div class="module-detail-container">
+        <!-- Module Header -->
+        <div class="module-header">
+            <h1><%= module.title %></h1>
+            <div class="module-meta">
+                <span class="module-code"><%= module.moduleCode %></span>
+                <span class="duration"><%= module.duration %> mins</span>
+            </div>
+            <div class="module-actions">
+                <a href="/modules" class="btn-back">Back to Modules</a>
+                <a href="/modules/<%= module._id %>/edit" class="btn-edit">Edit Module</a>
+                <a href="/modules/<%= module._id %>/quiz" class="btn-quiz">Take Quiz</a>
+                <button class="btn-delete" onclick="deleteModule('<%= module._id %>')">Delete</button>
+            </div>
+        </div>
+
+        <!-- Introduction Section -->
+        <div class="module-section introduction">
+            <h2>Introduction</h2>
+            <div class="section-content">
+                <%- module.introduction %>
+            </div>
+        </div>
+
+        <!-- Main Content Section -->
+        <div class="module-section content">
+            <h2>Module Content</h2>
+            <div class="section-content">
+                <%- module.content %>
+            </div>
+        </div>
+
+        <!-- Case Studies Section -->
+        <% if (module.caseStudies && module.caseStudies.length > 0) { %>
+            <div class="module-section case-studies">
+                <h2>Case Studies</h2>
+                <% module.caseStudies.forEach((caseStudy, index) => { %>
+                    <div class="case-study">
+                        <h3><%= caseStudy.title %></h3>
+                        <div class="case-content">
+                            <%- caseStudy.content %>
+                        </div>
+                        <div class="discussion-questions">
+                            <h4>Discussion Questions</h4>
+                            <% caseStudy.questions.forEach((qa, qIndex) => { %>
+                                <div class="qa-pair">
+                                    <p class="question"><strong>Q<%= qIndex + 1 %>:</strong> <%= qa.question %></p>
+                                    <p class="answer"><em>Answer:</em> <%= qa.answer %></p>
+                                </div>
+                            <% }) %>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+
+        <!-- Summary Section -->
+        <div class="module-section summary">
+            <h2>Summary</h2>
+            <div class="section-content">
+                <%- module.summary %>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function deleteModule(moduleId) {
+            if (confirm('Are you sure you want to delete this module?')) {
+                fetch(`/modules/${moduleId}`, {
+                    method: 'DELETE'
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.href = '/modules';
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>

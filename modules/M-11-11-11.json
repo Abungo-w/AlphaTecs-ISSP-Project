@@ -1,0 +1,86 @@
+{
+  "moduleCode": "M-11-11-11",
+  "title": "con cac",
+  "description": "<p>HIHIHIHIHIHI</p>",
+  "difficulty": "Beginner",
+  "duration": 30,
+  "content": "<p>HIHIHIHIHIHIHIHIHI</p>",
+  "caseStudy": [
+    {
+      "title": "case 1",
+      "content": "HIHIHIHI",
+      "questions": [
+        {
+          "question": "ok",
+          "answer": "awda"
+        },
+        {
+          "question": "HI",
+          "answer": "HI"
+        },
+        {
+          "question": "ok",
+          "answer": "awdaHI"
+        },
+        {
+          "question": "HIHI",
+          "answer": "HIHIHIHIHIHIHI"
+        },
+        {
+          "question": "test",
+          "answer": "asdsaddsadsa"
+        }
+      ]
+    },
+    {
+      "title": "test case study 2",
+      "content": "dasdasd",
+      "questions": [
+        {
+          "question": "sadsad",
+          "answer": "asda"
+        },
+        {
+          "question": "sadsad",
+          "answer": "asdsadas"
+        }
+      ]
+    }
+  ],
+  "quiz": [
+    {
+      "question": "adda",
+      "options": [
+        "adad",
+        "daad",
+        "adad",
+        "adadaaaa"
+      ],
+      "correct": "C"
+    },
+    {
+      "question": "HI",
+      "options": [
+        "HI",
+        "HIHI",
+        "HIHIHIHI",
+        "HIHIHIHIHI"
+      ],
+      "correct": "A"
+    },
+    {
+      "question": "henry",
+      "options": [
+        "henry",
+        "dasdsa",
+        "dsadsad",
+        "sadasd"
+      ],
+      "correct": "A"
+    }
+  ],
+  "createdAt": "2025-02-20T21:48:12.671Z",
+  "hasCaseStudy": true,
+  "hasQuiz": true,
+  "updatedAt": "2025-02-24T13:16:51.826Z"
+}
