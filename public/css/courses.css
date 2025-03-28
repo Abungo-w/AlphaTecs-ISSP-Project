@@ -68,8 +68,7 @@
 .course-list-container {
     max-width: 1200px;
     margin: 2rem auto;
-    padding: 0 2rem;
-    background: #f8fafc;
+    padding: 0 2rem
 }
 
 .course-list-header {
@@ -649,7 +648,6 @@
 body {
     padding-top: 60px; /* Match your navbar height */
     margin: 0;
-    background: #f7fafc;
     min-height: 100vh;
 }
 
@@ -975,3 +973,4 @@ body {
 .btn-quiz i {
     font-size: 1.1rem;
 }
+

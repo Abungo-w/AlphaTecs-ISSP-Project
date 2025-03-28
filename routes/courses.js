@@ -274,7 +274,8 @@ router.get('/:courseCode', ensureAuthenticated, async (req, res) => {
                 moduleDetails: moduleDetails.filter(Boolean)
             },
             user: req.user,
-            currentPage: 'courses'
+            currentPage: 'courses',
+            layout: false
         });
     } catch (error) {
         console.error('Error loading course:', error);

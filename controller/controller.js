@@ -184,7 +184,7 @@ let Controller = {
       )
     );
 
-    res.render("admin/admin", {blocks: users} );
+    res.render("admin/admin", {blocks: users, additionalCSS: "/css/admin"}  );
   },
 
   course: (req, res) => {

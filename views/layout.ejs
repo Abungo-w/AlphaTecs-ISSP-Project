@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AlphaTecs - Homepage</title>
     <link rel="stylesheet" href="/css/styles.css">
 
     <% if (typeof additionalCSS !== 'undefined') { %>
@@ -18,7 +17,7 @@
     <header>
         <div class="navbar">
             <div class="logo-section">
-                <img src="/Images/logo.png" alt="AlphaTecs Logo" class="logo">
+                <img src="/Images/logo.png" alt="AlphaTecs Logo" class="logo" onclick="window.location.href='/home';" style="cursor: pointer;">
             </div>
             <div class="search-bar">
                 <input type="text" placeholder="Search for coaching programs">
@@ -29,7 +28,7 @@
                     <a href="/courses/create_course" class="nav-btn create-course-btn">Create Course</a>
                     <a href="/courses" class="nav-btn view-courses-btn">View Courses</a>
                     <a href="/modules" class="nav-btn view-modules-btn">View Modules</a>
-                    <a href="/admin" class="nav-btn admin-panel-btn">Admin Panel</a>
+                    <a href="/admin" class="nav-btn admin-panel-btn">Session Control</a>
                 <% } %>
                 <img src="/Images/notification.png" class="notification-icon">
                 <div class="user-icon">                    
