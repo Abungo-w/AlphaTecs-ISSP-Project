@@ -110,24 +110,13 @@ header {
     object-fit: contain;
 }
 
-.search-bar {
-    flex: 1;
-    max-width: 400px;
-    margin: 0 2rem;
-}
-
-.search-bar input {
-    width: 100%;
-    padding: 0.5rem 1rem;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    background: #f8fafc;
-}
+/* Search bar styles removed */
 
 .header-options {
     display: flex;
     align-items: center;
     gap: 1.5rem;
+    margin-left: auto; /* Added to push content to the right */
 }
 
 .notification-icon {
@@ -145,6 +134,27 @@ header {
     color: #2d3748;
     display: flex;
     align-items: center;
+}
+
+/* User profile picture styles */
+.user-profile-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.user-profile-pic {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.user-name {
+    font-weight: 500;
+    font-size: 1rem;
 }
 
 .dropdown {
@@ -200,8 +210,9 @@ header {
 
 /* Hero Section */
 .hero-section {
-    background: url('../Images/background.png') no-repeat center center;
-    background-size: cover;
+    background: url('/Images/background.png') no-repeat center center;
+    background-size: cover; /* Changed to cover to fit the container */
+    background-position: center center;
     color: white;
     padding: 0; /* Remove padding */
     height: calc(70vh - 70px); /* Subtract header height */
@@ -223,7 +234,7 @@ header {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.5); /* Darkened overlay for better text visibility */
     z-index: -1;
 }
 
@@ -232,6 +243,7 @@ header {
     margin-bottom: 10px;
     color: white;
     z-index: 2;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); /* Add text shadow for better visibility */
 }
 
 .hero-section p {

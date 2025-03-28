@@ -20,9 +20,7 @@
             <div class="logo-section">
                 <img src="/Images/logo.png" alt="AlphaTecs Logo" class="logo">
             </div>
-            <div class="search-bar">
-                <input type="text" placeholder="Search for coaching programs">
-            </div>
+            <!-- Search bar removed -->
             <div class="header-options">
                 <% if (user && user.role === 'admin') { %>
                     <a href="/modules/create" class="nav-btn create-module-btn">Create Module</a>
@@ -31,18 +29,18 @@
                     <a href="/modules" class="nav-btn view-modules-btn">View Modules</a>
                     <a href="/admin" class="nav-btn admin-panel-btn">Admin Panel</a>
                 <% } %>
-                <img src="/Images/notification.png" class="notification-icon">
                 <div class="user-icon">                    
                     <% if (user) { %>
-                    <%- user.name %>
+                    <!-- Add profile picture -->
+                    <div class="user-profile-container">
+                        <img src="<%= user.profilePicture || '/Images/default-profile.png' %>" alt="Profile" class="user-profile-pic">
+                        <span class="user-name"><%- user.name %></span>
+                    </div>
                     <div class="dropdown">
                         <ul>
-                            <li><a href="/goals">Goals</a></li>
-                            <li><a href="/my-learning">My Learning</a></li>
-                            <li><a href="/proposed-courses">Proposed Courses</a></li>
-                            <li><a href="/accomplishments">Accomplishments</a></li>
+                            <li><a href="/home">Dashboard</a></li>
+                            <li><a href="/courses">My Learning</a></li>
                             <li><a href="/profile">Profile</a></li>
-                            <li><a href="/help">Help</a></li>
                             <li><a href="/logout">Log Out</a></li>
                         </ul>
                     </div>
