@@ -222,7 +222,7 @@
                 const selects = document.querySelectorAll('.module-select');
                 
                 // Get existing modules from the course
-                const existingModules = <%- JSON.stringify(course.modules || []) %>;
+                const existingModules = JSON.parse('<%= JSON.stringify(course.modules || []) %>');
                 console.log("Existing modules:", existingModules);
                 
                 // Populate each select with modules
