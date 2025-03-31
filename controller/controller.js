@@ -41,8 +41,25 @@ let Controller = {
   },
   
   logout: (req, res) => {
-    req.sessionStore.destroy(req.session.id, (err) => {
-      res.redirect('/login'); 
+    // Clear admin preservation data if exists
+    res.clearCookie('admin_preserve');
+    
+    // Clear app locals
+    if (req.app.locals.lastActiveAdmin) {
+      delete req.app.locals.lastActiveAdmin;
+    }
+    
+    // Destroy the session
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Error destroying session:', err);
+      }
+      
+      // Clear session cookie
+      res.clearCookie('app.sid');
+      
+      // Redirect to login page
+      res.redirect('/login');
     });
   },
 
@@ -167,7 +184,7 @@ let Controller = {
       )
     );
 
-    res.render("admin/admin", {blocks: users} );
+    res.render("admin/admin", {blocks: users, additionalCSS: "/css/admin"}  );
   },
 
   course: (req, res) => {

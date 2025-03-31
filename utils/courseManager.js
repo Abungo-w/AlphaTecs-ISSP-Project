@@ -92,18 +92,32 @@ class CourseManager {
     async updateCourse(courseData) {
         try {
             const courses = await this.loadCourses();
-            const index = await courses.findIndex(c => c.courseCode === courseData.courseCode);
+            const index = courses.findIndex(c => c.courseCode === courseData.courseCode);
             console.log('Index:', index);
             if (index === -1) {
                 throw new Error('Course not found');
             }
-            const updatedCourse = { ...courses[index], ...courseData };
+            
+            // Process modules properly - ensure we have an array of non-empty module codes
+            const modules = Array.isArray(courseData.moduleCodes) 
+                ? courseData.moduleCodes.filter(Boolean) 
+                : courseData.moduleCodes ? [courseData.moduleCodes].filter(Boolean) : [];
+            
+            console.log("Processing modules for update:", modules);
+            
+            // Create the updated course with proper module handling
+            const updatedCourse = { 
+                ...courses[index],
+                title: courseData.title,
+                introduction: courseData.introduction,
+                summary: courseData.summary,
+                modules: modules,
+                updatedAt: new Date().toISOString()
+            };
+            
             courses[index] = updatedCourse;
             await this.saveCourses(courses);
             return updatedCourse;
-            
-
-            
         } catch (error) {
             console.error('Error in updateCourse:', error);
             throw error;
