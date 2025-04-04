@@ -1,0 +1,13 @@
+// ...existing code...
+<div class="course-navigation">
+    <% if (currentPage > 1) { %>
+        <button onclick="goToPage('<%= courseId %>', <%= currentPage - 1 %>)" class="nav-btn prev">Previous</button>
+    <% } %>
+    
+    <% if (currentPage < totalPages) { %>
+        <button onclick="goToPage('<%= courseId %>', <%= currentPage + 1 %>)" class="nav-btn next">Next</button>
+    <% } else { %>
+        <a href="/courses" class="nav-btn return">Return to Courses</a>
+    <% } %>
+</div>
+// ...existing code...
