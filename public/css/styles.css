@@ -110,20 +110,7 @@ header {
     object-fit: contain;
 }
 
-.search-bar {
-    flex: 1;
-    max-width: 400px;
-    margin: 0 2rem;
-}
-
-.search-bar input {
-    width: 100%;
-    padding: 0.5rem 1rem;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    background: #f8fafc;
-}
-
+/* Remove search bar styles */
 .header-options {
     display: flex;
     align-items: center;

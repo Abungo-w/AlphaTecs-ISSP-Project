@@ -19,9 +19,6 @@
             <div class="logo-section">
                 <img src="/Images/logo.png" alt="AlphaTecs Logo" class="logo" onclick="window.location.href='/home';" style="cursor: pointer;">
             </div>
-            <div class="search-bar">
-                <input type="text" placeholder="Search for coaching programs">
-            </div>
             <div class="header-options">
                 <% if (user && user.role === 'admin') { %>
                     <a href="/modules/create" class="nav-btn create-module-btn">Create Module</a>
