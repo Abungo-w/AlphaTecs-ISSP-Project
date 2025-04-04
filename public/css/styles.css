@@ -210,25 +210,6 @@ header {
     color: #1e3c72;
 }
 
-/* Add icons to dropdown menu items */
-.dropdown ul li a::before {
-    font-family: "Arial";
-    width: 20px;
-    text-align: center;
-}
-
-.dropdown ul li:nth-child(1) a::before {
-    content: "📚";
-}
-
-.dropdown ul li:nth-child(2) a::before {
-    content: "👤";
-}
-
-.dropdown ul li:nth-child(3) a::before {
-    content: "🚪";
-}
-
 @keyframes dropdownFade {
     from {
         opacity: 0;

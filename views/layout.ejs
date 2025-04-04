@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     <% if (typeof additionalCSS !== 'undefined') { %>
         <link rel="stylesheet" href="<%= additionalCSS %>.css">
@@ -34,9 +35,10 @@
                     <span class="menu-icon">☰</span>
                     <div class="dropdown">
                         <ul>
-                            <li><a href="/courses">My Learning</a></li>
-                            <li><a href="/profile">Profile</a></li>
-                            <li><a href="/logout">Log Out</a></li>
+                            <li><a href="/home"><i class="fas fa-home"></i> Home Dashboard</a></li>
+                            <li><a href="/courses"><i class="fas fa-book"></i> My Learning</a></li>
+                            <li><a href="/profile"><i class="fas fa-user"></i> Profile</a></li>
+                            <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Log Out</a></li>
                         </ul>
                     </div>
                 <% } else { %>

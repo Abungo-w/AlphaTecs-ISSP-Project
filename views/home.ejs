@@ -26,7 +26,7 @@
                         <h3><%= course.title %></h3>
                         <p><%= course.introduction.replace(/<[^>]*>/g, '').substring(0, 100) %>...</p>
                         <div class="module-meta">
-                            <span><i class="fas fa-code"></i> <%= course.courseCode %></span>
+                            <span><%= course.courseCode %></span>
                             <span><i class="fas fa-book"></i> <%= course.modules ? course.modules.length : 0 %> modules</span>
                         </div>
                         <button class="start-btn" onclick="startCourse('<%= course.courseCode %>')">Start Learning</button>
@@ -54,7 +54,7 @@
                         <h3><%= course.title %></h3>
                         <p><%= course.introduction.replace(/<[^>]*>/g, '').substring(0, 100) %>...</p>
                         <div class="module-meta">
-                            <span><i class="fas fa-code"></i> <%= course.courseCode %></span>
+                            <span><%= course.courseCode %></span>
                             <span><i class="fas fa-book"></i> <%= course.modules ? course.modules.length : 0 %> modules</span>
                         </div>
                         <button class="start-btn" onclick="startCourse('<%= course.courseCode %>')">Start Learning</button>
