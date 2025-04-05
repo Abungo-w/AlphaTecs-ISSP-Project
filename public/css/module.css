@@ -544,3 +544,50 @@ input::-webkit-file-upload-button {
 .btn-quiz:hover {
     background: #2563eb;
 }
+
+.dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    background: white;
+    min-width: 240px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    z-index: 1000;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    animation: dropdownFade 0.2s ease-out;
+}
+
+.dropdown ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.dropdown ul li {
+    padding: 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.dropdown ul li:last-child {
+    border-bottom: none;
+}
+
+.dropdown ul li a {
+    padding: 12px 16px;
+    color: #334155;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s ease;
+}
+
+.dropdown ul li a:hover {
+    background: #f1f5f9;
+}
+
+.user-icon:hover .dropdown {
+    display: block;
+}
