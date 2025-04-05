@@ -197,26 +197,34 @@
 
 /* Layout */
 .course-view-wrapper {
-    display: flex;
-    min-height: calc(100vh - 60px);
+    display: flex; /* Ensure proper alignment of child elements */
+    min-height: 100vh; /* Ensure it spans the full viewport height */
     background: #f8fafc;
-    margin-top: 60px;
-    padding-left: 280px; /* Add padding to prevent content overlap */
+    margin-left: 0; /* Remove any left margin */
+    padding-left: 0; /* Remove unnecessary padding */
 }
 
 /* Sidebar */
 .course-sidebar {
-    width: 280px;
+    width: 220px; /* Slightly reduce the sidebar width */
     background: white;
     border-right: 1px solid #e2e8f0;
-    height: 100vh;
-    position: fixed;
-    top: 60px; /* Match navbar height */
-    left: 0;
-    overflow-y: auto;
+    position: sticky; /* Use sticky positioning to avoid overlapping */
+    top: 60px; /* Start below the top navbar (adjust if needed) */
+    bottom: 0; /* Ensure it extends to the bottom of the viewport */
+    height: auto; /* Allow dynamic height adjustment */
+    overflow-y: auto; /* Allow scrolling within the sidebar if content exceeds height */
+    left: 0; /* Align it to the very left edge of the viewport */
     padding: 1.5rem 0;
     box-shadow: 2px 0 5px rgba(0,0,0,0.05);
-    z-index: 100;
+    z-index: 10; /* Ensure it stays below the top navbar */
+}
+
+/* Footer */
+.footer {
+    position: relative;
+    z-index: 5; /* Ensure it stays above the sidebar */
+    margin-top: auto; /* Push the footer to the bottom */
 }
 
 .nav-item {
@@ -260,11 +268,11 @@
 
 /* Main Content */
 .course-view-container {
-    flex: 1;
+    flex: 1; /* Allow the main content to take up the remaining space */
     padding: 2rem;
-    max-width: calc(100% - 280px);
-    margin-left: auto;
-    margin-right: auto;
+    margin-left: 220px; /* Ensure content is offset to the right of the fixed sidebar */
+    max-width: 1200px; /* Increase the content width */
+    margin-right: auto; /* Keep the content aligned to the left */
     background: #f8fafc;
 }
 
@@ -516,4 +524,128 @@
         margin-left: 0;
         padding: 1rem;
     }
+}
+
+.btn-return {
+    padding: 0.75rem 1.5rem;
+    background: #3182ce;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.btn-return:hover {
+    background: #2c5282;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.small-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    border-radius: 4px;
+}
+
+.small-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-xs {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    border-radius: 3px;
+    height: 26px;
+    line-height: 1;
+    min-width: 60px;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-xs i {
+    font-size: 0.7rem;
+    margin-right: 0.25rem;
+}
+
+.navigation-buttons {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: space-between; /* Changed from center to space-between */
+    flex-direction: row;
+    width: 100%; /* Added to ensure full width */
+    flex-wrap: nowrap; /* Prevent wrapping */
+}
+
+.btn-prev, .btn-next, .btn-return {
+    padding: 0.75rem 1.5rem;
+    background: #3182ce;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    font-size: 0.95rem;
+    width: 180px;
+    height: 42px;
+    white-space: nowrap; /* Prevent text wrapping */
+    margin: 0;
+}
+
+/* Override the hover effect for extra small buttons */
+.btn-xs:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-prev, .btn-next, .btn-return {
+    padding: 0.75rem 1.5rem;
+    background: #3182ce;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    font-size: 1rem;
+    min-width: 140px;
+    justify-content: center;
+}
+
+.btn-prev {
+    background: #4a5568;
+}
+
+.btn-next, .btn-return {
+    background: #3182ce;
+}
+
+.btn-prev:hover, .btn-next:hover, .btn-return:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btn-prev:hover {
+    background: #3c4758;
+}
+
+.btn-next:hover, .btn-return:hover {
+    background: #2c5282;
 }

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     <% if (typeof additionalCSS !== 'undefined') { %>
         <link rel="stylesheet" href="<%= additionalCSS %>.css">
@@ -19,9 +20,6 @@
             <div class="logo-section">
                 <img src="/Images/logo.png" alt="AlphaTecs Logo" class="logo" onclick="window.location.href='/home';" style="cursor: pointer;">
             </div>
-            <div class="search-bar">
-                <input type="text" placeholder="Search for coaching programs">
-            </div>
             <div class="header-options">
                 <% if (user && user.role === 'admin') { %>
                     <a href="/modules/create" class="nav-btn create-module-btn">Create Module</a>
@@ -30,19 +28,17 @@
                     <a href="/modules" class="nav-btn view-modules-btn">View Modules</a>
                     <a href="/admin" class="nav-btn admin-panel-btn">Session Control</a>
                 <% } %>
-                <img src="/Images/notification.png" class="notification-icon">
                 <div class="user-icon">                    
                     <% if (user) { %>
-                    <%- user.name %>
+                    <img src="<%= user.profilePicture || '/Images/pfp.png' %>" alt="Profile" class="user-profile-pic">
+                    <span class="user-name"><%- user.name %></span>
+                    <span class="menu-icon">☰</span>
                     <div class="dropdown">
                         <ul>
-                            <li><a href="/goals">Goals</a></li>
-                            <li><a href="/my-learning">My Learning</a></li>
-                            <li><a href="/proposed-courses">Proposed Courses</a></li>
-                            <li><a href="/accomplishments">Accomplishments</a></li>
-                            <li><a href="/profile">Profile</a></li>
-                            <li><a href="/help">Help</a></li>
-                            <li><a href="/logout">Log Out</a></li>
+                            <li><a href="/home"><i class="fas fa-home"></i> Home Dashboard</a></li>
+                            <li><a href="/courses"><i class="fas fa-book"></i> My Learning</a></li>
+                            <li><a href="/profile"><i class="fas fa-user"></i> Profile</a></li>
+                            <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Log Out</a></li>
                         </ul>
                     </div>
                 <% } else { %>

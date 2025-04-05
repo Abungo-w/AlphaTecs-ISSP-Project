@@ -61,7 +61,7 @@ router.get('/', async (req, res) => {
         res.render('courses/list', { 
             courses,
             user: req.user || null,
-            currentPage: 'courses'  // Add currentPage for navbar active state
+            layout: 'layout'  // Specify main layout explicitly
         });
     } catch (error) {
         res.status(500).send('Error loading courses');
@@ -274,8 +274,7 @@ router.get('/:courseCode', ensureAuthenticated, async (req, res) => {
                 moduleDetails: moduleDetails.filter(Boolean)
             },
             user: req.user,
-            currentPage: 'courses',
-            layout: false
+            layout: 'layout'  // Specify main layout explicitly
         });
     } catch (error) {
         console.error('Error loading course:', error);
@@ -388,6 +387,48 @@ router.get('/:courseCode/details', ensureAuthenticated, async (req, res) => {
         console.error('Error loading course details:', error);
         req.flash('error', 'Failed to load course details');
         res.redirect('/courses');
+    }
+});
+
+router.get('/:courseId', async (req, res) => {
+    try {
+        const courses = getCourses();
+        const course = courses.find(c => c.courseCode === req.params.courseId);
+        
+        if (!course) {
+            return res.status(404).send('Course not found');
+        }
+
+        // Load complete module data
+        const moduleDir = path.join(__dirname, '../modules');
+        let moduleDetails = [];
+        
+        if (course.modules?.length > 0) {
+            moduleDetails = await Promise.all(course.modules.map(async moduleCode => {
+                try {
+                    const moduleFile = path.join(moduleDir, `${moduleCode}.json`);
+                    if (!fs.existsSync(moduleFile)) {
+                        throw new Error('Module not found');
+                    }
+                    return JSON.parse(await fs.promises.readFile(moduleFile, 'utf8'));
+                } catch (error) {
+                    console.error(`Error loading module ${moduleCode}:`, error);
+                    return null;
+                }
+            }));
+        }
+        
+        res.render('course-content', {
+            course: {
+                ...course,
+                moduleDetails: moduleDetails.filter(Boolean)
+            },
+            user: req.user,
+            layout: 'layout'  // Specify main layout explicitly
+        });
+    } catch (error) {
+        console.error('Error loading course:', error);
+        res.status(500).send('Error loading course details');
     }
 });
 

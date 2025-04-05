@@ -4,6 +4,7 @@ const path = require('path');
 const bcrypt = require('bcrypt');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const userModel = require("../models/userModel").userModel;
 
 let Controller = {
 
@@ -28,16 +29,27 @@ let Controller = {
     res.render("register", {layout: "login_signup_layout"});
   },
   registerSubmit: async (req, res) => {
-    let user = {
-      name: req.body.name,
-      email: req.body.email,
-      password: req.body.password,
-    }
-    await db.user.create({
-      data: user
-    })
+    try {
+      const { firstName, lastName, email, password, confirmPassword, jobTitle, field } = req.body;
+      
+      if (password !== confirmPassword) {
+        req.flash('error', 'Passwords do not match');
+        return res.redirect("/register");
+      }
 
-    res.redirect("/login");
+      await userModel.registerUser({
+          name: `${firstName} ${lastName}`,
+          email,
+          password,
+          jobTitle,
+          field
+      });
+      req.flash('success', 'Registration successful! Please login.');
+      res.redirect("/login");
+    } catch (error) {
+      req.flash('error', error.message);
+      res.redirect("/register");
+    }
   },
   
   logout: (req, res) => {
@@ -110,42 +122,38 @@ let Controller = {
 
   updateprofile: async (req, res) => {
     try {
-      const updateData = {};
-  
-      if (req.body.name) updateData.name = req.body.name;
-      if (req.body.email) updateData.email = req.body.email;
-      if (req.body.jobIndustry) updateData.jobIndustry = req.body.jobIndustry;
-      if (req.body.position) updateData.position = req.body.position;
-  
-      if (req.file) {
-        if (req.user.profilePicture) {
-          const oldFilePath = path.join(__dirname, '..', 'public', req.user.profilePicture);
-          if (fs.existsSync(oldFilePath)) {
-            fs.unlinkSync(oldFilePath);
-          }
-        }
-        updateData.profilePicture = `/uploads/${req.file.filename}`;
-      }
-  
-      if (req.body.password && req.body.password.trim() !== '') {
-        updateData.password = await bcrypt.hash(req.body.password, 10);
-      }
-  
-      const updatedUser = await prisma.user.update({
-        where: {
-          id: req.user.id
-        },
-        data: updateData
-      });
-  
-      req.user = updatedUser;
+      const { name, email, password, confirmPassword, jobTitle, field, notifications, privacy } = req.body;
       
-      req.flash('success', 'Profile updated successfully');
-      res.redirect('/profile');
+      if (password || confirmPassword) {
+        if (password !== confirmPassword) {
+          req.flash('error', 'Passwords do not match');
+          return res.redirect("/profile");
+        }
+      }
+
+      const updateData = {
+          name,
+          email,
+          jobTitle,
+          field,
+          notifications,
+          privacy
+      };
+
+      if (password) {
+          updateData.password = password;
+      }
+
+      if (req.file) {
+          updateData.profilePicture = '/uploads/' + req.file.filename;
+      }
+
+      await userModel.updateUser(req.user.id, updateData);
+      req.flash('success', 'Profile updated successfully!');
+      res.redirect("/profile");
     } catch (error) {
-      console.error('Profile update error:', error);
-      req.flash('error', 'Error updating profile: ' + error.message);
-      res.redirect('/profile');
+      req.flash('error', 'Failed to update profile: ' + error.message);
+      res.redirect("/profile");
     }
   },
 

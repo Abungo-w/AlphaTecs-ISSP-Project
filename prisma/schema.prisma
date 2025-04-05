@@ -11,19 +11,16 @@ datasource db {
 }
 
 model User {
-  id    Int     @id @default(autoincrement())
+  id    Int     @id
   name String?
   email String  @unique
   password  String
   role String @default("user")
   profilePicture String?
-  jobIndustry String?
-  position String?
-  notifications String? @default("all")
+  jobTitle String?  // Changed from jobIndustry
+  field String?     // Changed from position
   privacy String? @default("public")
   createdAt DateTime @default(now())
-  progress Progress[]
-
 }
 
 model Module {
@@ -37,8 +34,6 @@ model Module {
   course      Course[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  progress Progress[]
-
 }
 
 model Course {
@@ -47,15 +42,4 @@ model Course {
   introduction String
   summary String
   modules  Module[]
-}
-
-model Progress {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  moduleId  String
-  progress  Int
-  user      User     @relation(fields: [userId], references: [id])
-  module    Module   @relation(fields: [moduleId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }

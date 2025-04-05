@@ -32,8 +32,8 @@
                     <span><%= user.email %></span>
                 </p>
                 <p>
-                    <strong>Job Industry:</strong>
-                    <span><%= user.jobIndustry || 'Not specified' %></span>
+                    <strong>Job Title:</strong>
+                    <span><%= user.jobTitle || 'Not specified' %></span>
                 </p>
                 <p>
                     <% if (user.createdAt) { %>
@@ -45,8 +45,8 @@
                     <% } %>
                 </p>
                 <p>
-                    <strong>Position:</strong>
-                    <span><%= user.position || 'Not specified' %></span>
+                    <strong>Field:</strong>
+                    <span><%= user.field || 'Not specified' %></span>
                 </p>
             </div>
         </div>
@@ -65,21 +65,27 @@
                     <input type="email" id="email" name="email" value="<%= user.email %>">
                 </div>
                 <div class="form-group">
-                    <label for="jobIndustry">Job Industry:</label>
-                    <input type="text" id="jobIndustry" name="jobIndustry" value="<%= user.jobIndustry %>">
+                    <label for="jobTitle">Job Title:</label>
+                    <input type="text" id="jobTitle" name="jobTitle" value="<%= user.jobTitle %>">
                 </div>
                 <div class="form-group">
-                    <label for="position">Position:</label>
-                    <input type="text" id="position" name="position" value="<%= user.position %>">
+                    <label for="field">Field:</label>
+                    <input type="text" id="field" name="field" value="<%= user.field %>">
                 </div>
             </div>
 
             <div class="form-section">
                 <h3>Security</h3>
                 <div class="form-group">
-                    <label for="password">New Password:</label>
-                    <input type="password" id="password" name="password" placeholder="Enter new password">
-                    <small class="form-hint">Leave blank to keep current password</small>
+                    <div class="password-group">
+                        <label for="password">New Password:</label>
+                        <input type="password" id="password" name="password" placeholder="Enter new password">
+                    </div>
+                    <div class="confirm-password-group">
+                        <label for="confirmPassword">Confirm New Password:</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm new password">
+                    </div>
+                    <small class="form-hint">Leave both fields blank to keep current password</small>
                 </div>
             </div>
 
@@ -90,14 +96,6 @@
                     <input type="file" id="profilePicture" name="profilePicture">
                 </div>
                 <div class="form-group">
-                    <label for="notifications">Notification Preferences:</label>
-                    <select id="notifications" name="notifications">
-                        <option value="all" <%= user.notifications === 'all' ? 'selected' : '' %>>All Notifications</option>
-                        <option value="email" <%= user.notifications === 'email' ? 'selected' : '' %>>Email Only</option>
-                        <option value="none" <%= user.notifications === 'none' ? 'selected' : '' %>>No Notifications</option>
-                    </select>
-                </div>
-                <div class="form-group">
                     <label for="privacy">Privacy Settings:</label>
                     <select id="privacy" name="privacy">
                         <option value="public" <%= user.privacy === 'public' ? 'selected' : '' %>>Public</option>
@@ -106,7 +104,7 @@
                 </div>
             </div>
 
-            <button type="submit">Update Profile</button>
+            <button type="submit" onclick="return validatePasswords()">Update Profile</button>
         </form>
     </section>
     <script>
@@ -132,6 +130,19 @@
                 }
                 reader.readAsDataURL(input.files[0]);
             }
+        }
+
+        function validatePasswords() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password || confirmPassword) {
+                if (password !== confirmPassword) {
+                    alert('Passwords do not match!');
+                    return false;
+                }
+            }
+            return true;
         }
     </script>
 </main>
