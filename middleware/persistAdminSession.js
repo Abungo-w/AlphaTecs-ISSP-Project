@@ -33,15 +33,18 @@ const persistAdminSession = async (req, res, next) => {
     const isCourseEditRoute = req.originalUrl.includes('/courses/') && 
                            (req.originalUrl.includes('/edit') || req.method === 'POST');
     
-    // If this is a course edit operation, add special handling
-    if (isCourseEditRoute) {
-        // Log only for course edit routes
-        console.log('⚡ Course edit route detected:', req.originalUrl);
+    // Add module route detection alongside course routes
+    const isModuleEditRoute = req.originalUrl.includes('/modules/') && 
+                           (req.originalUrl.includes('/edit') || 
+                            req.method === 'POST' || 
+                            req.method === 'PUT' ||
+                            req.method === 'DELETE');
+
+    if (isModuleEditRoute || isCourseEditRoute) {
+        // Log only for edit routes
+        console.log('⚡ Protected route detected:', req.originalUrl);
         
-        // If admin user exists in request, save their info
         if (req.user && req.user.role === 'admin') {
-            // Console log removed
-            
             // Store in memory
             activeAdmins.set(req.sessionID, {
                 user: req.user,
