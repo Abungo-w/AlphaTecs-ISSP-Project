@@ -134,71 +134,28 @@ router.get('/:courseCode/edit', ensureAdmin, async (req, res) => {
 // Process edit - Using a simpler, more reliable approach
 router.post('/:courseCode/edit', ensureAdmin, async (req, res) => {
     try {
-        // Process module codes
-        let moduleCodes;
-        let title, introduction, summary;
-        
-        // Handle both traditional form and JSON requests
-        if (req.headers['content-type'] === 'application/json') {
-            const data = req.body;
-            moduleCodes = data['moduleCodes[]'];
-            title = data.title;
-            introduction = data['hidden-intro'];
-            summary = data['hidden-summary'];
-        } else {
-            moduleCodes = req.body['moduleCodes[]'];
-            title = req.body.title;
-            introduction = req.body['hidden-intro'];
-            summary = req.body['hidden-summary'];
-        }
-        
-        // Normalize module codes
-        if (!moduleCodes) {
-            moduleCodes = [];
-        } else if (!Array.isArray(moduleCodes)) {
-            moduleCodes = [moduleCodes];
-        }
-        
         const courseData = {
             courseCode: req.params.courseCode,
-            title: title,
-            introduction: introduction,
-            summary: summary,
-            moduleCodes: moduleCodes.filter(Boolean)
+            title: req.body.title,
+            introduction: req.body['hidden-intro'],
+            summary: req.body['hidden-summary'],
+            moduleCodes: Array.isArray(req.body['moduleCodes[]']) ? 
+                req.body['moduleCodes[]'] : [req.body['moduleCodes[]']]
         };
-        
+
         await courseManager.updateCourse(courseData);
-        
-        // Set a success message that persists
-        req.session.courseUpdateSuccess = true;
-        req.app.locals.courseUpdateSuccessTime = Date.now();
-        
-        // Force session save
-        await new Promise((resolve, reject) => {
-            req.session.save((err) => {
-                if (err) {
-                    console.error('Error saving session in course handler:', err);
-                    reject(err);
-                } else {
-                    resolve();
-                }
-            });
-        });
-        
-        // Handle JSON request differently
+
         if (req.headers['content-type'] === 'application/json') {
             return res.json({
                 success: true,
-                message: 'Course updated successfully',
-                redirectTo: `/courses/${req.params.courseCode}`
+                message: 'Course updated successfully'
             });
         } else {
-            // Use 303 See Other to force a GET after POST
-            return res.redirect(303, `/courses/${req.params.courseCode}`);
+            req.flash('success', 'Course updated successfully');
+            return res.redirect(`/courses/${req.params.courseCode}`);
         }
     } catch (error) {
         console.error('Error updating course:', error);
-        
         if (req.headers['content-type'] === 'application/json') {
             return res.status(500).json({
                 success: false,

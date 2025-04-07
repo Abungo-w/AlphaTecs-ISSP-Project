@@ -57,23 +57,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Emergency session info panel */
-        .session-info {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background: #2d3748;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 4px;
-            font-size: 12px;
-            z-index: 1000;
-        }
-        
-        .session-info p {
-            margin: 5px 0;
-        }
-
         /* Session protection layer */
         #sessionProtection {
             position: fixed;
@@ -99,13 +82,6 @@
     </style>
 </head>
 <body>
-    <!-- Session information for debugging -->
-    <div class="session-info">
-        <p>User: <%= user ? user.username || user.email : 'Guest' %></p>
-        <p>Role: <%= user ? user.role : 'n/a' %></p>
-        <p>Session: <span id="session-status">Active</span></p>
-    </div>
-
     <!-- Session protection overlay -->
     <div id="sessionProtection">
         <div class="spinner"></div>
@@ -341,7 +317,6 @@
             
             // Show session protection overlay
             document.getElementById('sessionProtection').style.display = 'flex';
-            document.getElementById('session-status').textContent = 'Processing...';
             
             try {
                 // Prepare the data
@@ -349,52 +324,38 @@
                     title: document.getElementById('title').value,
                     'hidden-intro': introEditor.root.innerHTML,
                     'hidden-summary': summaryEditor.root.innerHTML,
-                    'moduleCodes[]': []
+                    'moduleCodes[]': Array.from(document.querySelectorAll('select[name="moduleCodes[]"]'))
+                        .map(select => select.value)
+                        .filter(Boolean)
                 };
 
-                // Get module codes
-                document.querySelectorAll('select[name="moduleCodes[]"]').forEach(select => {
-                    if (select.value) {
-                        formData['moduleCodes[]'].push(select.value);
-                    }
-                });
-
-                // Add admin data for recovery
-                formData.adminId = document.querySelector('input[name="adminId"]').value;
-                formData.adminRole = document.querySelector('input[name="adminRole"]').value;
-                formData.fromEditForm = true;
-
-                // Make the update request using fetch
                 const response = await fetch('/courses/<%= course.courseCode %>/edit', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'X-ADMIN-PRESERVE': 'true'
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(formData),
-                    credentials: 'same-origin' // Important for cookies
+                    credentials: 'same-origin'
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+                    throw new Error(`Server returned ${response.status}`);
                 }
 
                 const result = await response.json();
                 
                 if (result.success) {
-                    // Store success indicator in localStorage
-                    localStorage.setItem('courseUpdateSuccess', 'true');
-                    
-                    // Use standard navigation which doesn't destroy the session
-                    window.location.href = result.redirectTo;
+                    // Redirect to course view page
+                    window.location.href = `/courses/<%= course.courseCode %>`;
                 } else {
-                    throw new Error(result.message || 'Unknown error');
+                    throw new Error(result.message || 'Update failed');
                 }
             } catch (error) {
                 console.error('Update failed:', error);
                 alert('Error updating course: ' + error.message);
+            } finally {
+                // Always hide the protection overlay
                 document.getElementById('sessionProtection').style.display = 'none';
-                document.getElementById('session-status').textContent = 'Error';
             }
         }
         

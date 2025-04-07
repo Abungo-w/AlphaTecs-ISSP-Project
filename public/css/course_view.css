@@ -270,10 +270,18 @@
 .course-view-container {
     flex: 1; /* Allow the main content to take up the remaining space */
     padding: 2rem;
-    margin: 0 auto; /* Center the container */
-    max-width: 1000px; /* Slightly reduced max-width */
+    margin-left: 220px; /* Adjusted to account for sidebar width */
+    max-width: calc(100% - 220px); /* Adjusted to match new sidebar width */
     background: #f8fafc;
     min-height: calc(100vh - 60px);
+}
+
+@media (max-width: 1024px) {
+    .course-view-container {
+        margin-left: 0;
+        max-width: 100%;
+        padding: 1rem;
+    }
 }
 
 .course-content {
