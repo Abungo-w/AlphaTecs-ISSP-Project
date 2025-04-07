@@ -42,6 +42,44 @@ router.get('/', ensureAuthenticated, (req, res) => {
     });
 });
 
+// Add session preservation middleware for module routes
+router.use((req, res, next) => {
+    if (req.user) {
+        // Store user info in app locals
+        req.app.locals.lastActiveUser = {
+            id: req.user.id,
+            username: req.user.username || req.user.email,
+            role: req.user.role,
+            time: Date.now()
+        };
+
+        // Touch session on each request
+        req.session.touch();
+    }
+    next();
+});
+
+// Add state preservation middleware for all module routes
+router.use((req, res, next) => {
+    if (req.user && req.user.role === 'admin') {
+        // Save state token for recovery
+        const stateToken = Buffer.from(JSON.stringify({
+            user: req.user,
+            time: Date.now()
+        })).toString('base64');
+        
+        res.locals.statePreservation = stateToken;
+        
+        // Store admin state
+        req.app.locals.lastAdminAction = {
+            user: req.user,
+            time: Date.now(),
+            path: req.originalUrl
+        };
+    }
+    next();
+});
+
 // Module creation page
 router.get('/create', ensureAdmin, (req, res) => {
     try {
@@ -57,7 +95,7 @@ router.get('/create', ensureAdmin, (req, res) => {
 });
 
 // Create new module - Process form submission
-router.post('/create', ensureAdmin, (req, res) => {
+router.post('/create', ensureAdmin, async (req, res) => {
     try {
         const moduleDir = path.join(__dirname, '..', 'modules');
         if (!fs.existsSync(moduleDir)){
@@ -102,10 +140,34 @@ router.post('/create', ensureAdmin, (req, res) => {
         
         const moduleFile = path.join(moduleDir, `${moduleData.moduleCode}.json`);
         fs.writeFileSync(moduleFile, JSON.stringify(moduleData, null, 2));
-        res.status(200).json({ 
-            message: 'Module created successfully', 
+
+        // Enhanced session handling
+        if (req.session) {
+            req.session.touch();
+            req.session.moduleAction = {
+                type: 'create',
+                moduleCode: moduleData.moduleCode,
+                timestamp: Date.now()
+            };
+        }
+        
+        // Force session save with promise
+        await new Promise((resolve, reject) => {
+            req.session.save((err) => {
+                if (err) {
+                    console.error('Session save error:', err);
+                    reject(err);
+                }
+                resolve();
+            });
+        });
+
+        // Return success with state preservation
+        res.json({ 
             success: true, 
-            moduleCode: moduleData.moduleCode 
+            message: 'Module created successfully',
+            moduleCode: moduleData.moduleCode,
+            stateToken: res.locals.statePreservation
         });
     } catch (error) {
         console.error('Error creating module:', error);
@@ -154,7 +216,33 @@ router.put('/:moduleCode', ensureAdmin, async (req, res) => {
 
         await fsPromises.writeFile(moduleFile, JSON.stringify(updatedModule, null, 2));
         
-        res.json({ success: true, message: 'Module updated successfully' });
+        // Enhanced session handling
+        if (req.session) {
+            req.session.touch();
+            req.session.moduleAction = {
+                type: 'update',
+                moduleCode: moduleCode,
+                timestamp: Date.now()
+            };
+        }
+
+        // Force session save with promise
+        req.session.touch();
+        await new Promise((resolve, reject) => {
+            req.session.save((err) => {
+                if (err) {
+                    console.error('Session save error:', err);
+                    reject(err);
+                }
+                resolve();
+            });
+        });
+
+        res.json({ 
+            success: true, 
+            message: 'Module updated successfully',
+            stateToken: res.locals.statePreservation
+        });
     } catch (error) {
         console.error('Error updating module:', error);
         res.status(500).json({ error: 'Failed to update module' });
@@ -173,15 +261,32 @@ router.delete('/:moduleCode', ensureAuthenticated, ensureAdmin, async (req, res)
 
         await fsPromises.unlink(moduleFile);
 
-        // Save session before sending response
-        req.session.save((err) => {
-            if (err) {
-                console.error('Session save error:', err);
-                return res.status(500).json({ success: false, error: 'Session error' });
-            }
-            res.json({ success: true, message: 'Module deleted successfully' });
-        });
+        // Enhanced session handling
+        if (req.session) {
+            req.session.touch();
+            req.session.moduleAction = {
+                type: 'delete',
+                moduleCode: moduleCode,
+                timestamp: Date.now()
+            };
 
+            // Force session save with better error handling
+            await new Promise((resolve, reject) => {
+                req.session.save((err) => {
+                    if (err) {
+                        console.error('Session save error:', err);
+                        reject(err);
+                    }
+                    resolve();
+                });
+            });
+        }
+
+        res.json({ 
+            success: true, 
+            message: 'Module deleted successfully',
+            stateToken: res.locals.statePreservation
+        });
     } catch (error) {
         console.error('Error deleting module:', error);
         res.status(500).json({ success: false, error: 'Failed to delete module' });

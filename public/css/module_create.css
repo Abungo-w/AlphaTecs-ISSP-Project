@@ -18,9 +18,10 @@
 }
 
 .form-group {
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     padding-bottom: 1rem;
     border-bottom: 1px solid #e2e8f0;
+    padding-top: 0.5rem;
 }
 
 .form-group:last-child {
@@ -495,40 +496,45 @@ textarea.form-input {
     padding: 2rem;
     margin-bottom: 1.5rem;
     position: relative;
+    padding-top: 3.5rem; /* Increased top padding to prevent overlapping */
+    margin-top: 2.5rem;
+}
+
+.quiz-question .question-header {
+    position: absolute;
+    top: -2rem; /* Move header above the question box */
+    left: 0;
+    font-weight: 600;
+    color: #2d3748;
+    background: transparent;
+    padding: 0.5rem 0;
+    border-bottom: none;  /* Remove the bottom border */
 }
 
 .quiz-question .btn-remove {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.5rem 1rem;
-    margin-top: 1rem;
-    background: #ef4444;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    width: auto;
-    height: auto;
     position: absolute;
     top: 1rem;
     right: 1rem;
     width: 30px;
     height: 30px;
-    padding: 0;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1.2rem;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.2s;
+    z-index: 2; /* Ensure button stays on top */
 }
 
-.quiz-question .btn-remove:hover {
-    background: #dc2626;
-}
-
-.options-container {
-    margin: 1.5rem 0;
+.form-group {
+    margin-top: 0.5rem; /* Add some space below the header/button area */
+    margin: 0;  /* Remove margins */
+    padding: 0;  /* Remove padding */
+    border: none;  /* Remove borders */
 }
 
 /* Case Study Section - Updated */
@@ -911,4 +917,36 @@ textarea.form-input {
 
 .quiz-question .btn-remove:hover {
     background: #dc2626;
+}
+
+.quiz-question .form-group {
+    margin-bottom: 0;  /* Remove bottom margin */
+    border-bottom: none;  /* Remove bottom border */
+}
+
+.options-container {
+    margin-top: 1rem;
+}
+
+.option-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+}
+
+.option-group:last-child {
+    margin-bottom: 0;
+}
+
+/* Remove any remaining borders/lines */
+.quiz-question:after,
+.quiz-question:before,
+.form-group:after,
+.form-group:before {
+    display: none;
 }
