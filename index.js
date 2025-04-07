@@ -208,7 +208,9 @@ app.use(Controller.user);
 })();
 
 // Routes
-app.get("/", Controller.index);
+app.get("/", (req, res) => {
+    res.redirect('/login');
+});
 app.get("/register", Controller.register);
 app.post("/register", Controller.registerSubmit);
 app.get("/login", forwardAuthenticated, Controller.login);
