@@ -169,7 +169,6 @@
 /* Quiz Section Styles */
 .quiz-section {
     margin-top: 3rem;
-    margin-bottom: 3rem;
     padding: 2rem;
     background: #f8fafc;
     border: 2px solid #e2e8f0;
@@ -177,8 +176,8 @@
 }
 
 .quiz-header {
+    text-align: center;
     margin-bottom: 2rem;
-    text-align: left;
 }
 
 .quiz-header h3 {
@@ -197,11 +196,12 @@
 }
 
 .question-wrapper {
-    background: #f8fafc;
-    border: 2px solid #e2e8f0;
+    background: white;
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
     padding: 1.5rem;
     margin-bottom: 1.5rem;
+    position: relative;
 }
 
 .question-header {
@@ -214,7 +214,6 @@
 .question-number {
     font-weight: 600;
     color: #2d3748;
-    font-size: 1.1rem;
 }
 
 .question-input {
@@ -233,11 +232,11 @@
 
 .option-group {
     display: grid;
-    grid-template-columns: 2.5rem auto 1fr;
+    grid-template-columns: 2.5rem 2.5rem 1fr;
     align-items: center;
     gap: 1rem;
     padding: 0.75rem;
-    background: white;
+    background: #f8fafc;
     border: 1px solid #e2e8f0;
     border-radius: 6px;
 }
@@ -248,10 +247,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f1f5f9;
+    background: #e2e8f0;
     border-radius: 4px;
     font-weight: 600;
-    color: #2d3748;
+    color: #4a5568;
 }
 
 .option-group input[type="text"] {

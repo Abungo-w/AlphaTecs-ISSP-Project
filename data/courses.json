@@ -34,34 +34,5 @@
       "M-41-50-10"
     ],
     "updatedAt": "2025-04-07T02:14:54.706Z"
-  },
-  {
-    "id": "1740403095282",
-    "courseCode": "C-00-01",
-    "title": "sadasdasd",
-    "introduction": "<p>dsadsadas</p>",
-    "summary": "<p>sadsadasda</p>",
-    "modules": [
-      "M-11-11-11",
-      "M-10-21-04",
-      "M-36-58-74",
-      "M-41-50-10"
-    ],
-    "createdAt": "2025-02-24T13:18:15.283Z"
-  },
-  {
-    "id": "1741035448714",
-    "courseCode": "C-12-34",
-    "title": "czxcxzcz",
-    "introduction": "<p>sadaasdsad. update part 1 </p>",
-    "summary": "<p>sadsaddasdsadas</p>",
-    "modules": [
-      "M-11-11-11"
-    ],
-    "createdAt": "2025-03-03T20:57:28.715Z",
-    "moduleCodes": [
-      "M-11-11-11",
-      "M-10-21-04"
-    ]
   }
 ]

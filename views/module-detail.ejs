@@ -98,7 +98,7 @@
             <% } %>
 
             <!-- Quiz Section -->
-            <% if (module.hasQuiz) { %>
+            <% if (module.hasQuiz && module.quiz && module.quiz.length > 0) { %>
                 <div class="quiz-section">
                     <h2>Module Quiz</h2>
                     <p class="quiz-info">Test your knowledge with this <%= module.quiz.length %>-question quiz</p>

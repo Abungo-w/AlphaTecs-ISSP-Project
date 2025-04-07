@@ -379,11 +379,13 @@ router.get('/:id', ensureAuthenticated, (req, res) => {
         // Structure the module data and strip HTML from description
         const moduleData = {
             ...moduleContent,
-            description: moduleContent.description.replace(/<[^>]*>/g, ''),
-            caseStudy: moduleContent.caseStudy,
+            moduleCode: moduleContent.moduleCode || moduleId, // Ensure moduleCode exists
+            description: moduleContent.description ? moduleContent.description.replace(/<[^>]*>/g, '') : '',
+            content: moduleContent.content || '',
+            caseStudy: moduleContent.caseStudy || [],
             quiz: moduleContent.quiz || [],
-            hasCaseStudy: moduleContent.hasCaseStudy,
-            hasQuiz: moduleContent.hasQuiz
+            hasCaseStudy: Boolean(moduleContent.caseStudy && moduleContent.caseStudy.length),
+            hasQuiz: Boolean(moduleContent.quiz && moduleContent.quiz.length)
         };
 
         res.render("module-detail", { 
@@ -411,29 +413,6 @@ router.get('/api/:moduleCode', ensureAuthenticated, (req, res) => {
     } catch (error) {
         console.error('Error fetching module:', error);
         res.status(500).json({ error: 'Failed to fetch module data' });
-    }
-});
-
-// Update single module view route
-router.get('/:id', ensureAuthenticated, (req, res) => {
-    try {
-        const moduleId = req.params.id;
-        const moduleFile = path.join(__dirname, '..', 'modules', `${moduleId}.json`);
-
-        if (!fs.existsSync(moduleFile)) {
-            return res.status(404).send('Module not found');
-        }
-
-        const moduleContent = JSON.parse(fs.readFileSync(moduleFile, 'utf-8'));
-        
-        res.render("modules/view", { 
-            module: moduleContent,
-            user: req.user,
-            currentPage: 'modules'
-        });
-    } catch (error) {
-        console.error('Error loading module:', error);
-        res.status(500).send('Error loading module: ' + error.message);
     }
 });
 

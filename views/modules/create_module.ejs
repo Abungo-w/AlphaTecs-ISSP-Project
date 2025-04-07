@@ -89,7 +89,7 @@
                 <i class="fas fa-plus"></i> Add Another Case Study
             </button>
 
-            <!-- Include Quiz Form -->
+            <!-- Include Quiz Form - Keep this -->
             <%- include('./partials/quiz_form') %>
 
             <div class="form-actions">
@@ -286,18 +286,19 @@
 
                         // Process quiz questions
                         quiz: Array.from(document.querySelectorAll('.question-wrapper')).map(wrapper => {
-                            const question = wrapper.querySelector('input[type="text"]').value;
-                            const options = Array.from(wrapper.querySelectorAll('.option-group input[type="text"]')).map(opt => opt.value);
-                            const correctAnswer = wrapper.querySelector('input[type="radio"]:checked')?.value;
+                            const question = wrapper.querySelector('input[type="text"][name*="[question]"]').value;
+                            const options = Array.from(wrapper.querySelectorAll('input[type="text"][name*="[options]"]'))
+                                .map(opt => opt.value);
+                            const correct = wrapper.querySelector('input[type="radio"]:checked')?.value;
                             
-                            if (!question || !options.every(opt => opt) || !correctAnswer) {
+                            if (!question || !options.every(opt => opt) || correct === undefined) {
                                 throw new Error('Please fill out all quiz questions completely');
                             }
 
                             return {
-                                question: question,
-                                options: options,
-                                correctAnswer: correctAnswer === 'A' ? 0 : correctAnswer === 'B' ? 1 : correctAnswer === 'C' ? 2 : 3
+                                question,
+                                options,
+                                correct: parseInt(correct)
                             };
                         })
                     };
@@ -337,6 +338,61 @@
                 }
 
                 return false; // Prevent traditional form submission
+            }
+
+            function addQuizQuestion() {
+                const container = document.getElementById('quiz-container');
+                const questionCount = container.children.length;
+                
+                const newQuestion = document.createElement('div');
+                newQuestion.className = 'question-wrapper';
+                newQuestion.innerHTML = `
+                    <div class="question-header">
+                        <div class="question-number">Question ${questionCount + 1}</div>
+                        <button type="button" class="btn-remove" onclick="removeQuizQuestion(this)">×</button>
+                    </div>
+                    <input type="text" name="quiz[${questionCount}][question]" class="question-input" 
+                           placeholder="Enter your question here" required>
+                    
+                    <div class="options-wrapper">
+                        <div class="option-group">
+                            <div class="option-label">A</div>
+                            <input type="radio" name="quiz[${questionCount}][correct]" value="0" required>
+                            <input type="text" name="quiz[${questionCount}][options][0]" placeholder="Option A" required>
+                        </div>
+                        <div class="option-group">
+                            <div class="option-label">B</div>
+                            <input type="radio" name="quiz[${questionCount}][correct]" value="1">
+                            <input type="text" name="quiz[${questionCount}][options][1]" placeholder="Option B" required>
+                        </div>
+                        <div class="option-group">
+                            <div class="option-label">C</div>
+                            <input type="radio" name="quiz[${questionCount}][correct]" value="2">
+                            <input type="text" name="quiz[${questionCount}][options][2]" placeholder="Option C" required>
+                        </div>
+                        <div class="option-group">
+                            <div class="option-label">D</div>
+                            <input type="radio" name="quiz[${questionCount}][correct]" value="3">
+                            <input type="text" name="quiz[${questionCount}][options][3]" placeholder="Option D" required>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(newQuestion);
+                updateQuizNumbers();
+            }
+
+            function removeQuizQuestion(button) {
+                const wrapper = button.closest('.question-wrapper');
+                if (wrapper && !wrapper.matches(':first-child')) {
+                    wrapper.remove();
+                    updateQuizNumbers();
+                }
+            }
+
+            function updateQuizNumbers() {
+                document.querySelectorAll('.question-wrapper .question-number').forEach((el, index) => {
+                    el.textContent = `Question ${index + 1}`;
+                });
             }
         </script>
     </div>

@@ -432,4 +432,44 @@ router.get('/:courseId', async (req, res) => {
     }
 });
 
+// Delete course route
+router.delete('/:courseCode', ensureAdmin, async (req, res) => {
+    try {
+        const courseCode = req.params.courseCode;
+        const courses = getCourses();
+        const courseIndex = courses.findIndex(c => c.courseCode === courseCode);
+
+        if (courseIndex === -1) {
+            return res.status(404).json({ success: false, message: 'Course not found' });
+        }
+
+        // Remove the course from the array
+        courses.splice(courseIndex, 1);
+
+        // Write updated courses back to file
+        const coursesFile = path.join(__dirname, '../data', 'courses.json');
+        await fs.promises.writeFile(coursesFile, JSON.stringify(courses, null, 2));
+
+        // Force session save
+        if (req.session) {
+            req.session.touch();
+            await new Promise((resolve, reject) => {
+                req.session.save(err => {
+                    if (err) reject(err);
+                    else resolve();
+                });
+            });
+        }
+
+        res.json({ success: true, message: 'Course deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting course:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Failed to delete course',
+            error: error.message 
+        });
+    }
+});
+
 module.exports = router;
