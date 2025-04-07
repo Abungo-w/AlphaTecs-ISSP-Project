@@ -24,8 +24,8 @@ const persistAdminSession = async (req, res, next) => {
         return next();
     }
     
-    // Skip for static resources
-    if (req.path.match(/\.(css|js|jpg|png|ico|svg)$/)) {
+    // Skip for static resources and non-admin users
+    if (req.path.match(/\.(css|js|jpg|png|ico|svg)$/) || !req.user?.role === 'admin') {
         return next();
     }
     
@@ -94,6 +94,24 @@ const persistAdminSession = async (req, res, next) => {
             }
             return originalEnd.apply(this, arguments);
         };
+    }
+    
+    // Force session touch for any admin route
+    if (req.user?.role === 'admin') {
+        req.session.touch();
+        req.session.adminLastActivity = Date.now();
+        
+        // Store admin info in res.locals for views
+        res.locals.adminInfo = {
+            id: req.user.id,
+            role: req.user.role
+        };
+    }
+
+    // Preserve admin session headers
+    if (req.user?.role === 'admin') {
+        res.setHeader('X-Admin-Session-Preserved', 'true');
+        res.setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate');
     }
     
     // For all routes, attempt admin recovery if session was lost

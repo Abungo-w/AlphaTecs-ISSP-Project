@@ -3,40 +3,45 @@ const router = express.Router();
 const courseManager = require('../utils/courseManager');
 const { ensureAdmin } = require('../middleware/checkAuth');
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs').promises;
 const { ensureAuthenticated } = require('../middleware/checkAuth');
 
 // Intercept any destruction of admin sessions
 router.use((req, res, next) => {
-    const originalEnd = res.end;
-    
     // Preserve session for admins
     if (req.user && req.user.role === 'admin') {
-        // Save reference for emergency recovery
-        req.app.locals.lastAdminUser = req.user;
-        req.app.locals.lastAdminTime = Date.now();
-        
-        // Touch session on each request
         req.session.touch();
+        req.session.adminPreserve = {
+            id: req.user.id,
+            time: Date.now()
+        };
     }
-    
-    // Add this flag for debugging
-    res.locals.isAdmin = req?.user?.role === 'admin';
-    
     next();
 });
 
-// Get courses data
-function getCourses() {
+// Get courses data - Update this function
+async function getCourses() {
     try {
         const coursesFile = path.join(__dirname, '../data', 'courses.json');
-        if (fs.existsSync(coursesFile)) {
-            return JSON.parse(fs.readFileSync(coursesFile, 'utf8'));
+        if (await fs.access(coursesFile).then(() => true).catch(() => false)) {
+            const data = await fs.readFile(coursesFile, 'utf8');
+            return JSON.parse(data);
         }
         return [];
     } catch (error) {
         console.error('Error reading courses:', error);
         return [];
+    }
+}
+
+// Save courses data - Add this function
+async function saveCourses(courses) {
+    try {
+        const coursesFile = path.join(__dirname, '../data', 'courses.json');
+        await fs.writeFile(coursesFile, JSON.stringify(courses, null, 2));
+    } catch (error) {
+        console.error('Error saving courses:', error);
+        throw error;
     }
 }
 
@@ -242,43 +247,53 @@ router.get('/api/session-ping', (req, res) => {
 // Get single course
 router.get('/:courseCode', ensureAuthenticated, async (req, res) => {
     try {
-        const courses = getCourses();
-        const course = courses.find(c => c.courseCode === req.params.courseCode);
+        const course = await courseManager.getCourse(req.params.courseCode);
         
         if (!course) {
-            return res.status(404).send('Course not found');
+            req.flash('error', 'Course not found');
+            return res.redirect('/courses');
         }
 
-        // Load complete module data
-        const moduleDir = path.join(__dirname, '../modules');
+        // Load module details with better error handling
         let moduleDetails = [];
         
         if (course.modules?.length > 0) {
-            moduleDetails = await Promise.all(course.modules.map(async moduleCode => {
+            const moduleDir = path.join(__dirname, '../modules');
+            
+            moduleDetails = await Promise.all(course.modules.map(async (moduleCode) => {
                 try {
                     const moduleFile = path.join(moduleDir, `${moduleCode}.json`);
                     if (!fs.existsSync(moduleFile)) {
-                        throw new Error('Module not found');
+                        console.warn(`Module file not found: ${moduleCode}`);
+                        return null;
                     }
-                    return JSON.parse(await fs.promises.readFile(moduleFile, 'utf8'));
+                    
+                    const moduleData = await fs.readFile(moduleFile, 'utf8');
+                    return JSON.parse(moduleData);
                 } catch (error) {
                     console.error(`Error loading module ${moduleCode}:`, error);
                     return null;
                 }
             }));
         }
+
+        // Filter out failed modules and render
+        const validModuleDetails = moduleDetails.filter(Boolean);
         
-        res.render('courses/view', {
+        return res.render('courses/view', {
             course: {
                 ...course,
-                moduleDetails: moduleDetails.filter(Boolean)
+                moduleDetails: validModuleDetails
             },
             user: req.user,
-            layout: 'layout'  // Specify main layout explicitly
+            messages: req.flash(),
+            layout: 'layout'
         });
+
     } catch (error) {
         console.error('Error loading course:', error);
-        res.status(500).send('Error loading course details');
+        req.flash('error', 'Error loading course details: ' + error.message);
+        return res.redirect('/courses');
     }
 });
 
@@ -432,43 +447,55 @@ router.get('/:courseId', async (req, res) => {
     }
 });
 
-// Delete course route
+// Delete course route - update this
 router.delete('/:courseCode', ensureAdmin, async (req, res) => {
     try {
         const courseCode = req.params.courseCode;
-        const courses = getCourses();
+        const courses = await getCourses();
         const courseIndex = courses.findIndex(c => c.courseCode === courseCode);
 
         if (courseIndex === -1) {
             return res.status(404).json({ success: false, message: 'Course not found' });
         }
 
-        // Remove the course from the array
+        // Store admin session info before deletion
+        const adminInfo = {
+            id: req.user.id,
+            role: req.user.role,
+            time: Date.now()
+        };
+        
+        // Ensure session is touched before deletion
+        req.session.touch();
+        req.session.adminInfo = adminInfo;
+
+        // Perform the deletion
         courses.splice(courseIndex, 1);
+        await saveCourses(courses);
 
-        // Write updated courses back to file
-        const coursesFile = path.join(__dirname, '../data', 'courses.json');
-        await fs.promises.writeFile(coursesFile, JSON.stringify(courses, null, 2));
-
-        // Force session save
-        if (req.session) {
-            req.session.touch();
-            await new Promise((resolve, reject) => {
-                req.session.save(err => {
-                    if (err) reject(err);
-                    else resolve();
-                });
+        // Force session preservation
+        await new Promise((resolve, reject) => {
+            req.session.save((err) => {
+                if (err) {
+                    console.error('Session save error:', err);
+                    reject(err);
+                }
+                resolve();
             });
-        }
+        });
 
-        res.json({ success: true, message: 'Course deleted successfully' });
+        // Set recovery headers
+        res.setHeader('X-Admin-Session-ID', req.sessionID);
+        res.setHeader('X-Admin-Preserve', 'true');
+
+        res.json({ 
+            success: true, 
+            message: 'Course deleted successfully',
+            adminSession: adminInfo // Send back session info for verification
+        });
     } catch (error) {
         console.error('Error deleting course:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Failed to delete course',
-            error: error.message 
-        });
+        res.status(500).json({ success: false, message: 'Failed to delete course' });
     }
 });
 

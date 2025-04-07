@@ -10,19 +10,37 @@ class CourseManager {
 
     async loadCourses() {
         try {
-            const data = await fs.readFile(this.coursesFile, 'utf8');
-            return JSON.parse(data);
-        } catch (error) {
-            if (error.code === 'ENOENT') {
+            const exists = await fs.access(this.coursesFile)
+                .then(() => true)
+                .catch(() => false);
+
+            if (!exists) {
                 await fs.writeFile(this.coursesFile, '[]');
                 return [];
             }
-            throw error;
+
+            const data = await fs.readFile(this.coursesFile, 'utf8');
+            const courses = JSON.parse(data);
+            
+            // Validate course data
+            return courses.map(course => ({
+                ...course,
+                modules: course.modules || [],
+                createdAt: course.createdAt || new Date().toISOString()
+            }));
+        } catch (error) {
+            console.error('Error loading courses:', error);
+            return [];
         }
     }
 
     async saveCourses(courses) {
-        await fs.writeFile(this.coursesFile, JSON.stringify(courses, null, 2));
+        try {
+            await fs.writeFile(this.coursesFile, JSON.stringify(courses, null, 2));
+        } catch (error) {
+            console.error('Error saving courses:', error);
+            throw error;
+        }
     }
 
     async createCourse(courseData) {
@@ -56,8 +74,22 @@ class CourseManager {
     }
 
     async getCourse(courseCode) {
-        const courses = await this.loadCourses();
-        return courses.find(c => c.courseCode === courseCode);
+        try {
+            const courses = await this.loadCourses();
+            const course = courses.find(c => c.courseCode === courseCode);
+            
+            if (!course) {
+                throw new Error('Course not found');
+            }
+            
+            // Ensure modules array exists
+            course.modules = course.modules || [];
+            
+            return course;
+        } catch (error) {
+            console.error('Error in getCourse:', error);
+            throw error;
+        }
     }
 
     async getAllCourses() {

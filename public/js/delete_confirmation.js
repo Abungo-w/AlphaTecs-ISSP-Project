@@ -22,18 +22,32 @@ async function confirmDelete() {
     const endpoint = `/${type}s/${code}`;
     
     try {
+        // Add session recovery headers
+        const headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-Admin-Preserve': 'true',
+            'X-Requested-With': 'XMLHttpRequest'
+        };
+
+        if (type === 'course') {
+            headers['X-Session-Preserve'] = 'true';
+        }
+
         const response = await fetch(endpoint, {
             method: 'DELETE',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include'
+            headers,
+            credentials: 'same-origin' // Changed from 'include' for better session handling
         });
 
         const data = await response.json();
 
         if (data.success) {
+            // Verify admin session is preserved
+            if (data.adminSession) {
+                localStorage.setItem('adminSessionInfo', JSON.stringify(data.adminSession));
+            }
+            
             const card = document.querySelector(`[data-${type}-code="${code}"]`);
             if (card) {
                 card.remove();
@@ -54,12 +68,23 @@ async function confirmDelete() {
                 }
             }
             showFlashMessage('success', `${type.charAt(0).toUpperCase() + type.slice(1)} deleted successfully`);
-        } else {
-            throw new Error(data.message || `Failed to delete ${type}`);
         }
     } catch (error) {
-        console.error('Error:', error);
-        showFlashMessage('error', error.message);
+        console.error('Delete operation error:', error);
+        showFlashMessage('error', 'Error during delete: ' + error.message);
+        
+        // Attempt session recovery if needed
+        const adminInfo = localStorage.getItem('adminSessionInfo');
+        if (adminInfo) {
+            await fetch('/api/recover-session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: adminInfo,
+                credentials: 'same-origin'
+            });
+        }
     }
     
     closeDeleteModal();
