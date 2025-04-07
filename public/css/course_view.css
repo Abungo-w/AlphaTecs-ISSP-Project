@@ -270,10 +270,19 @@
 .course-view-container {
     flex: 1; /* Allow the main content to take up the remaining space */
     padding: 2rem;
-    margin-left: 220px; /* Ensure content is offset to the right of the fixed sidebar */
-    max-width: 1200px; /* Increase the content width */
-    margin-right: auto; /* Keep the content aligned to the left */
+    margin: 0 auto; /* Center the container */
+    max-width: 1000px; /* Slightly reduced max-width */
     background: #f8fafc;
+    min-height: calc(100vh - 60px);
+}
+
+.course-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    margin: 0 auto; /* Center the content */
+    max-width: 800px; /* Control content width */
 }
 
 .course-header {
@@ -582,6 +591,9 @@
     flex-direction: row;
     width: 100%; /* Added to ensure full width */
     flex-wrap: nowrap; /* Prevent wrapping */
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
 }
 
 .btn-prev, .btn-next, .btn-return {

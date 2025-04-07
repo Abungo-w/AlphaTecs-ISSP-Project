@@ -1,0 +1,64 @@
+{
+  "moduleCode": "M-12-23-45",
+  "title": "Fundamentals of IT System Administration",
+  "description": "<p>This module covers essential concepts, tools, and best practices for IT system administrators to maintain secure and efficient computing environments.</p>",
+  "difficulty": "Beginner",
+  "duration": 120,
+  "content": "<h3><strong>1. Introduction to System Administration</strong></h3><ul><li><strong>nitoring:</strong>&nbsp;Using tools (e.g., Nagios, SolarWinds) to track system health and preempt failures.</li></ul><h3><br></h3><h3><strong>2. Essential SysAdmin Tools</strong></h3><ul><li><strong>Remote Access:</strong>&nbsp;SSH (Linux/macOS) and RDP (Windows) for remote management.</li><li><strong>Automation:</strong>&nbsp;Scripting (PowerShell, Bash) to streamline repetitive tasks.</li><li><strong>Virtualization:</strong>&nbsp;VMware or Hyper-V for resource-efficient server deployment.</li></ul><h3><br></h3><h3><strong>3. Common Challenges &amp; Solutions</strong></h3><ul><li><strong>Downtime Prevention:</strong>&nbsp;RAID configurations for redundancy; load balancers for traffic distribution.</li><li><strong>Security Threats:</strong>&nbsp;Regular audits, multi-factor authentication (MFA), and employee training to combat phishing.</li><li><strong>Scalability:</strong>&nbsp;Cloud integration (AWS/Azure) for flexible resource allocation.</li></ul><h3><br></h3><h3><strong>4. Best Practices</strong></h3><ul><li>Document&nbsp;<em>all</em>&nbsp;changes to systems and networks.</li><li>Follow the&nbsp;<strong>Principle of Least Privilege</strong>&nbsp;(PoLP)</li></ul><p><br></p><p>System administrators (sysadmins) maintain an organization’s IT infrastructure, ensuring reliability, security, and performance. Key responsibilities include:</p><ul><li><strong>User Management:</strong>&nbsp;Creating, modifying, and disabling accounts via directory services (e.g., Active Directory, LDAP).</li><li><strong>Security:</strong>&nbsp;Implementing firewalls, patches, and access controls to protect against breaches.</li><li><strong>Backup &amp; Recovery:</strong>&nbsp;Scheduling backups and testing disaster recovery plans.</li><li><strong>Mo</strong></li><li>for user permissions.</li><li>Test backups&nbsp;<em>before</em>&nbsp;they’re needed in a crisis.</li></ul><p><br></p>",
+  "caseStudy": [
+    {
+      "title": "Server Outage Crisis",
+      "content": "<p>The primary file server at XYZ Corporation crashed at 11:30 PM, affecting 200+ employees. The last backup was 24 hours old, and critical financial data from today's transactions hasn't been backed up. As the on-call system admin, you must restore services while minimizing data loss.</p>",
+      "questions": [
+        {
+          "question": "What would be your first three actions in this situation?",
+          "answer": "1. Diagnose the cause of crash (hardware failure? corruption?).\n\n2. Notify stakeholders about expected downtime.\n\n3. Attempt data recovery from backup or temporary solutions."
+        },
+        {
+          "question": "How would you prevent this situation in the future?",
+          "answer": "Implement real-time backups, server monitoring alerts, and a documented disaster recovery plan."
+        },
+        {
+          "question": "If hardware diagnostics show a failed RAID controller but the drives are intact, what would be your recovery approach?",
+          "answer": "1. Replace the RAID controller with an identical model,\n\n2. Rebuild the RAID array using the existing drives,\n\n3. Validate data integrity before bringing the server back online."
+        }
+      ]
+    }
+  ],
+  "quiz": [
+    {
+      "question": "Which tool is BEST for centralized user authentication?",
+      "options": [
+        "Microsoft Active Directory",
+        "Adobe Photoshop",
+        "Google Docs",
+        "utoCAD"
+      ],
+      "correct": "A"
+    },
+    {
+      "question": "What does RAID 1 provide?",
+      "options": [
+        "Disk striping for speed",
+        "Disk mirroring for redundancy",
+        "Error correction codes",
+        "Cloud integration"
+      ],
+      "correct": "B"
+    },
+    {
+      "question": "A user reports \"Access Denied\" to a shared folder. Your first step should be:",
+      "options": [
+        "Reboot their computer",
+        "Verify their permissions in the system",
+        "Reinstall Windows",
+        "Ignore the ticket"
+      ],
+      "correct": "B"
+    }
+  ],
+  "createdAt": "2025-04-07T10:51:14.516Z",
+  "hasCaseStudy": true,
+  "hasQuiz": false,
+  "updatedAt": "2025-04-07T11:41:31.003Z"
+}

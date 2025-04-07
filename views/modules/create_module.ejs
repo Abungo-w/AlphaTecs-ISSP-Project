@@ -113,12 +113,18 @@
                             ['blockquote', 'code-block'],
                             [{ 'header': [1, 2, 3, false] }],
                             [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                            ['link', 'image']
+                            ['link', 'image'],
+                            [{ 'align': [] }],
+                            [{ 'color': [] }, { 'background': [] }]
                         ]
                     },
-                    formats: ['bold', 'italic', 'underline', 'blockquote', 'code-block', 
-                             'header', 'list', 'link', 'image'],
+                    formats: [
+                        'bold', 'italic', 'underline', 'blockquote', 'code-block',
+                        'header', 'list', 'link', 'image', 'align', 'color', 'background'
+                    ]
                 });
+
+                editors.moduleEditor.clipboard.dangerouslyPasteHTML(document.getElementById('hiddenModuleContent').value || '');
 
                 // Add this to format existing content
                 editors.moduleEditor.clipboard.addMatcher('h1, h2, h3', function(node, delta) {
@@ -272,7 +278,7 @@
                         title: document.getElementById('title').value,
                         description: document.getElementById('description').value,
                         duration: parseInt(document.getElementById('duration').value),
-                        content: editors.moduleEditor.root.innerHTML,
+                        content: editors.moduleEditor.root.innerHTML.replace(/\n/g, ''), // Remove extra newlines
                         
                         // Process case studies
                         caseStudies: Array.from(document.querySelectorAll('.case-study-box')).map((box, index) => ({
@@ -286,21 +292,31 @@
 
                         // Process quiz questions
                         quiz: Array.from(document.querySelectorAll('.question-wrapper')).map(wrapper => {
-                            const question = wrapper.querySelector('input[type="text"][name*="[question]"]').value;
+                            const question = wrapper.querySelector('input[name*="[question]"]').value.trim();
+                            const correctRadio = wrapper.querySelector('input[type="radio"]:checked');
                             const options = Array.from(wrapper.querySelectorAll('input[type="text"][name*="[options]"]'))
-                                .map(opt => opt.value);
-                            const correct = wrapper.querySelector('input[type="radio"]:checked')?.value;
+                                .map(opt => opt.value.trim());
                             
-                            if (!question || !options.every(opt => opt) || correct === undefined) {
-                                throw new Error('Please fill out all quiz questions completely');
+                            if (!question || !options.every(opt => opt)) {
+                                throw new Error('Please fill out all quiz questions and options');
+                            }
+                            
+                            if (!correctRadio) {
+                                throw new Error('Please select a correct answer for each question');
                             }
 
+                            // Map radio button values (0,1,2,3) to letter answers (A,B,C,D)
+                            const letterMap = ['A', 'B', 'C', 'D'];
+                            const correctAnswer = letterMap[parseInt(correctRadio.value)];
+
                             return {
-                                question,
-                                options,
-                                correct: parseInt(correct)
+                                question: question,
+                                options: options,
+                                correct: correctAnswer
                             };
-                        })
+                        }),
+                        hasCaseStudy: document.querySelectorAll('.case-study-box').length > 0,
+                        hasQuiz: document.querySelectorAll('.question-wrapper').length > 0
                     };
 
                     console.log('Sending data:', moduleData); // Debug log

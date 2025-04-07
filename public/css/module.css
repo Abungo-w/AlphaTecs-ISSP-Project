@@ -591,3 +591,107 @@ input::-webkit-file-upload-button {
 .user-icon:hover .dropdown {
     display: block;
 }
+
+/* Module Content Styling */
+.section-content.ql-editor {
+    padding: 0;
+    overflow: visible;
+    white-space: normal;
+    font-family: inherit;
+}
+
+.section-content.ql-editor p {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.section-content.ql-editor h1,
+.section-content.ql-editor h2,
+.section-content.ql-editor h3 {
+    margin: 1.5rem 0 1rem;
+    font-weight: bold;
+    color: #2d3748;
+}
+
+.section-content.ql-editor h1 { font-size: 2em; }
+.section-content.ql-editor h2 { font-size: 1.5em; }
+.section-content.ql-editor h3 { font-size: 1.17em; }
+
+.section-content.ql-editor ul,
+.section-content.ql-editor ol {
+    padding-left: 2.5rem !important;  /* Increase indentation */
+    margin: 0.5rem 0 !important;
+}
+
+.section-content.ql-editor li {
+    padding-left: 0.5rem !important;  /* Add more padding for list items */
+    margin-bottom: 0.25rem !important;
+    position: relative;
+}
+
+.section-content.ql-editor li::marker {
+    color: #4a5568;  /* Match text color */
+}
+
+.section-content.ql-editor ul,
+.section-content.ql-editor ol {
+    padding-left: 2rem;
+    margin: 1rem 0;
+}
+
+.section-content.ql-editor li {
+    margin-bottom: 0.5rem;
+}
+
+.section-content.ql-editor img {
+    max-width: 100%;
+    height: auto;
+    margin: 1rem auto;
+    display: block;
+}
+
+.section-content.ql-editor blockquote {
+    border-left: 4px solid #e2e8f0;
+    padding-left: 1rem;
+    margin: 1rem 0;
+    color: #4a5568;
+}
+
+.section-content.ql-editor .ql-align-center {
+    text-align: center;
+}
+
+.section-content.ql-editor .ql-align-right {
+    text-align: right;
+}
+
+.section-content.ql-editor .ql-align-justify {
+    text-align: justify;
+}
+
+.section-content.ql-editor pre.ql-syntax {
+    background: #f7fafc;
+    padding: 1rem;
+    border-radius: 4px;
+    overflow-x: auto;
+    margin: 1rem 0;
+    font-family: monospace;
+}
+
+.section-content img,
+.ql-editor img {
+    max-width: 100%;
+    height: auto !important; /* Override any inline heights */
+    display: block;
+    margin: 1rem auto;
+    border-radius: 4px;
+    object-fit: contain; /* Ensure image fits within bounds */
+}
+
+.module-card figure,
+.course-card figure {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    overflow: hidden; /* Prevent image overflow */
+}

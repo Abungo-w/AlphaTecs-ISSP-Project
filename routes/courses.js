@@ -3,7 +3,7 @@ const router = express.Router();
 const courseManager = require('../utils/courseManager');
 const { ensureAdmin } = require('../middleware/checkAuth');
 const path = require('path');
-const fs = require('fs').promises;
+const fs = require('node:fs').promises;
 const { ensureAuthenticated } = require('../middleware/checkAuth');
 
 // Intercept any destruction of admin sessions
